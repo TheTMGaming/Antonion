@@ -14,6 +14,9 @@ collectstatic:
 dev:
 	python src/manage.py runserver localhost:8000
 
+bot:
+	python src/manage.py runbot
+
 command:
 	python src/manage.py ${c}
 
