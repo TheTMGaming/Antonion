@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from app.internal.admin.admin_user import AdminUserAdmin
 from app.internal.admin.telegram_user import TelegramUserAdmin
 

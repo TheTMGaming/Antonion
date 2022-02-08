@@ -17,8 +17,7 @@ from environ import Env
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Environ
-ENVIRON = Env(
+env = Env(
     DATABASE_NAME=(str, ''),
     DATABASE_USER=(str, ''),
     DATABASE_PASSWORD=(str, ''),
@@ -28,16 +27,16 @@ ENVIRON = Env(
     TELEGRAM_BOT_TOKEN=(str, ''),
     DEBUG=(bool, False),
 )
-Env.read_env(BASE_DIR / 'config' / '.env')
+Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ENVIRON("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = ENVIRON("DEBUG")
+DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -92,11 +91,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": ENVIRON("DATABASE_NAME"),
-        "USER": ENVIRON("DATABASE_USER"),
-        "PASSWORD": ENVIRON("DATABASE_PASSWORD"),
-        "HOST": ENVIRON("DATABASE_HOST"),
-        "PORT": ENVIRON("DATABASE_PORT")
+        "NAME": env("DATABASE_NAME"),
+        "USER": env("DATABASE_USER"),
+        "PASSWORD": env("DATABASE_PASSWORD"),
+        "HOST": env("DATABASE_HOST"),
+        "PORT": env("DATABASE_PORT")
     }
 }
 
@@ -142,3 +141,5 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.AdminUser"
+
+TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN')

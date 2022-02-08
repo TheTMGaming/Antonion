@@ -1,15 +1,21 @@
-from telegram.ext import Updater, CommandHandler
-from config.settings import ENVIRON
+from django.conf import settings
+
 from app.internal.transport.bot.handlers import *
 
+from telegram.ext import Updater, CommandHandler
 
-def start():
-    updater = Updater(ENVIRON('TELEGRAM_BOT_TOKEN'))
-    dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler('start', handle_start))
-    dispatcher.add_handler(CommandHandler('set_phone', handle_set_phone))
-    dispatcher.add_handler(CommandHandler('me', handle_me))
+def start() -> None:
+    handlers = [
+        CommandHandler('start', handle_start),
+        CommandHandler('set_phone', handle_set_phone),
+        CommandHandler('me', handle_me),
+    ]
+
+    updater = Updater(settings.TELEGRAM_BOT_TOKEN)
+
+    for handler in handlers:
+        updater.dispatcher.add_handler(handler)
 
     updater.start_polling()
     updater.idle()
