@@ -17,19 +17,16 @@ def handle_start(update: Update, context: CallbackContext):
 def handle_set_phone(update: Update, context: CallbackContext):
     user = update.effective_user
     phone = context.args[0]
-    was_existed = True
 
     if not exists(user.id):
-        was_existed = False
         handle_start(update, context)
 
-    adding_message = "Your phone has been added"
     updating_message = "Your phone has been updated"
     error_message = "Invalid phone format!!!"
 
     was_set = try_set_phone(user.id, phone)
 
-    message = error_message if not was_set else adding_message if not was_existed else updating_message
+    message = updating_message if was_set else error_message
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 
