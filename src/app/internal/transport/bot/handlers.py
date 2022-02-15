@@ -17,12 +17,7 @@ def handle_start(update: Update, context: CallbackContext) -> None:
 
 def handle_set_phone(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
-
-    if len(context.args) != 1:
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text=f'Expected 1 argument, but was {len(context.args)}')
-        return
-    phone = context.args[0]
+    phone = ''.join(context.args)
 
     if not exists(user.id):
         handle_start(update, context)
