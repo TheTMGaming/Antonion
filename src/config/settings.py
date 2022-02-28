@@ -11,20 +11,21 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
-from environ import Env
 
+from environ import Env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = Env(
-    DATABASE_NAME=(str, ''),
-    DATABASE_USER=(str, ''),
-    DATABASE_PASSWORD=(str, ''),
-    DATABASE_HOST=(str, ''),
-    DATABASE_PORT=(str, ''),
-    SECRET_KEY=(str, ''),
-    TELEGRAM_BOT_TOKEN=(str, ''),
+    ALLOWED_HOSTS=(str, ""),
+    DATABASE_NAME=(str, ""),
+    DATABASE_USER=(str, ""),
+    DATABASE_PASSWORD=(str, ""),
+    DATABASE_HOST=(str, ""),
+    DATABASE_PORT=(str, ""),
+    SECRET_KEY=(str, ""),
+    TELEGRAM_BOT_TOKEN=(str, ""),
     DEBUG=(bool, False),
 )
 Env.read_env()
@@ -38,7 +39,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = env("ALLOWED_HOSTS").split()
 
 
 # Application definition
@@ -50,7 +51,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "app",
 ]
 
@@ -95,7 +95,7 @@ DATABASES = {
         "USER": env("DATABASE_USER"),
         "PASSWORD": env("DATABASE_PASSWORD"),
         "HOST": env("DATABASE_HOST"),
-        "PORT": env("DATABASE_PORT")
+        "PORT": env("DATABASE_PORT"),
     }
 }
 
@@ -142,4 +142,4 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.AdminUser"
 
-TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN')
+TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN")
