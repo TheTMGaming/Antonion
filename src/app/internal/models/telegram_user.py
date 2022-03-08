@@ -11,3 +11,13 @@ class TelegramUser(models.Model):
 
     def __str__(self):
         return self.username
+
+    def to_dictionary(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "phone": self.phone,
+            "is_bot": self.is_bot,
+        }

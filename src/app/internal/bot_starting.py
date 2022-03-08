@@ -1,7 +1,7 @@
 from django.conf import settings
 from telegram.ext import CommandHandler, Updater
 
-from app.internal.transport.bot.handlers import handle_me, handle_set_phone, handle_start
+from app.internal.transport.bot.user_handlers import handle_me, handle_set_phone, handle_start
 
 
 def start() -> None:
