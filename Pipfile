@@ -9,6 +9,7 @@ phonenumbers = "*"
 django-environ = "*"
 python-telegram-bot = "*"
 psycopg2-binary = "*"
+bcrypt = "*"
 
 [dev-packages]
 flake8 = "*"

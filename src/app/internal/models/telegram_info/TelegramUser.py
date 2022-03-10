@@ -8,6 +8,7 @@ class TelegramUser(models.Model):
     last_name = models.CharField(max_length=255, null=True)
     phone = models.CharField(max_length=15, null=True)
     is_bot = models.BooleanField(default=False)
+    passport = models.ForeignKey("Passport", on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.username
@@ -21,3 +22,8 @@ class TelegramUser(models.Model):
             "phone": self.phone,
             "is_bot": self.is_bot,
         }
+
+    class Meta:
+        db_table = "telegram_users"
+        verbose_name = "Telegram User"
+        verbose_name_plural = "Telegram Users"

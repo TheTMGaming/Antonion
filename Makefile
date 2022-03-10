@@ -3,7 +3,6 @@ migrate:
 
 makemigrations:
 	python src/manage.py makemigrations
-	sudo chown -R ${USER} src/app/migrations/
 
 createsuperuser:
 	python src/manage.py createsuperuser
@@ -28,7 +27,6 @@ debug:
 
 piplock:
 	pipenv install
-	sudo chown -R ${USER} Pipfile.lock
 
 lint:
 	isort .
