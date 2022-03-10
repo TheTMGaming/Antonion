@@ -8,12 +8,13 @@ django = "*"
 phonenumbers = "*"
 django-environ = "*"
 python-telegram-bot = "*"
-mysqlclient = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 flake8 = "*"
 isort = "*"
 black = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.7"

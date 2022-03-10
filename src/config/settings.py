@@ -19,11 +19,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = Env(
     ALLOWED_HOSTS=(str, ""),
-    DATABASE_NAME=(str, ""),
-    DATABASE_USER=(str, ""),
-    DATABASE_PASSWORD=(str, ""),
-    DATABASE_HOST=(str, ""),
-    DATABASE_PORT=(str, ""),
+    MYSQL_DATABASE=(str, ""),
+    MYSQL_USER=(str, ""),
+    MYSQL_PASSWORD=(str, ""),
+    MYSQL_HOST=(str, ""),
+    MYSQL_PORT=(str, ""),
     SECRET_KEY=(str, ""),
     TELEGRAM_BOT_TOKEN=(str, ""),
     DEBUG=(bool, False),
@@ -90,12 +90,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": env("DATABASE_NAME"),
-        "USER": env("DATABASE_USER"),
-        "PASSWORD": env("DATABASE_PASSWORD"),
-        "HOST": env("DATABASE_HOST"),
-        "PORT": env("DATABASE_PORT"),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("POSTGRES_HOST"),
+        "PORT": env("POSTGRES_PORT"),
     }
 }
 
