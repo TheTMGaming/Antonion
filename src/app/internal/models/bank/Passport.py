@@ -15,6 +15,8 @@ class Passport(models.Model):
     birthday = models.DateField()
     created_at = models.DateField()
 
+    IDENTIFIERS_NUMBER = 2
+
     def __str__(self):
         return f"{self.series} {self.number}"
 

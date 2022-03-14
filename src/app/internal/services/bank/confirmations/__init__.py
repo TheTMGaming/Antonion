@@ -1,0 +1,3 @@
+from .BankAccountConfirmation import BankAccountConfirmation
+from .BankCardConfirmation import BankCardConfirmation
+from .DocumentConfirmation import DocumentConfirmation

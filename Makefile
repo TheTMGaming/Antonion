@@ -10,9 +10,6 @@ createsuperuser:
 collectstatic:
 	python src/manage.py collectstatic --no-input
 
-dev:
-	python src/manage.py runserver localhost:8000
-
 bot:
 	python src/manage.py runbot
 
@@ -40,6 +37,9 @@ check_lint:
 
 build:
 	docker-compose up -d --build
+
+dev:
+	docker-compose up --build
 
 down:
 	docker-compose down

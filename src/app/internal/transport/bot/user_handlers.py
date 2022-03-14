@@ -1,25 +1,24 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.services.user_service import exists, get_user_info, try_add_user, try_set_phone
+from app.internal.services.telegram_user import exists, get_user_info, try_add_user, try_set_phone
 
-_WELCOME = "Hello, {username}"
-_UPDATING_DETAILS = "Your details have been updated"
-_UNKNOWN_USER = "I don't know you yet. Let's get acquainted? (command: /start)"
+_WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
+_UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"
+_UNKNOWN_USER = "Моя вас не знать. Моя предложить знакомиться с вами! (команда /start)"
 _DETAILS = (
-    "Catch your details:\n\n"
+    "Ловите информацию о вас:\n\n"
     "ID: {id}\n"
-    "Username: {username}\n"
-    "First name: {first_name}\n"
-    "Last name: {last_name}\n"
-    "Phone: {phone}\n"
-    "Bot: {is_bot}"
+    "Ник: {username}\n"
+    "Фамилия: {last_name}\n"
+    "Имя: {first_name}\n"
+    "Телефон: {phone}\n"
+    "Серия и номер паспорта: {passport}\n"
+    "Бот: {is_bot}"
 )
-_UNDEFINED_PHONE = (
-    "Oops. I can't find your phone number in my address book. " "Please write it to me (command: /set_phone [value])"
-)
-_UPDATING_PHONE = "Your phone has been updated"
-_INVALID_PHONE_INPUT = "You entered the wrong phone number"
+_UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей мобилке. Пожалуйста, продиктуйте! (команда /set_phone)"
+_UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
+_INVALID_PHONE_INPUT = "Похоже, что вы ввели не номер телефона..."
 
 
 def handle_start(update: Update, context: CallbackContext) -> None:
@@ -57,6 +56,7 @@ def handle_me(update: Update, context: CallbackContext) -> None:
         username=user.username,
         first_name=user.first_name,
         last_name=user.last_name,
+        passport=user.passport,
         phone=user.phone,
         is_bot=user.is_bot,
     )

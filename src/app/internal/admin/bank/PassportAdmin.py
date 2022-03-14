@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from app.models import Passport
+from app.internal.models.bank import Passport
 
 
 @register(Passport)

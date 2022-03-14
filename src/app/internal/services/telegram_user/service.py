@@ -3,7 +3,7 @@ from typing import Optional, Union
 from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, parse
 from telegram import User
 
-from app.models import TelegramUser
+from app.internal.models.telegram_info import TelegramUser
 
 
 def try_add_user(user: User) -> bool:
