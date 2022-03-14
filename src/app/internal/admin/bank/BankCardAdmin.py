@@ -6,3 +6,4 @@ from app.internal.models.bank import BankCard
 @register(BankCard)
 class BankCardAdmin(ModelAdmin):
     list_display = ("number", "bank_account", "passport", "code", "created_at", "closed_at")
+    readonly_fields = ("number", "bank_account", "code")
