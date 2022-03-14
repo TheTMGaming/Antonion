@@ -14,7 +14,7 @@ _UNKNOWN_CARD_NUMBER = (
     "Такой карточки в записной книжке у меня нет. Просьба: позвоните Васе, чтобы он записал вас на приём к моей тёте"
 )
 _ASK_CODE = "Введите cvv2/cvc2-код"
-_BALANCE_BY_CARD = "На карточке '{card_number}' лежит '{balance}' бананов"
+_BALANCE_BY_CARD = "На карточке {card_number} лежит {balance}"
 _REPEAT_OPERATION_BY_CARD = "Неправильный номер карты или код. Начините сначала"
 
 _INCORRECT_BANK_ACCOUNT_NUMBER = (
@@ -23,7 +23,7 @@ _INCORRECT_BANK_ACCOUNT_NUMBER = (
 )
 _ASK_PASSPORT = "Введите серию и номер паспорта через пробел, а то я глупы... впрочем, неважно"
 _REPEAT_OPERATION_BY_BANK_ACCOUNT = "Неправильный номер счёта или идентификатор паспорта. Начините сначала"
-_BALANCE_BY_BANK_ACCOUNT = "На счёте '{account_number}' лежит '{balance}' бананов"
+_BALANCE_BY_BANK_ACCOUNT = "На счёте {account_number} лежит {balance}"
 
 _EXPECTED_PASSPORT_ARGS = (
     "Я ожидал серию и номер паспорта через пробел, но получил это... Введите ещё раз, только как я хочу!"
@@ -84,7 +84,7 @@ def handle_confirmation_account(update: Update, context: CallbackContext) -> int
         chat_id=chat_id,
         bot=context.bot,
         document=bank_account,
-        confirmation=BankAccountConfirmation(bank_account, series, number),
+        confirmation=BankAccountConfirmation(bank_account, int(series), int(number)),
         confirmation_error_message=_REPEAT_OPERATION_BY_BANK_ACCOUNT,
         get_message_with_balance=lambda account: _BALANCE_BY_BANK_ACCOUNT.format(
             account_number=account.number, balance=account.balance

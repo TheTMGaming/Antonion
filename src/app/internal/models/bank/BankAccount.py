@@ -1,4 +1,5 @@
 from django.db import models
+from djmoney.models.fields import MoneyField
 
 from app.internal.models.bank.Passport import Passport
 
@@ -6,7 +7,7 @@ from app.internal.models.bank.Passport import Passport
 class BankAccount(models.Model):
     number = models.BigAutoField(primary_key=True)
     passport = models.ForeignKey(Passport, on_delete=models.PROTECT)
-    balance = models.DecimalField(decimal_places=2, max_digits=20, default=0)
+    balance = MoneyField(decimal_places=2, max_digits=20, default=0, default_currency="RUB")
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
