@@ -4,6 +4,7 @@ services:
   app:
     build: .
     container_name: app
+    restart: always
     env_file:
       - src/config/.env
     environment:
@@ -18,6 +19,7 @@ services:
   db:
     image: postgres:14-alpine
     container_name: postgres
+    restart: always
     env_file:
       - src/config/.env
     ports:
