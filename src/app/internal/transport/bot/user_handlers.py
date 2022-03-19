@@ -13,12 +13,10 @@ _DETAILS = (
     "Фамилия: {last_name}\n"
     "Имя: {first_name}\n"
     "Телефон: {phone}\n"
-    "Серия и номер паспорта: {passport}\n"
-    "Бот: {is_bot}"
 )
 _UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей мобилке. Пожалуйста, продиктуйте! (команда /set_phone)"
 _UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
-_INVALID_PHONE_INPUT = "Похоже, что вы ввели не номер телефона..."
+_INVALID_PHONE = "Я не могу сохранить эти кракозябры. Проверьте их, пожалуйста!"
 
 
 def handle_start(update: Update, context: CallbackContext) -> None:
@@ -40,7 +38,7 @@ def handle_set_phone(update: Update, context: CallbackContext) -> None:
 
     was_set = try_set_phone(user.id, phone)
 
-    message = _UPDATING_PHONE if was_set else _INVALID_PHONE_INPUT
+    message = _UPDATING_PHONE if was_set else _INVALID_PHONE
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 
@@ -56,9 +54,7 @@ def handle_me(update: Update, context: CallbackContext) -> None:
         username=user.username,
         first_name=user.first_name,
         last_name=user.last_name,
-        passport=user.passport,
         phone=user.phone,
-        is_bot=user.is_bot,
     )
 
     message = details if user.phone else _UNDEFINED_PHONE

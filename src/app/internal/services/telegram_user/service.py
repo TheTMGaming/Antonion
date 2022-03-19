@@ -1,6 +1,8 @@
-from typing import Optional, Union
+from typing import Union
 
-from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, parse
+from django.conf import settings
+
+from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, parse, is_valid_number_for_region
 from telegram import User
 
 from app.internal.models.telegram_info import TelegramUser
@@ -11,7 +13,6 @@ def try_add_user(user: User) -> bool:
         "username": user.username,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "is_bot": user.is_bot,
     }
 
     obj, was_added = TelegramUser.objects.update_or_create(id=user.id, defaults=attributes)
@@ -19,7 +20,7 @@ def try_add_user(user: User) -> bool:
     return was_added
 
 
-def get_user_info(user_id: Union[int, str]) -> Optional[TelegramUser]:
+def get_user_info(user_id: Union[int, str]) -> TelegramUser:
     return TelegramUser.objects.filter(id=user_id).first()
 
 
@@ -28,23 +29,15 @@ def exists(user_id: Union[int, str]) -> bool:
 
 
 def try_set_phone(user_id: Union[int, str], value: str) -> bool:
-    user = get_user_info(user_id)
-    phone = _parse_phone(value)
-
-    if not user or not phone:
+    try:
+        phone = parse("+7" + value[1:] if value.startswith("8") else value)
+    except NumberParseException:
         return False
 
-    TelegramUser.objects.filter(id=user_id).update(phone=phone)
+    user = get_user_info(user_id)
+    if not user or not is_valid_number_for_region(phone, settings.PHONE_REGION):
+        return False
+
+    TelegramUser.objects.filter(id=user_id).update(phone=format_number(phone, PhoneNumberFormat.E164))
 
     return True
-
-
-def _parse_phone(value: str) -> Optional[str]:
-    if value.startswith("8"):
-        value = "+7" + value[1:]
-
-    try:
-        phone = parse(value)
-        return format_number(phone, PhoneNumberFormat.E164)
-    except NumberParseException:
-        return None

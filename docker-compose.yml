@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: api
+    command: "pipenv run python src/manage.py runserver 0.0.0.0:8000"
+    restart: always
+    env_file:
+      - src/config/.env
+    environment:
+      POSTGRES_HOST: db
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+
+  bot:
+    build: .
+    container_name: bot
+    command: "pipenv run python src/manage.py runbot"
+    restart: always
+    env_file:
+      - src/config/.env
+    environment:
+      POSTGRES_HOST: db
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    container_name: postgres
+    restart: always
+    env_file:
+      - src/config/.env
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:

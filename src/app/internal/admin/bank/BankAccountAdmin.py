@@ -5,5 +5,5 @@ from app.internal.models.bank import BankAccount
 
 @register(BankAccount)
 class BankAccountAdmin(ModelAdmin):
-    list_display = ("number", "passport", "balance", "created_at")
-    exclude = ("balance",)
+    list_display = ("pretty_number", "balance")
+    exclude = ("number",)
