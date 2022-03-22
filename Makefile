@@ -21,7 +21,7 @@ down:
 	docker-compose down
 
 exec:
-	docker-compose exec app ${c}
+	docker-compose exec api ${c}
 
 bash:
 	make exec c="bash"
