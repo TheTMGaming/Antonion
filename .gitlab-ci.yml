@@ -31,7 +31,7 @@ lint:
   script: make check_lint
   only:
     - master
-    environment: prod
+  environment: prod
 
 test:
   stage: test
@@ -40,7 +40,7 @@ test:
   script: make test
   only:
     - master
-    environment: prod
+  environment: prod
 
 deploy:
   stage: deploy
