@@ -45,7 +45,7 @@ up:
 	docker-compose up -d --build
 
 build:
-	docker-compose build --no-cache --force-rm
+	docker-compose build
 
 down:
 	docker-compose down
@@ -61,10 +61,11 @@ bash:
 	make exec c="bash"
 
 pull:
-	docker-compose pull "${IMAGE_NAME}"
+	docker pull ${IMAGE_NAME}
 
 push:
-	docker-compose push "${IMAGE_NAME}"
+	docker images -a
+	docker push ${IMAGE_NAME}
 
 test:
 	echo "stub"
