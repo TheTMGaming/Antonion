@@ -1,3 +1,33 @@
+command:
+	pipenv run python src/manage.py ${c}
+
+run_api:
+	make command c="runserver 0.0.0.0:8000"
+
+run_bot:
+	make command c="runbot"
+
+migrate:
+	make command c="migrate"
+
+makemigrations:
+	make command c="makemigrations"
+
+createsuperuser:
+	make command c="createsuperuser"
+
+collectstatic:
+	make command c="collectstatic --no-input"
+
+shell:
+	make command c="shell"
+
+debug:
+	make command c="debug"
+
+piplock:
+	pipenv install
+
 lint:
 	isort .
 	flake8 --config setup.cfg
@@ -20,32 +50,21 @@ build:
 down:
 	docker-compose down
 
+stop:
+	docker-compose rm -sf api
+	docker-compose rm -sf bot
+
 exec:
 	docker-compose exec api ${c}
 
 bash:
 	make exec c="bash"
 
-migrate:
-	make exec c="pipenv run python src/manage.py migrate ${c}"
+pull:
+	docker-compose pull ${IMAGE_APP}
 
-makemigrations:
-	make exec c="pipenv run python src/manage.py makemigrations"
+push:
+	docker-compose push ${IMAGE_APP}
 
-createsuperuser:
-	make exec c="pipenv run python src/manage.py createsuperuser"
-
-collectstatic:
-	make exec c="pipenv run python src/manage.py collectstatic --no-input"
-
-command:
-	make exec c="pipenv run python src/manage.py ${c}"
-
-shell:
-	make exec c="pipenv run python src/manage.py shell"
-
-debug:
-	make exec c="pipenv run python src/manage.py debug"
-
-piplock:
-	make exec c="pipenv run app pipenv install"
+test:
+	echo "stub"

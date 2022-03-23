@@ -4,21 +4,21 @@ services:
   api:
     build: .
     container_name: api
-    command: "pipenv run python src/manage.py runserver 0.0.0.0:8000"
+    command: make run_api
     restart: always
     env_file:
       - src/config/.env
     environment:
       POSTGRES_HOST: db
     ports:
-      - "8001:8000"
+      - "8000:8000"
     depends_on:
       - db
 
   bot:
     build: .
     container_name: bot
-    command: "pipenv run python src/manage.py runbot"
+    command: make run_bot
     restart: always
     env_file:
       - src/config/.env
