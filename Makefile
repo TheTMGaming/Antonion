@@ -61,10 +61,10 @@ bash:
 	make exec c="bash"
 
 pull:
-	docker-compose pull ${IMAGE_APP}
+	docker-compose pull "${IMAGE_NAME}"
 
 push:
-	docker-compose push ${IMAGE_APP}
+	docker-compose push "${IMAGE_NAME}"
 
 test:
 	echo "stub"
