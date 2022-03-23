@@ -10,7 +10,7 @@ variables:
   IMAGE_APP: ${IMAGE_APP}
 
 before_script:
-  - apk install make
+  - apk add make
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - cp $DON_ENV $(pwd)/.env
 
