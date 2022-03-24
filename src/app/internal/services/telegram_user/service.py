@@ -1,8 +1,7 @@
 from typing import Union
 
 from django.conf import settings
-
-from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, parse, is_valid_number_for_region
+from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, is_valid_number_for_region, parse
 from telegram import User
 
 from app.internal.models.telegram_info import TelegramUser

@@ -25,7 +25,8 @@ lint:
   stage: lint
   tags:
     - job:lint
-  script: make pull check_lint
+  script:
+    - make pull lint_build
   only:
     - master
   environment: prod

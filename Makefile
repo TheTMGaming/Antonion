@@ -29,14 +29,17 @@ piplock:
 	pipenv install
 
 lint:
-	isort .
-	flake8 --config setup.cfg
-	black --config pyproject.toml .
+	pipenv run isort .
+	pipenv run flake8 --config setup.cfg
+	pipenv run black --config pyproject.toml .
 
 check_lint:
-	isort --check --diff .
-	flake8 --config setup.cfg
-	black --check --config pyproject.toml .
+	pipenv run isort --check --diff .
+	pipenv run flake8 --config setup.cfg
+	pipenv run black --check --config pyproject.toml .
+
+lint_build:
+	docker run --rm "${IMAGE_NAME}" make check_lint
 
 dev:
 	docker-compose up --build
