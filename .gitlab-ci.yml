@@ -25,7 +25,7 @@ lint:
   stage: lint
   tags:
     - job:lint
-  script: make check_lint
+  script: make pull check_lint
   only:
     - master
   environment: prod
@@ -34,7 +34,7 @@ test:
   stage: test
   tags:
     - job:test
-  script: make test
+  script: make pull test
   only:
     - master
   environment: prod
