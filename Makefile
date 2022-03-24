@@ -67,8 +67,7 @@ pull:
 	docker pull ${IMAGE_NAME}
 
 push:
-	docker images -a
 	docker push ${IMAGE_NAME}
 
 test:
-	echo "stub"
+	echo "test"
