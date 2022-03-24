@@ -44,7 +44,7 @@ deploy:
   stage: deploy
   tags:
     - job:deploy
-  script: make pull stop migrate up
+  script: make pull restart
   only:
     - master
   environment: prod

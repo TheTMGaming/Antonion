@@ -47,15 +47,16 @@ dev:
 up:
 	docker-compose up -d --build
 
+restart:
+	docker-compose rm -sf api
+	docker-compose rm -sf bot
+	make up
+
 build:
 	docker-compose build
 
 down:
 	docker-compose down
-
-stop:
-	docker-compose rm -sf api
-	docker-compose rm -sf bot
 
 exec:
 	docker-compose exec api ${c}
