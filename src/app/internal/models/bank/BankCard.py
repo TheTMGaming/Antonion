@@ -1,9 +1,10 @@
 from django.db import models
 
 from app.internal.models.bank.BankAccount import BankAccount
+from app.internal.models.bank.GeneratedDocument import GeneratedDocument
 
 
-class BankCard(models.Model):
+class BankCard(models.Model, GeneratedDocument):
     DIGITS_COUNT = 16
     _MIN_NUMBER_VALUE = 10 ** (DIGITS_COUNT - 1)
     _MAX_NUMBER_VALUE = _MIN_NUMBER_VALUE * 10 - 1
@@ -15,19 +16,20 @@ class BankCard(models.Model):
     def __str__(self):
         return self.pretty_number
 
-    @property
-    def pretty_number(self) -> str:
-        group = BankCard._GROUP_NUMBER_COUNT
-        str_ = str(self.number)
-        return " ".join([str_[i * group : (i + 1) * group] for i in range(len(str_) // group)])
-
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args, **kwargs):
         if not self.pk:
-            self.number = BankCard._generate_number()
+            self.number = self.generate_number()
         super().save(*args, **kwargs)
 
-    @staticmethod
-    def _generate_number() -> int:
+    @property
+    def group_number_count(self):
+        return BankCard._GROUP_NUMBER_COUNT
+
+    @property
+    def number_field(self):
+        return self.number
+
+    def generate_number(self) -> int:
         last: BankCard = BankCard.objects.order_by("number").last()
         if not last:
             return BankCard._MIN_NUMBER_VALUE

@@ -1,10 +1,11 @@
 from django.db import models
 from djmoney.models.fields import MoneyField
 
+from app.internal.models.bank.GeneratedDocument import GeneratedDocument
 from app.internal.models.telegram_info.TelegramUser import TelegramUser
 
 
-class BankAccount(models.Model):
+class BankAccount(models.Model, GeneratedDocument):
     DIGITS_COUNT = 20
     _MIN_NUMBER_VALUE = 10 ** (DIGITS_COUNT - 1)
     _GROUP_NUMBER_COUNT = 4
@@ -16,19 +17,20 @@ class BankAccount(models.Model):
     def __str__(self):
         return self.pretty_number
 
-    @property
-    def pretty_number(self) -> str:
-        group = BankAccount._GROUP_NUMBER_COUNT
-        str_ = str(self.number)
-        return " ".join([str_[i * group : (i + 1) * group] for i in range(len(str_) // group)])
-
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args, **kwargs):
         if not self.pk:
-            self.number = BankAccount._generate_number()
+            self.number = self.generate_number()
         super().save(*args, **kwargs)
 
-    @staticmethod
-    def _generate_number() -> int:
+    @property
+    def group_number_count(self):
+        return BankAccount._GROUP_NUMBER_COUNT
+
+    @property
+    def number_field(self):
+        return self.number
+
+    def generate_number(self) -> int:
         last: BankAccount = BankAccount.objects.order_by("number").last()
         if not last:
             return BankAccount._MIN_NUMBER_VALUE

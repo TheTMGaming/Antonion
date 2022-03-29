@@ -19,11 +19,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = Env(
     ALLOWED_HOSTS=(str, ""),
-    MYSQL_DATABASE=(str, ""),
-    MYSQL_USER=(str, ""),
-    MYSQL_PASSWORD=(str, ""),
-    MYSQL_HOST=(str, ""),
-    MYSQL_PORT=(str, ""),
+    POSTGRES_DB=(str, ""),
+    POSTGRES_USER=(str, ""),
+    POSTGRES_PASSWORD=(str, ""),
+    POSTGRES_HOST=(str, ""),
+    POSTGRES_PORT=(str, ""),
     SECRET_KEY=(str, ""),
     TELEGRAM_BOT_TOKEN=(str, ""),
     DEBUG=(bool, False),
