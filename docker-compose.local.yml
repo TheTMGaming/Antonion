@@ -7,7 +7,7 @@ services:
     command: make migrate run_api
     restart: always
     env_file:
-      - src/config/.env
+      - src/config/.env.test
     environment:
       POSTGRES_HOST: db
     ports:
@@ -21,7 +21,7 @@ services:
     command: make run_bot
     restart: always
     env_file:
-      - src/config/.env
+      - src/config/.env.test
     environment:
       POSTGRES_HOST: db
     depends_on:
@@ -34,7 +34,7 @@ services:
     env_file:
       - src/config/.env
     volumes:
-      - data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
 volumes:
-  data:
+  pgdata:

@@ -5,4 +5,5 @@ local_settings.py
 __pycache__
 *.pyc
 /src/config/.env
+/src/config/.env.test
 .idea
