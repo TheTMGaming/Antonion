@@ -45,11 +45,10 @@ dev:
 	docker-compose -f docker-compose.local.yml up -d --build
 
 up:
-	docker-compose up -d --build
+	docker-compose up --build
 
 restart:
-	docker-compose rm -sf api
-	docker-compose rm -sf bot
+	docker-compose rm -sf app
 	make up
 
 build:
