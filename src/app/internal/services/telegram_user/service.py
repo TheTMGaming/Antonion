@@ -37,6 +37,6 @@ def try_set_phone(user_id: Union[int, str], value: str) -> bool:
     if not user or not is_valid_number_for_region(phone, settings.PHONE_REGION):
         return False
 
-    TelegramUser.objects.filter(id=user_id).update(phone=format_number(phone, PhoneNumberFormat.E164))
+    TelegramUser.objects.filter(id=user_id).handle(phone=format_number(phone, PhoneNumberFormat.E164))
 
     return True

@@ -1,11 +1,8 @@
 command:
 	pipenv run python src/manage.py ${c}
 
-run_api:
+run:
 	make command c="runserver 0.0.0.0:8000"
-
-run_bot:
-	make command c="runbot"
 
 migrate:
 	make command c="migrate"
@@ -45,7 +42,7 @@ dev:
 	docker-compose -f docker-compose.local.yml up -d --build
 
 up:
-	docker-compose up --build
+	docker-compose up -d --build
 
 restart:
 	docker-compose rm -sf app
@@ -58,7 +55,7 @@ down:
 	docker-compose down
 
 exec:
-	docker-compose exec api ${c}
+	docker-compose exec app ${c}
 
 bash:
 	make exec c="bash"
