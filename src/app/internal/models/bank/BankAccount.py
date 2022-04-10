@@ -2,7 +2,7 @@ from django.db import models
 from djmoney.models.fields import MoneyField
 
 from app.internal.models.bank.GeneratedDocument import GeneratedDocument
-from app.internal.models.telegram_info.TelegramUser import TelegramUser
+from app.internal.models.user.TelegramUser import TelegramUser
 
 
 class BankAccount(models.Model, GeneratedDocument):

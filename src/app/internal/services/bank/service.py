@@ -1,12 +1,26 @@
+from itertools import chain
+from typing import List
+
+from django.db.models import QuerySet
+
 from app.internal.models.bank import BankAccount, BankCard
+from app.internal.models.user import TelegramUser
 
 
 def get_card(number: str) -> BankCard:
     return BankCard.objects.filter(number=number).first()
 
 
+def get_cards(user: TelegramUser) -> List[BankCard]:
+    return list(card for account in get_bank_accounts(user) for card in account.bank_cards.all())
+
+
 def get_bank_account(number: str) -> BankAccount:
     return BankAccount.objects.filter(number=number).first()
+
+
+def get_bank_accounts(user: TelegramUser) -> QuerySet[BankAccount]:
+    return BankAccount.objects.filter(owner=user.id).all()
 
 
 def confirm_card(card: BankCard, user_id: int) -> bool:

@@ -3,8 +3,8 @@ from typing import Optional
 from django.http import HttpRequest, JsonResponse
 from django.views import View
 
-from app.internal.models.telegram_info import TelegramUser
-from app.internal.services.telegram_user import get_user_info
+from app.internal.models.user import TelegramUser
+from app.internal.services.user import get_user_info
 
 
 class UserDetailsView(View):

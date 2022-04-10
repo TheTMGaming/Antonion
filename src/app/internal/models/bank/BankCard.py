@@ -11,7 +11,7 @@ class BankCard(models.Model, GeneratedDocument):
     _GROUP_NUMBER_COUNT = 4
 
     number = models.CharField(primary_key=True, max_length=DIGITS_COUNT)
-    bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+    bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE, related_name="bank_cards")
 
     def __str__(self):
         return self.pretty_number

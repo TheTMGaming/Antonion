@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 
-from app.internal.transport.bot import BotWebhook
+from app.internal.transport.bot.starters import BotWebhook
 
 urlpatterns = [
     path("admin/", admin.site.urls),

@@ -7,6 +7,7 @@ class TelegramUser(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, null=True)
     phone = models.CharField(max_length=15, null=True)
+    friends = models.ManyToManyField("self", symmetrical=False)
 
     def __str__(self):
         return str(self.username)

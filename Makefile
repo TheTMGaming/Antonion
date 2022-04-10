@@ -4,6 +4,9 @@ command:
 run:
 	make command c="runserver 0.0.0.0:8000"
 
+bot:
+	make command c="runbot"
+
 migrate:
 	make command c="migrate"
 
