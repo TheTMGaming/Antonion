@@ -35,6 +35,7 @@ _ACCRUAL_EMPTY_ERROR = "Размер перевода не может быть �
 _ACCRUAL_GREATER_BALANCE_ERROR = (
     "Размер перевода не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
 )
+_FRIEND_LIST_EMPTY_ERROR = "Заведите сначала друзей! Команда /add_friend"
 
 _TRANSFER_DETAILS = (
     "Проверьте корректность данных перевода. Если согласны, введите /confirm, иначе - /cancel\n\n"
@@ -63,15 +64,18 @@ _ACCRUAL_SESSION = "accrual"
 @if_phone_is_set
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
     user = get_user(update.effective_user.id)
-    documents = get_documents_with_enums(user)
 
+    friends = get_friends_with_enums(user)
+    if len(friends) == 0:
+        update.message.reply_text(_FRIEND_LIST_EMPTY_ERROR)
+        return ConversationHandler.END
+
+    documents = get_documents_with_enums(user)
     if len(documents) == 0:
         update.message.reply_text(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
         return ConversationHandler.END
 
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = documents
-
-    friends = get_friends_with_enums(user)
 
     _save_and_send_friend_list(update, context, friends)
 
