@@ -15,9 +15,9 @@ from app.internal.services.bank.transfer import (
 )
 from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
-from app.internal.transport.bot.modules.user.decorators import if_phone_is_set
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
@@ -61,6 +61,8 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
+@if_update_message_exist
+@if_user_exist
 @if_phone_is_set
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
     user = get_user(update.effective_user.id)
@@ -82,6 +84,7 @@ def handle_transfer_start(update: Update, context: CallbackContext) -> int:
     return TransferStates.DESTINATION
 
 
+@if_update_message_exist
 def handle_transfer_destination(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     friend: TelegramUser = context.user_data[_FRIEND_VARIANTS_SESSION].get(number)
@@ -96,6 +99,7 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
     return _save_and_send_document_list(update, context, documents)
 
 
+@if_update_message_exist
 def handle_transfer_destination_document(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     destination: BankObject = context.user_data[_DESTINATION_DOCUMENTS_SESSION].get(number)
@@ -112,6 +116,7 @@ def handle_transfer_destination_document(update: Update, context: CallbackContex
     return TransferStates.SOURCE_DOCUMENT
 
 
+@if_update_message_exist
 def handle_transfer_source_document(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     source: BankObject = context.user_data[_SOURCE_DOCUMENTS_SESSION].get(number)
@@ -131,6 +136,7 @@ def handle_transfer_source_document(update: Update, context: CallbackContext) ->
     return TransferStates.ACCRUAL
 
 
+@if_update_message_exist
 def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
     accrual = parse_accrual(update.message.text)
     if accrual == 0:
@@ -149,6 +155,7 @@ def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
     return TransferStates.CONFIRM
 
 
+@if_update_message_exist
 def handle_transfer(update: Update, context: CallbackContext) -> int:
     source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
     destination: BankObject = context.user_data[_DESTINATION_DOCUMENT_SESSION]

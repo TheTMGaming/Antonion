@@ -3,12 +3,11 @@ from telegram.ext import CallbackContext
 
 from app.internal.services.friend import exists_friend, get_friend, get_friends
 from app.internal.services.user import get_user
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 from app.internal.transport.bot.modules.user import get_user_details
-from app.internal.transport.bot.modules.user.decorators import if_phone_is_set
 
-_INVALID_IDENTIFIER_OR_LIST_EMPTY_ERROR = (
-    "Такого страдальца я не знаю, либо их вообще нет... Проверьте введённый username/id!"
-)
+_INVALID_IDENTIFIER_OR_LIST_EMPTY_ERROR = "Такого страдальца я не знаю, либо их вообще нет!"
+_USER_NOT_FOUND_ERROR = "В нашей базе нет такого пользователя!"
 _ALREADY_EXIST_ERROR = "Так он уже твой друг! Смысл было меня отвлекать от важных дел!"
 _ADD_SUCCESS = "Ураа! Да прибудет денюж... в смысле дружба!"
 _REMOVE_SUCCESS = "Товарищ покинул ваш чат..."
@@ -16,6 +15,8 @@ _LIST_EMPTY_ERROR = "У вас пока что нет друзей:("
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль!"
 
 
+@if_update_message_exist
+@if_user_exist
 @if_phone_is_set
 def handle_add_friend(update: Update, context: CallbackContext) -> None:
     user = get_user(update.effective_user.id)
@@ -28,7 +29,7 @@ def handle_add_friend(update: Update, context: CallbackContext) -> None:
         return
 
     if not friend:
-        update.message.reply_text(_INVALID_IDENTIFIER_OR_LIST_EMPTY_ERROR)
+        update.message.reply_text(_USER_NOT_FOUND_ERROR)
         return
 
     if exists_friend(user, friend):
@@ -39,6 +40,8 @@ def handle_add_friend(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(_ADD_SUCCESS)
 
 
+@if_update_message_exist
+@if_user_exist
 @if_phone_is_set
 def handle_remove_friend(update: Update, context: CallbackContext) -> None:
     user = get_user(update.effective_user.id)
@@ -53,6 +56,8 @@ def handle_remove_friend(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(_REMOVE_SUCCESS)
 
 
+@if_update_message_exist
+@if_user_exist
 @if_phone_is_set
 def handle_friends(update: Update, context: CallbackContext) -> None:
     user = get_user(update.effective_user.id)

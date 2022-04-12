@@ -4,12 +4,11 @@ from telegram.ext import CallbackContext
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_accounts
 from app.internal.services.bank.card import get_cards
-from app.internal.services.user import exists_user, get_user, try_add_user, try_set_phone
-from app.internal.transport.bot.modules.user.decorators import if_phone_is_set
+from app.internal.services.user import get_user, try_add_user, try_set_phone
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
 _UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"
-_UNKNOWN_USER = "Моя вас не знать. Моя предложить знакомиться с вами! (команда /start)"
 _DETAILS = (
     "ID: {id}\n"
     "Ник: {username}\n"
@@ -24,6 +23,7 @@ _UPDATING_PHONE = "Телефон обновил! Готовьтесь к зах
 _INVALID_PHONE = "Я не могу сохранить эти кракозябры. Проверьте их, пожалуйста!"
 
 
+@if_update_message_exist
 def handle_start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
 
@@ -34,13 +34,11 @@ def handle_start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
+@if_update_message_exist
+@if_user_exist
 def handle_set_phone(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     phone = "".join(context.args)
-
-    if not exists_user(user.id):
-        update.message.reply_text(_UNKNOWN_USER)
-        return
 
     was_set = try_set_phone(user.id, phone)
 
@@ -49,6 +47,8 @@ def handle_set_phone(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
+@if_update_message_exist
+@if_user_exist
 @if_phone_is_set
 def handle_me(update: Update, context: CallbackContext) -> None:
     user = get_user(update.effective_user.id)
