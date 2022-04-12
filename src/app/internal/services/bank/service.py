@@ -44,7 +44,7 @@ def _validate_number(number: str, length: int) -> bool:
     return number.isdigit() and len(number) == length
 
 
-def get_documents_with_number(user: TelegramUser) -> dict:
+def get_documents_with_enums(user: TelegramUser) -> dict:
     return dict(
         (number, document) for number, document in enumerate(chain(get_bank_accounts(user), get_cards(user)), start=1)
     )

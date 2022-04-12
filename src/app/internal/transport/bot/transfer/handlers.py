@@ -1,14 +1,15 @@
 from decimal import Decimal
-from typing import Dict, Type
+from typing import Dict
 
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-from app.internal.models.bank import BankAccount, BankCard, BankObject
+from app.internal.models.bank import BankAccount, BankObject
 from app.internal.models.user import TelegramUser
-from app.internal.services.bank import get_documents_with_number, try_transfer
+from app.internal.services.bank import get_documents_with_enums, try_transfer
 from app.internal.services.bank.service import parse_accrual
 from app.internal.services.user import get_friends, get_user_info
+from app.internal.transport.bot.document_details import send_documents_list
 from app.internal.transport.bot.transfer.TransferStates import TransferStates
 
 _STUPID_SOURCE = "У вас нет счёта или карты! Как вы собрались переводить?"
@@ -19,9 +20,6 @@ _FRIEND_VARIANT = "{number}) {username} ({first_name})"
 
 _TRANSFER_DESTINATION_WELCOME = "Выберите банковский счёт или карту получателя:\n"
 _TRANSFER_SOURCE_WELCOME = "Откуда списать:\n"
-_TRANSFER_METHODS = "Счета:\n{accounts}\nКарты:\n{cards}\n"
-_DOCUMENT_VARIANT = "{number}) {document}"
-_DOCUMENT_VARIANT_WITH_BALANCE = "{number}) {document} ({balance})"
 _DOCUMENT_LIST_EMPTY = "К сожалению, у друга нет счетов и карт. Выберите другого, либо /cancel"
 _INPUT_ACCRUAL_MESSAGE = "Введите размер перевода:\n"
 _BALANCE_ZERO = "Баланс равен нулю. Выберите другой счёт или другую карту, либо /cancel"
@@ -53,7 +51,7 @@ _ACCRUAL_SESSION = "accrual"
 
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
     user = get_user_info(update.effective_user.id)
-    documents = get_documents_with_number(user)
+    documents = get_documents_with_enums(user)
 
     if len(documents) == 0:
         update.message.reply_text(_STUPID_SOURCE)
@@ -84,7 +82,7 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
 
     context.user_data[_CHOSEN_FRIEND_SESSION] = friend
 
-    documents = get_documents_with_number(friend)
+    documents = get_documents_with_enums(friend)
 
     if len(documents) == 0:
         update.message.reply_text(_DOCUMENT_LIST_EMPTY)
@@ -92,7 +90,7 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
 
     context.user_data[_DESTINATION_DOCUMENTS_SESSION] = documents
 
-    _send_documents_list(update, documents, _TRANSFER_DESTINATION_WELCOME)
+    send_documents_list(update, documents, _TRANSFER_DESTINATION_WELCOME)
 
     return TransferStates.DESTINATION_DOCUMENT
 
@@ -108,7 +106,7 @@ def handle_transfer_destination_document(update: Update, context: CallbackContex
     context.user_data[_DESTINATION_DOCUMENT_SESSION] = destination
 
     source_documents: Dict[str, BankObject] = context.user_data[_SOURCE_DOCUMENTS_SESSION]
-    _send_documents_list(update, source_documents, _TRANSFER_SOURCE_WELCOME, show_balance=True)
+    send_documents_list(update, source_documents, _TRANSFER_SOURCE_WELCOME, show_balance=True)
 
     return TransferStates.SOURCE_DOCUMENT
 
@@ -181,29 +179,3 @@ def _send_transfer_details(update: Update, context: CallbackContext) -> None:
     )
 
     update.message.reply_text(details)
-
-
-def _send_documents_list(
-    update: Update, documents: Dict[str, BankObject], welcome_text: str, show_balance=False
-) -> None:
-    methods = _TRANSFER_METHODS.format(
-        accounts=_build_details(documents, BankAccount, show_balance),
-        cards=_build_details(documents, BankCard, show_balance),
-    )
-
-    update.message.reply_text(welcome_text + methods)
-
-
-def _build_details(
-    documents: Dict[str, BankObject], type_document: Type[BankCard | BankAccount], show_balance=False
-) -> str:
-    pattern = _DOCUMENT_VARIANT_WITH_BALANCE if show_balance else _DOCUMENT_VARIANT
-    return "\t" * 3 + "\n\t\t\t".join(
-        pattern.format(
-            number=num,
-            document=str(document),
-            balance=document.get_balance(),
-        )
-        for num, document in documents.items()
-        if isinstance(document, type_document)
-    )
