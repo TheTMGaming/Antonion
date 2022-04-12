@@ -1,8 +1,19 @@
-from typing import Dict
+from typing import Dict, Optional, Union
 
 from django.db.models import QuerySet
 
 from app.internal.models.user import TelegramUser
+from app.internal.services.user.TelegramUserFields import TelegramUserFields
+
+
+def get_friend(user: TelegramUser, identifier: Union[int, str]) -> Optional[TelegramUser]:
+    param = (
+        {TelegramUserFields.ID: int(identifier)}
+        if str(identifier).isdigit()
+        else {TelegramUserFields.USERNAME: str(identifier)}
+    )
+
+    return get_friends(user).filter(**param).first()
 
 
 def get_friends(user: TelegramUser) -> QuerySet[TelegramUser]:
