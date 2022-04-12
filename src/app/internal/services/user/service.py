@@ -5,8 +5,7 @@ from phonenumbers import NumberParseException, PhoneNumberFormat, format_number,
 from telegram import User
 
 from app.internal.models.user import TelegramUser
-
-from .TelegramUserFields import TelegramUserFields
+from app.internal.services.user.TelegramUserFields import TelegramUserFields
 
 
 def try_add_user(user: User) -> bool:

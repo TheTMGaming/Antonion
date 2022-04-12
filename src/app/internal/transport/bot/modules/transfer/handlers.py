@@ -9,7 +9,7 @@ from app.internal.models.user import TelegramUser
 from app.internal.services.bank.transfer import get_documents_with_enums, parse_accrual, try_transfer
 from app.internal.services.friend import get_friends
 from app.internal.services.user import get_user
-from app.internal.transport.bot.document_details import send_documents_list
+from app.internal.transport.bot.modules.document import send_documents_list
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 
 _STUPID_SOURCE = "У вас нет счёта или карты! Как вы собрались переводить?"

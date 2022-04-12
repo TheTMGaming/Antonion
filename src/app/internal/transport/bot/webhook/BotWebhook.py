@@ -4,7 +4,7 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.views import View
 
-from .BotWebhookService import BotWebhookService
+from app.internal.transport.bot.webhook.BotWebhookService import BotWebhookService
 
 
 class BotWebhook(View):
