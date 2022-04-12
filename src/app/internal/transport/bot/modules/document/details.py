@@ -9,9 +9,7 @@ _DOCUMENT_VARIANT = "{number}) {document}"
 _DOCUMENT_VARIANT_WITH_BALANCE = "{number}) {document} ({balance})"
 
 
-def send_documents_list(
-    update: Update, documents: Dict[str, BankObject], welcome_text: str, show_balance=False
-) -> None:
+def send_document_list(update: Update, documents: Dict[int, BankObject], welcome_text: str, show_balance=False) -> None:
     methods = _DOCUMENT_GROUPS.format(
         accounts=build_details(documents, BankAccount, show_balance),
         cards=build_details(documents, BankCard, show_balance),
@@ -21,7 +19,7 @@ def send_documents_list(
 
 
 def build_details(
-    documents: Dict[str, BankObject], type_document: Type[BankCard | BankAccount], show_balance=False
+    documents: Dict[int, BankObject], type_document: Type[BankCard | BankAccount], show_balance=False
 ) -> str:
     pattern = _DOCUMENT_VARIANT_WITH_BALANCE if show_balance else _DOCUMENT_VARIANT
     return "\t" * 3 + "\n\t\t\t".join(

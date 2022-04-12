@@ -1,1 +1,1 @@
-from .details import build_details, send_documents_list
+from .details import build_details, send_document_list

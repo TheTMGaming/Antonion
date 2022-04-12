@@ -5,7 +5,7 @@ from app.internal.models.bank import BankAccount, BankObject
 from app.internal.services.bank.transfer import get_documents_with_enums
 from app.internal.services.user import get_user
 from app.internal.transport.bot.modules.balance import BalanceStates
-from app.internal.transport.bot.modules.document import send_documents_list
+from app.internal.transport.bot.modules.document import send_document_list
 
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 _WELCOME = "Выберите банковский счёт или карту, либо /cancel\n"
@@ -23,7 +23,7 @@ def handle_balance_start(update: Update, context: CallbackContext) -> int:
 
     context.user_data[_DOCUMENTS_SESSION] = documents
 
-    send_documents_list(update, documents, _WELCOME)
+    send_document_list(update, documents, _WELCOME)
 
     return BalanceStates.CHOICE
 

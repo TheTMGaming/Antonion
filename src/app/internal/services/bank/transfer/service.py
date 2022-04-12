@@ -14,8 +14,16 @@ def get_documents_with_enums(user: TelegramUser) -> dict:
     )
 
 
+def is_balance_zero(document: BankObject) -> bool:
+    return document.get_balance() == 0
+
+
 def parse_accrual(message: str) -> Decimal:
     return Decimal(round(Decimal(message), 2))
+
+
+def can_extract_from(document: BankObject, accrual: Decimal) -> bool:
+    return accrual <= document.get_balance()
 
 
 def try_transfer(source: BankObject, destination: BankObject, accrual: Decimal) -> bool:
