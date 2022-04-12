@@ -1,12 +1,12 @@
 from typing import Union
 
 from django.conf import settings
-from django.db.models import QuerySet
 from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, is_valid_number_for_region, parse
 from telegram import User
 
 from app.internal.models.user import TelegramUser
-from app.internal.services.user.TelegramUserFields import TelegramUserFields
+
+from .TelegramUserFields import TelegramUserFields
 
 
 def try_add_user(user: User) -> bool:
@@ -21,7 +21,7 @@ def try_add_user(user: User) -> bool:
     return was_added
 
 
-def get_user_info(identifier: Union[int, str]) -> TelegramUser:
+def get_user(identifier: Union[int, str]) -> TelegramUser:
     param = (
         {TelegramUserFields.ID: int(identifier)}
         if str(identifier).isdigit()
@@ -31,16 +31,8 @@ def get_user_info(identifier: Union[int, str]) -> TelegramUser:
     return TelegramUser.objects.filter(**param).first()
 
 
-def exists(user_id: Union[int, str]) -> bool:
-    return bool(get_user_info(user_id))
-
-
-def get_friends(user: TelegramUser) -> QuerySet[TelegramUser]:
-    return user.friends.all()
-
-
-def exists_friend(user: TelegramUser, friend: TelegramUser) -> bool:
-    return friend in get_friends(user)
+def exists_user(user_id: Union[int, str]) -> bool:
+    return bool(get_user(user_id))
 
 
 def try_set_phone(user_id: Union[int, str], value: str) -> bool:
@@ -49,7 +41,7 @@ def try_set_phone(user_id: Union[int, str], value: str) -> bool:
     except NumberParseException:
         return False
 
-    user = get_user_info(user_id)
+    user = get_user(user_id)
     if not user or not is_valid_number_for_region(phone, settings.PHONE_REGION):
         return False
 

@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 
-from app.internal.transport.bot.starters import start
+from app.internal.transport.bot.polling import start_polling
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        start()
+        start_polling()

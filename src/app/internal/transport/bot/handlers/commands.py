@@ -1,13 +1,7 @@
 from telegram.ext import CommandHandler
 
-from app.internal.transport.bot import (
-    handle_add_friend,
-    handle_friends,
-    handle_me,
-    handle_remove_friend,
-    handle_set_phone,
-    handle_start,
-)
+from app.internal.transport.bot.modules.friends import handle_add_friend, handle_friends, handle_remove_friend
+from app.internal.transport.bot.modules.user import handle_me, handle_set_phone, handle_start
 
 commands = [
     CommandHandler("start", handle_start),

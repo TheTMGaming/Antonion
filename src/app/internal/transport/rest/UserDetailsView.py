@@ -4,7 +4,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views import View
 
 from app.internal.models.user import TelegramUser
-from app.internal.services.user import get_user_info
+from app.internal.services.user import get_user
 
 
 class UserDetailsView(View):
@@ -13,7 +13,7 @@ class UserDetailsView(View):
     _UNDEFINED_PHONE = "The user '{user_id}' does not have a phone number"
 
     def get(self, request: HttpRequest, user_id: int) -> JsonResponse:
-        info = get_user_info(user_id)
+        info = get_user(user_id)
 
         data = {
             "message": UserDetailsView._get_message(expected_user_id=user_id, found_info=info),

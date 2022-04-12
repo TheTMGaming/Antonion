@@ -1,0 +1,33 @@
+from decimal import Decimal
+from itertools import chain
+
+from app.internal.models.bank import BankObject, TransactionTypes
+from app.internal.models.user import TelegramUser
+from app.internal.services.bank.account import get_bank_accounts
+from app.internal.services.bank.card import get_cards
+from app.internal.services.bank.transaction import declare_transaction
+
+
+def get_documents_with_enums(user: TelegramUser) -> dict:
+    return dict(
+        (number, document) for number, document in enumerate(chain(get_bank_accounts(user), get_cards(user)), start=1)
+    )
+
+
+def parse_accrual(message: str) -> Decimal:
+    return Decimal(round(Decimal(message), 2))
+
+
+def try_transfer(source: BankObject, destination: BankObject, accrual: Decimal) -> bool:
+    is_extract = source.try_extract(accrual)
+    is_add = destination.try_add(accrual)
+
+    if is_extract and is_add:
+        source.save_operation()
+        destination.save_operation()
+
+        declare_transaction(source.get_owner(), destination.get_owner(), TransactionTypes.TRANSFER, accrual)
+
+        return True
+
+    return False

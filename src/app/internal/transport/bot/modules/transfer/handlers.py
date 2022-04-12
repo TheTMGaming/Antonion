@@ -6,11 +6,11 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.models.bank import BankAccount, BankObject
 from app.internal.models.user import TelegramUser
-from app.internal.services.bank import get_documents_with_enums, try_transfer
-from app.internal.services.bank.service import parse_accrual
-from app.internal.services.user import get_friends, get_user_info
+from app.internal.services.bank.transfer import get_documents_with_enums, parse_accrual, try_transfer
+from app.internal.services.friend import get_friends
+from app.internal.services.user import get_user
 from app.internal.transport.bot.document_details import send_documents_list
-from app.internal.transport.bot.transfer.TransferStates import TransferStates
+from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 
 _STUPID_SOURCE = "У вас нет счёта или карты! Как вы собрались переводить?"
 _STUPID_CHOICE = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
@@ -50,7 +50,7 @@ _ACCRUAL_SESSION = "accrual"
 
 
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
-    user = get_user_info(update.effective_user.id)
+    user = get_user(update.effective_user.id)
     documents = get_documents_with_enums(user)
 
     if len(documents) == 0:

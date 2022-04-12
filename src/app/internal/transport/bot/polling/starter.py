@@ -1,10 +1,10 @@
 from django.conf import settings
 from telegram.ext import Updater
 
-from app.internal.transport.bot.starters.bot_handlers import handlers
+from app.internal.transport.bot.handlers import handlers
 
 
-def start() -> None:
+def start_polling() -> None:
     updater = Updater(settings.TELEGRAM_BOT_TOKEN)
     for handler in handlers:
         updater.dispatcher.add_handler(handler)
