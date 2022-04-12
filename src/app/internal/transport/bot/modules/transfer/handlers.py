@@ -17,6 +17,7 @@ from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.transport.bot.modules.user.decorators import if_phone_is_set
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
@@ -59,6 +60,7 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
+@if_phone_is_set
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
     user = get_user(update.effective_user.id)
     documents = get_documents_with_enums(user)

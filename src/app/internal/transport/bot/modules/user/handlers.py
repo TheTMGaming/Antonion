@@ -5,6 +5,7 @@ from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_accounts
 from app.internal.services.bank.card import get_cards
 from app.internal.services.user import exists_user, get_user, try_add_user, try_set_phone
+from app.internal.transport.bot.modules.user.decorators import if_phone_is_set
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
 _UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"
@@ -19,7 +20,6 @@ _DETAILS = (
     "Карты:\n\t\t\t{cards}\n"
 )
 
-_UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей мобилке. Пожалуйста, продиктуйте! (команда /set_phone)"
 _UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
 _INVALID_PHONE = "Я не могу сохранить эти кракозябры. Проверьте их, пожалуйста!"
 
@@ -49,14 +49,11 @@ def handle_set_phone(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
+@if_phone_is_set
 def handle_me(update: Update, context: CallbackContext) -> None:
     user = get_user(update.effective_user.id)
 
-    if not user:
-        update.message.reply_text(_UNKNOWN_USER)
-        return
-
-    message = get_user_details(user) if user.phone else _UNDEFINED_PHONE
+    message = get_user_details(user)
 
     update.message.reply_text(message)
 
