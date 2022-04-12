@@ -31,16 +31,16 @@ _ACCRUAL_WELCOME = "Введите размер перевода:\n"
 _SOURCE_DOCUMENT_LIST_EMPTY_ERROR = "У вас нет счёта или карты! Как вы собрались переводить?"
 _FRIEND_DOCUMENT_LIST_EMPTY_ERROR = "К сожалению, у друга нет счетов и карт. Выберите другого, либо /cancel"
 _BALANCE_ZERO_ERROR = "Баланс равен нулю. Выберите другой счёт или другую карту, либо /cancel"
-_ACCRUAL_EMPTY_ERROR = "Размер платежа не может быть равняться 0. Введите значение больше 0, либо /cancel"
+_ACCRUAL_EMPTY_ERROR = "Размер перевода не может быть равняться 0. Введите значение больше 0, либо /cancel"
 _ACCRUAL_GREATER_BALANCE_ERROR = (
-    "Размер платежа не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
+    "Размер перевода не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
 )
 
 _TRANSFER_DETAILS = (
     "Проверьте корректность данных перевода. Если согласны, введите /confirm, иначе - /cancel\n\n"
     "Откуда ({source_type}): {source} ({balance})\n\n"
     "Куда ({dest_type}): {destination}\n\n"
-    "Размер платежа: {accrual}\n\n"
+    "Сумма: {accrual}\n\n"
 )
 _CARD_TYPE = "Карта"
 _ACCOUNT_TYPE = "Счёт"
