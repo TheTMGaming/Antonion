@@ -1,10 +1,13 @@
+from decimal import Decimal
+
 from django.db import models
 
 from app.internal.models.bank.BankAccount import BankAccount
-from app.internal.models.bank.GeneratedDocument import GeneratedDocument
+from app.internal.models.bank.BankObject import BankObject
+from app.internal.models.user import TelegramUser
 
 
-class BankCard(models.Model, GeneratedDocument):
+class BankCard(models.Model, BankObject):
     DIGITS_COUNT = 16
     _MIN_NUMBER_VALUE = 10 ** (DIGITS_COUNT - 1)
     _MAX_NUMBER_VALUE = _MIN_NUMBER_VALUE * 10 - 1
@@ -35,6 +38,21 @@ class BankCard(models.Model, GeneratedDocument):
             return BankCard._MIN_NUMBER_VALUE
 
         return int(last.number) + 1
+
+    def get_balance(self) -> Decimal:
+        return self.bank_account.get_balance()
+
+    def try_add(self, value: Decimal) -> bool:
+        return self.bank_account.try_add(value)
+
+    def try_extract(self, value: Decimal) -> bool:
+        return self.bank_account.try_extract(value)
+
+    def save_operation(self) -> None:
+        self.save()
+
+    def get_owner(self) -> TelegramUser:
+        return self.bank_account.owner
 
     class Meta:
         db_table = "bank_cards"

@@ -5,5 +5,5 @@ _CANCEL_OPERATION = "Не хочешь разговаривать - ну и, л�
 
 
 def handle_cancel(update: Update, context: CallbackContext) -> int:
-    context.bot.send_message(chat_id=update.effective_chat.id, text=_CANCEL_OPERATION)
+    update.message.reply_text(_CANCEL_OPERATION)
     return ConversationHandler.END

@@ -1,9 +1,10 @@
+from decimal import Decimal, getcontext
 from itertools import chain
-from typing import List
+from typing import List, Union
 
 from django.db.models import QuerySet
 
-from app.internal.models.bank import BankAccount, BankCard
+from app.internal.models.bank import BankAccount, BankCard, BankObject, Transaction, TransactionTypes
 from app.internal.models.user import TelegramUser
 
 
@@ -41,3 +42,34 @@ def validate_bank_account_number(number: str) -> bool:
 
 def _validate_number(number: str, length: int) -> bool:
     return number.isdigit() and len(number) == length
+
+
+def get_documents_with_number(user: TelegramUser) -> dict:
+    return dict(
+        (number, document) for number, document in enumerate(chain(get_bank_accounts(user), get_cards(user)), start=1)
+    )
+
+
+def parse_accrual(message: str) -> Decimal:
+    return Decimal(round(Decimal(message), 2))
+
+
+def try_transfer(source: BankObject, destination: BankObject, accrual: Decimal) -> bool:
+    is_extract = source.try_extract(accrual)
+    is_add = destination.try_add(accrual)
+
+    if is_extract and is_add:
+        source.save_operation()
+        destination.save_operation()
+
+        declare_transaction(source.get_owner(), destination.get_owner(), TransactionTypes.TRANSFER, accrual)
+
+        return True
+
+    return False
+
+
+def declare_transaction(
+    source: TelegramUser, destination: TelegramUser, type_: TransactionTypes, accrual: Decimal
+) -> Transaction:
+    return Transaction.objects.create(type=type_, source=source, destination=destination, accrual=accrual)

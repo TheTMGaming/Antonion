@@ -8,15 +8,15 @@ bot:
 	make command c="runbot"
 
 migrate:
-	make command c="migrate"
+	make command c="migrate" ${o}
 
-makemigrations:
+migrations:
 	make command c="makemigrations"
 
-createsuperuser:
+superuser:
 	make command c="createsuperuser"
 
-collectstatic:
+static:
 	make command c="collectstatic --no-input"
 
 shell:

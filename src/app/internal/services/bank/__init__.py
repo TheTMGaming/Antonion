@@ -5,6 +5,8 @@ from .service import (
     get_bank_accounts,
     get_card,
     get_cards,
+    get_documents_with_number,
+    try_transfer,
     validate_bank_account_number,
     validate_card_number,
 )

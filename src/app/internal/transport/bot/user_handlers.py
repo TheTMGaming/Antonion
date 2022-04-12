@@ -14,7 +14,7 @@ _DETAILS = (
     "Фамилия: {last_name}\n"
     "Имя: {first_name}\n"
     "Телефон: {phone}\n"
-    "Cчета:\n\t\t\t{bank_accounts}\n"
+    "Счета:\n\t\t\t{bank_accounts}\n"
     "Карты:\n\t\t\t{cards}\n"
 )
 

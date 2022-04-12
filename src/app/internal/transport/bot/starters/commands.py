@@ -11,7 +11,7 @@ from app.internal.transport.bot import (
     handle_start,
 )
 
-handlers = [
+commands = [
     CommandHandler("start", handle_start),
     CommandHandler("set_phone", handle_set_phone),
     CommandHandler("me", handle_me),
