@@ -49,7 +49,7 @@ class BankCard(models.Model, BankObject):
         return self.bank_account.try_extract(value)
 
     def save_operation(self) -> None:
-        self.save()
+        self.bank_account.save_operation()
 
     def get_owner(self) -> TelegramUser:
         return self.bank_account.owner

@@ -12,4 +12,3 @@ class BankCardAdmin(ModelAdmin):
 @register(Transaction)
 class TransactionAdmin(ModelAdmin):
     list_display = ("source", "destination", "accrual")
-    
