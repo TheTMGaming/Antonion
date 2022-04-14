@@ -5,6 +5,7 @@ services:
     build: nginx/
     volumes:
       - /etc/letsencrypt/:/etc/letsencrypt/
+      - static:/app/static
     ports:
       - "80:80"
       - "443:443"
@@ -15,10 +16,12 @@ services:
     build: .
     image: "${IMAGE_NAME}"
     container_name: app
-    command: make migrate run
+    command: make migrate static run
     restart: always
     env_file:
       - src/config/.env
+    volumes:
+      - static:/app/static
     environment:
       POSTGRES_HOST: db
     depends_on:
@@ -35,3 +38,4 @@ services:
 
 volumes:
   data:
+  static:
