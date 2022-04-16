@@ -17,7 +17,7 @@ superuser:
 	make command c="createsuperuser"
 
 static:
-	make command c="collectstatic --no-input"
+	make command c="collectstatic --no-input --clear"
 
 shell:
 	make command c="shell"

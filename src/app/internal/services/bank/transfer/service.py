@@ -1,6 +1,8 @@
 from decimal import Decimal
 from itertools import chain
 
+from django.db import transaction, IntegrityError
+
 from app.internal.models.bank import BankObject, TransactionTypes
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_accounts
@@ -31,11 +33,16 @@ def try_transfer(source: BankObject, destination: BankObject, accrual: Decimal) 
     is_add = destination.try_add(accrual)
 
     if is_extract and is_add:
-        source.save_operation()
-        destination.save_operation()
+        try:
+            with transaction.atomic():
+                source.save_operation()
+                destination.save_operation()
 
-        declare_transaction(source.get_owner(), destination.get_owner(), TransactionTypes.TRANSFER, accrual)
+            declare_transaction(source.get_owner(), destination.get_owner(), TransactionTypes.TRANSFER, accrual)
 
-        return True
+            return True
+
+        except IntegrityError:
+            return False
 
     return False
