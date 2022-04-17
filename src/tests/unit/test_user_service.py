@@ -1,12 +1,13 @@
 from itertools import chain
 from re import sub
-from typing import Dict, List
+from typing import List
 
 import pytest
 from telegram import User
 
 from app.internal.models.user import TelegramUser
 from app.internal.services.user import get_user, is_user_exist, try_add_or_update_user, try_set_phone
+
 
 _CORRECTED_PHONE_NUMBERS = list(
     chain(
@@ -47,9 +48,7 @@ def test_adding_user_to_db(first_user: User) -> None:
 
 
 @pytest.mark.django_db
-def test_updating_user_in_db(first_user: User, second_user: User) -> None:
-    _create_telegram_user(first_user)
-
+def test_updating_user_in_db(first_user: User, second_user: User, telegram_user: TelegramUser) -> None:
     first_user.username = second_user.username
     first_user.first_name = second_user.first_name
     first_user.last_name = second_user.last_name
@@ -61,41 +60,26 @@ def test_updating_user_in_db(first_user: User, second_user: User) -> None:
 
 
 @pytest.mark.django_db
-def test_getting_user_by_identifier(users: List[User]) -> None:
-    telegram_users = _create_dict_of_added_users(users)
-
+def test_getting_user_by_identifier(users: List[User], telegram_users: List[TelegramUser]) -> None:
     assert all(
-        telegram_user == get_user(user.id) == get_user(user.username) for user, telegram_user in telegram_users.items()
+        telegram_users[i] == get_user(users[i].id) == get_user(users[i].username) for i in range(len(users))
     )
 
 
 @pytest.mark.django_db
-def test_check_existing_of_user_by_id(users: List[User]) -> None:
-    [_create_telegram_user(user) for user in users]
-
+def test_check_existing_of_user_by_id(users: List[User], telegram_users: List[TelegramUser]) -> None:
     assert all(is_user_exist(user.id) for user in users)
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("number", _CORRECTED_PHONE_NUMBERS + _WRONG_PHONE_NUMBERS)
-def test_setting_phone(first_user: User, number: str) -> None:
-    _create_telegram_user(first_user)
+def test_setting_phone(telegram_user: TelegramUser, number: str) -> None:
     expected = "+7" + sub("[^0-9]", "", number)[1:]
 
-    was_set = try_set_phone(first_user.id, number)
-    user = TelegramUser.objects.filter(id=first_user.id).first()
+    was_set = try_set_phone(telegram_user.id, number)
+    user = TelegramUser.objects.filter(id=telegram_user.id).first()
 
     assert was_set and user.phone == expected or not was_set and user.phone is None
-
-
-def _create_dict_of_added_users(users: List[User]) -> Dict[User, TelegramUser]:
-    return dict((user, _create_telegram_user(user)) for user in users)
-
-
-def _create_telegram_user(user: User) -> TelegramUser:
-    return TelegramUser.objects.create(
-        id=user.id, username=user.username, first_name=user.first_name, last_name=user.last_name
-    )
 
 
 def _assert_telegram_user(expected: User) -> None:

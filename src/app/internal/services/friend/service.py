@@ -6,6 +6,10 @@ from app.internal.models.user import TelegramUser
 from app.internal.services.user.TelegramUserFields import TelegramUserFields
 
 
+def add_friend(user: TelegramUser, friend: TelegramUser) -> None:
+    user.friends.add(friend)
+
+
 def get_friend(user: TelegramUser, identifier: Union[int, str]) -> Optional[TelegramUser]:
     param = (
         {TelegramUserFields.ID: int(identifier)}
@@ -24,5 +28,5 @@ def get_friends_with_enums(user: TelegramUser) -> Dict[int, TelegramUser]:
     return dict((num, friend) for num, friend in enumerate(get_friends(user), 1))
 
 
-def exists_friend(user: TelegramUser, friend: TelegramUser) -> bool:
+def is_friend_exist(user: TelegramUser, friend: TelegramUser) -> bool:
     return friend in get_friends(user)

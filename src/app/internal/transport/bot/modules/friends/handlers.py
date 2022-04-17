@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.services.friend import exists_friend, get_friend, get_friends
+from app.internal.services.friend import add_friend, get_friend, get_friends, is_friend_exist
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 from app.internal.transport.bot.modules.user import get_user_details
@@ -32,11 +32,11 @@ def handle_add_friend(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(_USER_NOT_FOUND_ERROR)
         return
 
-    if exists_friend(user, friend):
+    if is_friend_exist(user, friend):
         update.message.reply_text(_ALREADY_EXIST_ERROR)
         return
 
-    user.friends.add(friend)
+    add_friend(user, friend)
     update.message.reply_text(_ADD_SUCCESS)
 
 
