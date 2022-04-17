@@ -70,4 +70,4 @@ push:
 	docker push ${IMAGE_NAME}
 
 test:
-	echo "test"
+	cd src && pipenv run pytest --disable-warnings

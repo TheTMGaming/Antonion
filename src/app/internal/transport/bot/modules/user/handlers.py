@@ -4,7 +4,7 @@ from telegram.ext import CallbackContext
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_accounts
 from app.internal.services.bank.card import get_cards
-from app.internal.services.user import get_user, try_add_user, try_set_phone
+from app.internal.services.user import get_user, try_add_or_update_user, try_set_phone
 from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
@@ -27,7 +27,7 @@ _INVALID_PHONE = "Я не могу сохранить эти кракозябр�
 def handle_start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
 
-    was_added = try_add_user(user)
+    was_added = try_add_or_update_user(user)
 
     message = _WELCOME.format(username=user.username) if was_added else _UPDATING_DETAILS
 

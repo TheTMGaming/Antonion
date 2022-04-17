@@ -1,1 +1,1 @@
-from .service import exists_user, get_user, try_add_user, try_set_phone
+from .service import get_user, is_user_exist, try_add_or_update_user, try_set_phone

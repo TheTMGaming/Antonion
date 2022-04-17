@@ -1,7 +1,7 @@
 from decimal import Decimal
 from itertools import chain
 
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
 
 from app.internal.models.bank import BankObject, TransactionTypes
 from app.internal.models.user import TelegramUser

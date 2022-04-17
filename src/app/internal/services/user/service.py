@@ -8,7 +8,7 @@ from app.internal.models.user import TelegramUser
 from app.internal.services.user.TelegramUserFields import TelegramUserFields
 
 
-def try_add_user(user: User) -> bool:
+def try_add_or_update_user(user: User) -> bool:
     attributes = {
         TelegramUserFields.USERNAME: user.username,
         TelegramUserFields.FIRST_NAME: user.first_name,
@@ -30,13 +30,13 @@ def get_user(identifier: Union[int, str]) -> TelegramUser:
     return TelegramUser.objects.filter(**param).first()
 
 
-def exists_user(user_id: Union[int, str]) -> bool:
+def is_user_exist(user_id: Union[int, str]) -> bool:
     return bool(get_user(user_id))
 
 
 def try_set_phone(user_id: Union[int, str], value: str) -> bool:
     try:
-        phone = parse("+7" + value[1:] if value.startswith("8") else value)
+        phone = parse("+7" + value[1:] if value.startswith(("7", "8")) else value)
     except NumberParseException:
         return False
 

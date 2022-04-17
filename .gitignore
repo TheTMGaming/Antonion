@@ -8,3 +8,4 @@ __pycache__
 /src/config/.env
 /src/config/.env.test
 .idea
+.pytest_cache
