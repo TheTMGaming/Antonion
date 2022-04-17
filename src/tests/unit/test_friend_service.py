@@ -42,4 +42,3 @@ def test_check_friend_exist(telegram_user: TelegramUser, friends: List[TelegramU
 
 def _add_friend(user: TelegramUser, friends: List[TelegramUser]) -> None:
     [add_friend(user, friend) for friend in friends]
-

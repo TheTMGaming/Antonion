@@ -27,19 +27,15 @@ def users(first_user: User, second_user: User, third_user: User) -> List[User]:
 
 
 @pytest.fixture(scope="function")
-def telegram_user(first_user: User) -> TelegramUser:
-    user = TelegramUser.objects.filter(id=first_user.id)
-
-    return TelegramUser.objects.create(
-        id=first_user.id, username=first_user.username, first_name=first_user.first_name, last_name=first_user.last_name
-    ) if not user else user
-
-
-@pytest.fixture(scope="function")
 def telegram_users(users: List[User]) -> List[TelegramUser]:
     return [
         TelegramUser.objects.create(
             id=user.id, username=user.username, first_name=user.first_name, last_name=user.last_name
         )
-        for user in users if not TelegramUser.objects.filter(id=user.id)
+        for user in users
     ]
+
+
+@pytest.fixture(scope="function")
+def telegram_user(telegram_users: List[TelegramUser]) -> TelegramUser:
+    return telegram_users[0]

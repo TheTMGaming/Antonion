@@ -8,7 +8,6 @@ from telegram import User
 from app.internal.models.user import TelegramUser
 from app.internal.services.user import get_user, is_user_exist, try_add_or_update_user, try_set_phone
 
-
 _CORRECTED_PHONE_NUMBERS = list(
     chain(
         *(
@@ -48,22 +47,24 @@ def test_adding_user_to_db(first_user: User) -> None:
 
 
 @pytest.mark.django_db
-def test_updating_user_in_db(first_user: User, second_user: User, telegram_user: TelegramUser) -> None:
-    first_user.username = second_user.username
-    first_user.first_name = second_user.first_name
-    first_user.last_name = second_user.last_name
+def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
+    user = User(
+        id=telegram_user.id,
+        first_name=telegram_user.first_name[::-1],
+        last_name=telegram_user.last_name[::-1],
+        username=telegram_user.username[::-1],
+        is_bot=False,
+    )
 
-    was_added = try_add_or_update_user(first_user)
+    was_added = try_add_or_update_user(user)
     assert not was_added
 
-    _assert_telegram_user(first_user)
+    _assert_telegram_user(user)
 
 
 @pytest.mark.django_db
 def test_getting_user_by_identifier(users: List[User], telegram_users: List[TelegramUser]) -> None:
-    assert all(
-        telegram_users[i] == get_user(users[i].id) == get_user(users[i].username) for i in range(len(users))
-    )
+    assert all(telegram_users[i] == get_user(users[i].id) == get_user(users[i].username) for i in range(len(users)))
 
 
 @pytest.mark.django_db
