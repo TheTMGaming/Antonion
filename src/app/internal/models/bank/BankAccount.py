@@ -15,7 +15,7 @@ class BankAccount(models.Model, BankObject):
 
     number = models.CharField(primary_key=True, max_length=DIGITS_COUNT)
     balance = models.DecimalField(
-        decimal_places=DECIMAL_PLACES, max_digits=20, default=0, validators=[MinValueValidator(0)]
+        decimal_places=DECIMAL_PLACES, max_digits=DIGITS_COUNT, default=0, validators=[MinValueValidator(0)]
     )
     owner = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
 

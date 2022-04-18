@@ -22,4 +22,3 @@ def test_transaction_declaration(telegram_users: List[TelegramUser]) -> None:
             assert transaction.source == source
             assert transaction.destination == destination
             assert transaction.accrual == accrual
-
