@@ -39,14 +39,16 @@ _WRONG_PHONE_NUMBERS = [
 
 
 @pytest.mark.django_db
-def test_adding_user_to_db(first_user: User) -> None:
-    was_added = try_add_or_update_user(first_user)
+@pytest.mark.unit
+def test_adding_user_to_db(user: User) -> None:
+    was_added = try_add_or_update_user(user)
     assert was_added
 
-    _assert_telegram_user(first_user)
+    _assert_telegram_user(user)
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
     user = User(
         id=telegram_user.id,
@@ -63,16 +65,19 @@ def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_getting_user_by_identifier(users: List[User], telegram_users: List[TelegramUser]) -> None:
     assert all(telegram_users[i] == get_user(users[i].id) == get_user(users[i].username) for i in range(len(users)))
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_check_existing_of_user_by_id(users: List[User], telegram_users: List[TelegramUser]) -> None:
     assert all(is_user_exist(user.id) for user in users)
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 @pytest.mark.parametrize("number", _CORRECTED_PHONE_NUMBERS + _WRONG_PHONE_NUMBERS)
 def test_setting_phone(telegram_user: TelegramUser, number: str) -> None:
     expected = "+7" + sub("[^0-9]", "", number)[1:]

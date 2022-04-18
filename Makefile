@@ -71,3 +71,12 @@ push:
 
 test:
 	cd src && pipenv run pytest --disable-warnings
+
+unit:
+	cd src && pipenv run pytest -m unit --disable-warnings
+
+smoke:
+	cd src && pipenv run pytest -m smoke --disable-warnings
+
+integration:
+	cd src && pipenv run pytest -m integration --disable-warnings

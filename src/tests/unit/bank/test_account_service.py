@@ -8,6 +8,7 @@ from app.internal.services.bank.account import get_bank_account, get_bank_accoun
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_getting_account_by_number(telegram_user: TelegramUser, bank_accounts: List[BankAccount]) -> None:
     actual = [get_bank_account(account.number) for account in bank_accounts]
 
@@ -15,6 +16,7 @@ def test_getting_account_by_number(telegram_user: TelegramUser, bank_accounts: L
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_getting_accounts_by_user(telegram_user: TelegramUser, bank_accounts: List[BankAccount]) -> None:
     actual = list(get_bank_accounts(telegram_user))
 

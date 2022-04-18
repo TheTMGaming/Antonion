@@ -17,6 +17,7 @@ class TransferError(IntEnum):
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_checking_balance_zero(bank_account: BankAccount, cards: List[BankCard]) -> None:
     bank_account.balance = 0
     bank_account.save()
@@ -27,6 +28,7 @@ def test_checking_balance_zero(bank_account: BankAccount, cards: List[BankCard])
     assert is_balance_zero(card)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ["digits", "expected"],
     [
@@ -71,6 +73,7 @@ def test_parsing_accrual(digits: str, expected: str):
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ["subtracted_value", "expected"],
     list(
@@ -129,6 +132,7 @@ TRANSFER_PARAMETERS = [
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 @pytest.mark.parametrize(*TRANSFER_PARAMETERS)
 def test_transfer_account_to_account(
     bank_account: BankAccount, another_account: BankAccount, accrual: Decimal, error_type: TransferError
@@ -137,6 +141,7 @@ def test_transfer_account_to_account(
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 @pytest.mark.parametrize(*TRANSFER_PARAMETERS)
 def test_transfer_account_to_card(
     bank_account: BankAccount, another_card: BankCard, accrual: Decimal, error_type: TransferError
@@ -145,6 +150,7 @@ def test_transfer_account_to_card(
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 @pytest.mark.parametrize(*TRANSFER_PARAMETERS)
 def test_transfer_card_to_account(
     card: BankCard, another_account: BankAccount, accrual: Decimal, error_type: TransferError
@@ -153,6 +159,7 @@ def test_transfer_card_to_account(
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 @pytest.mark.parametrize(*TRANSFER_PARAMETERS)
 def test_transfer_card_to_card(
     card: BankCard, another_card: BankCard, accrual: Decimal, error_type: TransferError

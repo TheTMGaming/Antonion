@@ -36,7 +36,7 @@ def handle_add_friend(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(_ALREADY_EXIST_ERROR)
         return
 
-    add_friend(user, friend)
+    user.friends.add(friend)
     update.message.reply_text(_ADD_SUCCESS)
 
 

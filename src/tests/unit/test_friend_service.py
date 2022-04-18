@@ -1,13 +1,13 @@
-from typing import List, Tuple
+from typing import List
 
 import pytest
-from telegram import User
 
 from app.internal.models.user import TelegramUser
 from app.internal.services.friend import add_friend, get_friend, get_friends, is_friend_exist
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_adding_friend(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
     _add_friend(telegram_user, friends)
 
@@ -15,6 +15,7 @@ def test_adding_friend(telegram_user: TelegramUser, friends: List[TelegramUser])
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_getting_friend_by_identifier(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
     _add_friend(telegram_user, friends)
 
@@ -25,6 +26,7 @@ def test_getting_friend_by_identifier(telegram_user: TelegramUser, friends: List
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_getting_friends(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
     _add_friend(telegram_user, friends)
 
@@ -34,6 +36,7 @@ def test_getting_friends(telegram_user: TelegramUser, friends: List[TelegramUser
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_check_friend_exist(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
     _add_friend(telegram_user, friends)
 

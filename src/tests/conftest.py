@@ -7,7 +7,7 @@ from app.internal.models.user import TelegramUser
 
 
 @pytest.fixture(scope="function")
-def first_user(user_id=1337, first_name="Вася", last_name="Пупкин", username="geroj") -> User:
+def user(user_id=1337, first_name="Вася", last_name="Пупкин", username="geroj") -> User:
     return User(id=user_id, first_name=first_name, last_name=last_name, username=username, is_bot=False)
 
 
@@ -22,8 +22,8 @@ def third_user(user_id=1111, first_name="Ваня", last_name="Чоткий", us
 
 
 @pytest.fixture(scope="function")
-def users(first_user: User, second_user: User, third_user: User) -> List[User]:
-    return [first_user, second_user, third_user]
+def users(user, second_user: User, third_user: User) -> List[User]:
+    return [user, second_user, third_user]
 
 
 @pytest.fixture(scope="function")

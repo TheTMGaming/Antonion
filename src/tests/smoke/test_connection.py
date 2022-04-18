@@ -1,8 +1,8 @@
 from multiprocessing.connection import Client
-from django.urls import reverse
 
 import pytest
 from django.conf import settings
+from django.urls import reverse
 from telegram import TelegramError
 
 from app.internal.models.user import TelegramUser
@@ -10,10 +10,12 @@ from app.internal.transport.bot.webhook.BotWebhookService import BotWebhookServi
 
 
 @pytest.mark.django_db
+@pytest.mark.smoke
 def test_connection_with_db(telegram_user: TelegramUser) -> None:
     pass
 
 
+@pytest.mark.smoke
 def test_webhook_service() -> None:
     service = BotWebhookService(settings.TELEGRAM_BOT_TOKEN)
 
@@ -25,6 +27,7 @@ def test_webhook_service() -> None:
 
 
 @pytest.mark.django_db
+@pytest.mark.smoke
 def test_rest(telegram_user: TelegramUser, client: Client) -> None:
     url = reverse("me", args=[telegram_user.id])
     response = client.get(url)

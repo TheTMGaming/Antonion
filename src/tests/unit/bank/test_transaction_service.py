@@ -10,6 +10,7 @@ from app.internal.services.bank.transaction import declare_transaction
 
 
 @pytest.mark.django_db
+@pytest.mark.unit
 def test_transaction_declaration(telegram_users: List[TelegramUser]) -> None:
     source, destination = telegram_users[:2]
 
