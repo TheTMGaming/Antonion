@@ -70,10 +70,10 @@ push:
 	docker push ${IMAGE_NAME}
 
 test_build:
-	docker run --rm "${IMAGE_NAME}" make test
+	docker-compose run --rm app make test
 
 test:
-	cd src && pipenv run pytest --disable-warnings
+	cd src && pipenv run pytest --disable-warnings --no-summary
 
 unit:
 	cd src && pipenv run pytest -m unit --disable-warnings
