@@ -69,6 +69,9 @@ pull:
 push:
 	docker push ${IMAGE_NAME}
 
+test_build:
+	docker run --rm "${IMAGE_NAME}" make test
+
 test:
 	cd src && pipenv run pytest --disable-warnings
 

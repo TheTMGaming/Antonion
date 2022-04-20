@@ -35,7 +35,7 @@ test:
   stage: test
   tags:
     - job:test
-  script: make pull test
+  script: make pull test_build
   only:
     - master
   environment: prod
