@@ -1,0 +1,23 @@
+overload:
+  enabled: true
+  package: yandextank.plugins.DataUploader
+  token_file: "token.txt"
+phantom:
+  address: yuraperov.backend22.2tapp.cc:443
+  ssl: true
+  header_http: "1.1"
+  headers:
+    - "[Host: yuraperov.backend22.2tapp.cc]"
+    - "[Connection: close]"
+  load_profile:
+    load_type: rps
+    schedule: line(5, 100, 1m)
+  uris:
+    - /api/me/1218124144
+autostop:
+  autostop:
+   - http(5xx, 10%,5s)
+console:
+  enabled: true
+telegraf:
+  enabled: false

@@ -80,3 +80,12 @@ smoke:
 
 integration:
 	cd src && pipenv run pytest -m integration --disable-warnings
+
+performance:
+	cd && \
+	docker run \
+    -v %cd%/src/tests/performance:/var/loadtest \
+    --net host \
+    -it \
+    --entrypoint "/bin/bash" \
+    direvius/yandex-tank

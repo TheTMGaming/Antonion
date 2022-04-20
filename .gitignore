@@ -9,3 +9,6 @@ __pycache__
 /src/config/.env.test
 .idea
 .pytest_cache
+src/tests/performance/logs
+src/tests/performance/tank_errors.log
+src/tests/performance/token.txt
