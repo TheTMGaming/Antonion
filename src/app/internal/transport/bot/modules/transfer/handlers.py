@@ -31,7 +31,7 @@ _ACCRUAL_WELCOME = "Введите размер перевода:\n"
 _SOURCE_DOCUMENT_LIST_EMPTY_ERROR = "У вас нет счёта или карты! Как вы собрались переводить?"
 _FRIEND_DOCUMENT_LIST_EMPTY_ERROR = "К сожалению, у друга нет счетов и карт. Выберите другого, либо /cancel"
 _BALANCE_ZERO_ERROR = "Баланс равен нулю. Выберите другой счёт или другую карту, либо /cancel"
-_ACCRUAL_EMPTY_ERROR = "Размер перевода не может быть равняться 0. Введите значение больше 0, либо /cancel"
+_ACCRUAL_PARSE_ERROR = "Размер перевода некорректен. Введите значение больше 0, либо /cancel"
 _ACCRUAL_GREATER_BALANCE_ERROR = (
     "Размер перевода не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
 )
@@ -56,7 +56,6 @@ _DESTINATION_DOCUMENT_SESSION = "destination_document"
 _SOURCE_DOCUMENT_SESSION = "source_document"
 
 _CHOSEN_FRIEND_SESSION = "chosen_friend"
-_DOCUMENT_CHOSEN_SESSION = "chosen_document"
 _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
@@ -96,7 +95,7 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
 
     documents = get_documents_with_enums(friend)
 
-    return _save_and_send_document_list(update, context, documents)
+    return _save_and_send_friend_document_list(update, context, documents)
 
 
 @if_update_message_exist
@@ -138,9 +137,10 @@ def handle_transfer_source_document(update: Update, context: CallbackContext) ->
 
 @if_update_message_exist
 def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
-    accrual = parse_accrual(update.message.text)
-    if accrual == 0:
-        update.message.reply_text(_ACCRUAL_EMPTY_ERROR)
+    try:
+        accrual = parse_accrual(update.message.text)
+    except ValueError:
+        update.message.reply_text(_ACCRUAL_PARSE_ERROR)
         return TransferStates.ACCRUAL
 
     source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
@@ -166,6 +166,8 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_text(message)
 
+    context.user_data.clear()
+
     return ConversationHandler.END
 
 
@@ -180,7 +182,9 @@ def _save_and_send_friend_list(update: Update, context: CallbackContext, friends
     update.message.reply_text(_FRIEND_VARIANTS_WELCOME + friend_list)
 
 
-def _save_and_send_document_list(update: Update, context: CallbackContext, documents: Dict[int, BankObject]) -> int:
+def _save_and_send_friend_document_list(
+    update: Update, context: CallbackContext, documents: Dict[int, BankObject]
+) -> int:
     if len(documents) == 0:
         update.message.reply_text(_FRIEND_DOCUMENT_LIST_EMPTY_ERROR)
         return TransferStates.DESTINATION

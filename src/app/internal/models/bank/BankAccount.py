@@ -35,12 +35,10 @@ class BankAccount(models.Model, BankObject):
     def number_field(self):
         return self.number
 
-    def generate_number(self) -> int:
+    def generate_number(self) -> str:
         last: BankAccount = BankAccount.objects.order_by("number").last()
-        if not last:
-            return BankAccount._MIN_NUMBER_VALUE
 
-        return int(last.number) + 1
+        return str(int(last.number) + 1 if last else BankAccount._MIN_NUMBER_VALUE)
 
     def get_balance(self) -> Decimal:
         return Decimal(self.balance)

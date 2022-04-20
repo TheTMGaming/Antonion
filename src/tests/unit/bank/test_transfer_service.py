@@ -7,7 +7,7 @@ import pytest
 
 from app.internal.models.bank import BankAccount, BankCard, BankObject, Transaction
 from app.internal.services.bank.transfer import can_extract_from, is_balance_zero, parse_accrual, try_transfer
-from tests.unit.bank.conftest import BALANCE
+from tests.conftest import BALANCE
 
 
 class TransferError(IntEnum):

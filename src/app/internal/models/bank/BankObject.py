@@ -16,7 +16,7 @@ class BankObject:
         pass
 
     @abstractmethod
-    def generate_number(self) -> int:
+    def generate_number(self) -> str:
         pass
 
     @property

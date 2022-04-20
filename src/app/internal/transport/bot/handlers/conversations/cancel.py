@@ -7,6 +7,8 @@ _CANCEL_OPERATION = "Не хочешь разговаривать - ну и, л�
 def handle_cancel(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(_CANCEL_OPERATION)
 
+    context.user_data.clear()
+
     return ConversationHandler.END
 
 

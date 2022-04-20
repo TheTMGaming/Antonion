@@ -1,16 +1,19 @@
-from typing import List
+from typing import Callable, List
 from unittest.mock import MagicMock
 
 import pytest
 from telegram import User
 
+from app.internal.models.bank import BankAccount
 from app.internal.models.user import TelegramUser
+from tests.conftest import BALANCE
 
 
 @pytest.fixture(scope="function")
 def update(user: User) -> MagicMock:
     message = MagicMock()
     message.reply_text.return_value = None
+    message.text = ""
 
     update = MagicMock()
     update.effective_user = user
@@ -20,22 +23,25 @@ def update(user: User) -> MagicMock:
 
 
 @pytest.fixture(scope="function")
-def context(*args) -> MagicMock:
+def context() -> MagicMock:
     context = MagicMock()
     context.args = []
+    context.user_data = dict()
 
     return context
 
 
 @pytest.fixture(scope="function")
-def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+78005553535") -> List[TelegramUser]:
-    for user in telegram_users:
-        user.phone = phone
-        user.save()
-
-    return telegram_users
+def friend(telegram_user_with_phone: TelegramUser, friends: List[TelegramUser]) -> TelegramUser:
+    telegram_user_with_phone.friends.add(friends[0])
+    return friends[0]
 
 
 @pytest.fixture(scope="function")
-def telegram_user_with_phone(telegram_users_with_phone: List[TelegramUser]):
-    return telegram_users_with_phone[0]
+def friend_with_account(friend: TelegramUser, friend_account: BankAccount) -> TelegramUser:
+    return friend
+
+
+@pytest.fixture(scope="function")
+def friend_account(friend: TelegramUser) -> BankAccount:
+    return BankAccount.objects.create(balance=BALANCE, owner=friend)
