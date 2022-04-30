@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import F
 
 from app.internal.models.bank.BankObject import BankObject
 from app.internal.models.user.TelegramUser import TelegramUser
@@ -41,30 +40,11 @@ class BankAccount(models.Model, BankObject):
 
         return str(int(last.number) + 1 if last else BankAccount._MIN_NUMBER_VALUE)
 
-    def get_balance(self) -> Decimal:
-        return Decimal(self.balance)
-
-    def try_add(self, value: Decimal) -> bool:
-        if value <= 0:
-            return False
-
-        self.balance = F("balance") + value
-
-        return True
-
-    def try_extract(self, value: Decimal) -> bool:
-        if value <= 0:
-            return False
-
-        self.balance = F("balance") - value
-
-        return True
-
-    def save_operation(self) -> None:
-        self.save(update_fields=("balance",))
-
     def get_owner(self) -> TelegramUser:
         return self.owner
+
+    def get_balance(self) -> Decimal:
+        return self.balance
 
     class Meta:
         db_table = "bank_accounts"

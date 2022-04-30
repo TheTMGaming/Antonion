@@ -22,14 +22,14 @@ from app.internal.transport.bot.modules.transfer.handlers import (
     _ACCRUAL_SESSION,
     _BALANCE_ZERO_ERROR,
     _CHOSEN_FRIEND_SESSION,
-    _DESTINATION_DOCUMENT_SESSION,
     _DESTINATION_DOCUMENTS_SESSION,
+    _DESTINATION_SESSION,
     _FRIEND_DOCUMENT_LIST_EMPTY_ERROR,
     _FRIEND_LIST_EMPTY_ERROR,
     _FRIEND_VARIANTS_SESSION,
     _SOURCE_DOCUMENT_LIST_EMPTY_ERROR,
-    _SOURCE_DOCUMENT_SESSION,
     _SOURCE_DOCUMENTS_SESSION,
+    _SOURCE_SESSION,
     _STUPID_CHOICE_ERROR,
     _TRANSFER_FAIL,
     _TRANSFER_SUCCESS,
@@ -147,8 +147,8 @@ def test_destination_document(
     next_state = handle_transfer_destination_document(update, context)
 
     assert next_state == TransferStates.SOURCE_DOCUMENT
-    assert _DESTINATION_DOCUMENT_SESSION in context.user_data
-    assert context.user_data[_DESTINATION_DOCUMENT_SESSION] == friend_account
+    assert _DESTINATION_SESSION in context.user_data
+    assert context.user_data[_DESTINATION_SESSION] == friend_account
 
 
 @pytest.mark.django_db
@@ -161,7 +161,7 @@ def test_destination_document_stupid_choice(update: MagicMock, context: MagicMoc
 
     assert next_state == TransferStates.DESTINATION_DOCUMENT
     update.message.reply_text.assert_called_once_with(_STUPID_CHOICE_ERROR)
-    assert _DESTINATION_DOCUMENT_SESSION not in context.user_data
+    assert _DESTINATION_SESSION not in context.user_data
 
 
 @pytest.mark.django_db
@@ -173,8 +173,8 @@ def test_source_document(update: MagicMock, context: MagicMock, bank_account: Ba
     next_state = handle_transfer_source_document(update, context)
 
     assert next_state == TransferStates.ACCRUAL
-    assert _SOURCE_DOCUMENT_SESSION in context.user_data
-    assert context.user_data[_SOURCE_DOCUMENT_SESSION] == bank_account
+    assert _SOURCE_SESSION in context.user_data
+    assert context.user_data[_SOURCE_SESSION] == bank_account
 
 
 @pytest.mark.django_db
@@ -187,7 +187,7 @@ def test_source_document_stupid_choice(update: MagicMock, context: MagicMock, ba
 
     assert next_state == TransferStates.SOURCE_DOCUMENT
     update.message.reply_text.assert_called_once_with(_STUPID_CHOICE_ERROR)
-    assert _SOURCE_DOCUMENT_SESSION not in context.user_data
+    assert _SOURCE_SESSION not in context.user_data
 
 
 @pytest.mark.django_db
@@ -202,7 +202,7 @@ def test_source_document_balance_zero(update: MagicMock, context: MagicMock, ban
 
     assert next_state == TransferStates.SOURCE_DOCUMENT
     update.message.reply_text.assert_called_once_with(_BALANCE_ZERO_ERROR)
-    assert _SOURCE_DOCUMENT_SESSION not in context.user_data
+    assert _SOURCE_SESSION not in context.user_data
 
 
 @pytest.mark.django_db
@@ -210,8 +210,8 @@ def test_source_document_balance_zero(update: MagicMock, context: MagicMock, ban
 def test_accrual(update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount) -> None:
     update.message.text = str(bank_account.balance)
     accrual = parse_accrual(update.message.text)
-    context.user_data[_SOURCE_DOCUMENT_SESSION] = bank_account
-    context.user_data[_DESTINATION_DOCUMENT_SESSION] = friend_account
+    context.user_data[_SOURCE_SESSION] = bank_account
+    context.user_data[_DESTINATION_SESSION] = friend_account
 
     next_state = handle_transfer_accrual(update, context)
 
@@ -240,7 +240,7 @@ def test_accrual_extract_error(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = str(bank_account.balance * 2)
-    context.user_data[_SOURCE_DOCUMENT_SESSION] = bank_account
+    context.user_data[_SOURCE_SESSION] = bank_account
 
     next_state = handle_transfer_accrual(update, context)
 
@@ -273,8 +273,8 @@ def _assert_transfer(
     accrual: Decimal,
     is_success: bool,
 ) -> None:
-    context.user_data[_SOURCE_DOCUMENT_SESSION] = source
-    context.user_data[_DESTINATION_DOCUMENT_SESSION] = destination
+    context.user_data[_SOURCE_SESSION] = source
+    context.user_data[_DESTINATION_SESSION] = destination
     context.user_data[_ACCRUAL_SESSION] = accrual
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = None
     context.user_data[_DESTINATION_DOCUMENTS_SESSION] = None

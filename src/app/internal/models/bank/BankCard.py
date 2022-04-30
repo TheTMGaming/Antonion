@@ -37,20 +37,11 @@ class BankCard(models.Model, BankObject):
 
         return str(int(last.number) + 1 if last else BankCard._MIN_NUMBER_VALUE)
 
-    def get_balance(self) -> Decimal:
-        return self.bank_account.get_balance()
-
-    def try_add(self, value: Decimal) -> bool:
-        return self.bank_account.try_add(value)
-
-    def try_extract(self, value: Decimal) -> bool:
-        return self.bank_account.try_extract(value)
-
-    def save_operation(self) -> None:
-        self.bank_account.save_operation()
-
     def get_owner(self) -> TelegramUser:
         return self.bank_account.owner
+
+    def get_balance(self) -> Decimal:
+        return self.bank_account.get_balance()
 
     class Meta:
         db_table = "bank_cards"

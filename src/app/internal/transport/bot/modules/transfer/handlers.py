@@ -6,6 +6,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.models.bank import BankAccount, BankCard, BankObject
 from app.internal.models.user import TelegramUser
+from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transfer import (
     can_extract_from,
     get_documents_with_enums,
@@ -54,8 +55,8 @@ _TRANSFER_FAIL = "Произошла непредвиденная ошибка!"
 _SOURCE_DOCUMENTS_SESSION = "source_documents"
 _DESTINATION_DOCUMENTS_SESSION = "destination_documents"
 
-_DESTINATION_DOCUMENT_SESSION = "destination_document"
-_SOURCE_DOCUMENT_SESSION = "source_document"
+_DESTINATION_SESSION = "destination_document"
+_SOURCE_SESSION = "source_document"
 
 _CHOSEN_FRIEND_SESSION = "chosen_friend"
 _FRIEND_VARIANTS_SESSION = "friend_variants"
@@ -88,6 +89,7 @@ def handle_transfer_start(update: Update, context: CallbackContext) -> int:
 @if_update_message_exist
 def handle_transfer_destination(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
+
     friend: TelegramUser = context.user_data[_FRIEND_VARIANTS_SESSION].get(number)
     if not friend:
         update.message.reply_text(_STUPID_CHOICE_ERROR)
@@ -109,7 +111,7 @@ def handle_transfer_destination_document(update: Update, context: CallbackContex
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.DESTINATION_DOCUMENT
 
-    context.user_data[_DESTINATION_DOCUMENT_SESSION] = destination
+    context.user_data[_DESTINATION_SESSION] = get_bank_account_from_document(destination)
 
     source_documents: Dict[int, BankObject] = context.user_data[_SOURCE_DOCUMENTS_SESSION]
     send_document_list(update, source_documents, _TRANSFER_SOURCE_WELCOME, show_balance=True)
@@ -126,11 +128,13 @@ def handle_transfer_source_document(update: Update, context: CallbackContext) ->
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
+    source: BankAccount = get_bank_account_from_document(source)
+
     if is_balance_zero(source):
         update.message.reply_text(_BALANCE_ZERO_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
-    context.user_data[_SOURCE_DOCUMENT_SESSION] = source
+    context.user_data[_SOURCE_SESSION] = source
 
     update.message.reply_text(_ACCRUAL_WELCOME)
 
@@ -145,7 +149,7 @@ def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_ACCRUAL_PARSE_ERROR)
         return TransferStates.ACCRUAL
 
-    source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
+    source: BankAccount = context.user_data[_SOURCE_SESSION]
     if not can_extract_from(source, accrual):
         update.message.reply_text(_ACCRUAL_GREATER_BALANCE_ERROR)
         return TransferStates.ACCRUAL
@@ -159,8 +163,8 @@ def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
 
 @if_update_message_exist
 def handle_transfer(update: Update, context: CallbackContext) -> int:
-    source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
-    destination: BankObject = context.user_data[_DESTINATION_DOCUMENT_SESSION]
+    source: BankAccount = context.user_data[_SOURCE_SESSION]
+    destination: BankAccount = context.user_data[_DESTINATION_SESSION]
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
 
     is_success = try_transfer(source, destination, accrual)
@@ -208,8 +212,8 @@ def _save_and_send_friend_document_list(
 
 
 def _send_transfer_details(update: Update, context: CallbackContext) -> None:
-    source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
-    destination: BankObject = context.user_data[_DESTINATION_DOCUMENT_SESSION]
+    source: BankObject = context.user_data[_SOURCE_SESSION]
+    destination: BankObject = context.user_data[_DESTINATION_SESSION]
     accrual: int = context.user_data[_ACCRUAL_SESSION]
 
     details = _TRANSFER_DETAILS.format(

@@ -26,20 +26,9 @@ class BankObject:
         return " ".join([str_[i * group : (i + 1) * group] for i in range(len(str_) // group)])
 
     @abstractmethod
-    def get_balance(self) -> Decimal:
-        pass
-
-    @abstractmethod
-    def try_add(self, value: Decimal) -> bool:
-        pass
-
-    def try_extract(self, value: Decimal) -> bool:
-        pass
-
-    @abstractmethod
-    def save_operation(self) -> None:
-        pass
-
-    @abstractmethod
     def get_owner(self) -> TelegramUser:
+        pass
+
+    @abstractmethod
+    def get_balance(self) -> Decimal:
         pass

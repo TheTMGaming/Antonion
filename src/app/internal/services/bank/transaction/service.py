@@ -2,12 +2,11 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 
-from app.internal.models.bank import Transaction, TransactionTypes
-from app.internal.models.user import TelegramUser
+from app.internal.models.bank import BankAccount, Transaction, TransactionTypes
 
 
 def declare_transaction(
-    source: TelegramUser, destination: TelegramUser, type_: TransactionTypes, accrual: Decimal
+    source: BankAccount, destination: BankAccount, type_: TransactionTypes, accrual: Decimal
 ) -> Transaction:
     if accrual < 0:
         raise ValidationError("Accrual must not be less than 0")

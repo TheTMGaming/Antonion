@@ -10,7 +10,7 @@ bot:
 migrate:
 	make command c="migrate ${o}"
 
-migrations:
+migration:
 	make command c="makemigrations ${o}"
 
 superuser:
