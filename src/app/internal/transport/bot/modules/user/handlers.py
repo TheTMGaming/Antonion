@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_accounts
@@ -70,3 +70,10 @@ def get_user_details(user: TelegramUser) -> str:
         bank_accounts="\n\t\t\t".join(map(str, bank_accounts)),
         cards="\n\t\t\t".join(map(str, cards)),
     )
+
+
+user_commands = [
+    CommandHandler("start", handle_start),
+    CommandHandler("set_phone", handle_set_phone),
+    CommandHandler("me", handle_me),
+]

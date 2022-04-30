@@ -1,12 +1,14 @@
 from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.models.bank import BankAccount, BankObject
 from app.internal.services.bank.transfer import get_documents_with_enums
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 from app.internal.transport.bot.modules.balance import BalanceStates
+from app.internal.transport.bot.modules.cancel import cancel
 from app.internal.transport.bot.modules.document import send_document_list
+from app.internal.transport.bot.modules.filters import INT
 
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 _WELCOME = "Выберите банковский счёт или карту, либо /cancel\n"
@@ -52,3 +54,12 @@ def handle_balance_choice(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(details)
 
     return ConversationHandler.END
+
+
+balance_conversation = ConversationHandler(
+    entry_points=[CommandHandler("balance", handle_balance_start)],
+    states={
+        BalanceStates.CHOICE: [MessageHandler(INT, handle_balance_choice)],
+    },
+    fallbacks=[cancel],
+)

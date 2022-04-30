@@ -5,5 +5,6 @@ from .handlers import (
     handle_transfer_destination_document,
     handle_transfer_source_document,
     handle_transfer_start,
+    transfer_conversation,
 )
 from .TransferStates import TransferStates

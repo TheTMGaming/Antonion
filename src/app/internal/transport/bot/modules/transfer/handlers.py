@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Dict
 
 from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.models.bank import BankAccount, BankCard, BankObject
 from app.internal.models.user import TelegramUser
@@ -17,7 +17,9 @@ from app.internal.services.bank.transfer import (
 from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
+from app.internal.transport.bot.modules.cancel import cancel
 from app.internal.transport.bot.modules.document import send_document_list
+from app.internal.transport.bot.modules.filters import FLOATING, INT
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
@@ -230,3 +232,16 @@ def _send_transfer_details(update: Update, context: CallbackContext) -> None:
 
 def _type_to_string(document: BankObject) -> str:
     return _ACCOUNT_TYPE if isinstance(document, BankAccount) else _CARD_TYPE
+
+
+transfer_conversation = ConversationHandler(
+    entry_points=[CommandHandler("transfer", handle_transfer_start)],
+    states={
+        TransferStates.DESTINATION: [MessageHandler(INT, handle_transfer_destination)],
+        TransferStates.DESTINATION_DOCUMENT: [MessageHandler(INT, handle_transfer_destination_document)],
+        TransferStates.SOURCE_DOCUMENT: [MessageHandler(INT, handle_transfer_source_document)],
+        TransferStates.ACCRUAL: [MessageHandler(FLOATING, handle_transfer_accrual)],
+        TransferStates.CONFIRM: [CommandHandler("confirm", handle_transfer)],
+    },
+    fallbacks=[cancel],
+)

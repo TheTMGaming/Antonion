@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.services.friend import add_friend, get_friend, get_friends, is_friend_exist
 from app.internal.services.user import get_user
@@ -69,3 +69,10 @@ def handle_friends(update: Update, context: CallbackContext) -> None:
 
     for details in (get_user_details(friend) for friend in friends):
         update.message.reply_text(details)
+
+
+friends_commands = [
+    CommandHandler("friends", handle_friends),
+    CommandHandler("add_friend", handle_add_friend),
+    CommandHandler("rm_friend", handle_remove_friend),
+]

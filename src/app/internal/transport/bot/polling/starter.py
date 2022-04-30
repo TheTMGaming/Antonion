@@ -1,7 +1,7 @@
 from django.conf import settings
 from telegram.ext import Updater
 
-from app.internal.transport.bot.handlers import handlers
+from app.internal.transport.bot import handlers
 
 
 def start_polling() -> None:
