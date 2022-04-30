@@ -15,6 +15,7 @@ flake8 = "*"
 isort = "*"
 black = "*"
 pytest-django = "==4.5.2"
+prettytable = "*"
 
 [dev-packages]
 psycopg2 = "*"
