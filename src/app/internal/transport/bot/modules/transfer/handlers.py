@@ -4,7 +4,7 @@ from typing import Dict
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-from app.internal.models.bank import BankAccount, BankObject
+from app.internal.models.bank import BankAccount, BankCard, BankObject
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.transfer import (
     can_extract_from,
@@ -43,6 +43,8 @@ _TRANSFER_DETAILS = (
     "Куда ({dest_type}): {destination}\n\n"
     "Сумма: {accrual}\n\n"
 )
+_ACCRUAL_DETAILS = "{type} {number} зачислено {accrual} от {username}"
+
 _CARD_TYPE = "Карта"
 _ACCOUNT_TYPE = "Счёт"
 _TRANSFER_SUCCESS = "Ваш платёж успешно выполнен!"
@@ -165,10 +167,19 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
 
     update.message.reply_text(message)
+    context.bot.send_message(chat_id=destination.get_owner().id, text=_get_accrual_detail(source, destination, accrual))
 
     context.user_data.clear()
 
     return ConversationHandler.END
+
+
+def _get_accrual_detail(source: BankObject, destination: BankObject, accrual: Decimal) -> str:
+    type_ = _CARD_TYPE if isinstance(destination, BankCard) else _ACCOUNT_TYPE
+
+    return _ACCRUAL_DETAILS.format(
+        type=type_, number=destination.pretty_number, accrual=accrual, username=source.get_owner().username
+    )
 
 
 def _save_and_send_friend_list(update: Update, context: CallbackContext, friends: Dict[int, TelegramUser]) -> None:

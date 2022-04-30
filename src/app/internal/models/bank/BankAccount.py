@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import F
 
 from app.internal.models.bank.BankObject import BankObject
 from app.internal.models.user.TelegramUser import TelegramUser
@@ -47,18 +48,20 @@ class BankAccount(models.Model, BankObject):
         if value <= 0:
             return False
 
-        self.balance += value
+        self.balance = F("balance") + value
+
         return True
 
     def try_extract(self, value: Decimal) -> bool:
         if value <= 0:
             return False
 
-        self.balance -= value
+        self.balance = F("balance") - value
+
         return True
 
     def save_operation(self) -> None:
-        self.save()
+        self.save(update_fields=("balance",))
 
     def get_owner(self) -> TelegramUser:
         return self.owner
