@@ -8,10 +8,10 @@ bot:
 	make command c="runbot"
 
 migrate:
-	make command c="migrate" ${o}
+	make command c="migrate ${o}"
 
 migrations:
-	make command c="makemigrations"
+	make command c="makemigrations ${o}"
 
 superuser:
 	make command c="createsuperuser"

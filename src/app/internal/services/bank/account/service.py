@@ -9,4 +9,4 @@ def get_bank_account(number: str) -> BankAccount:
 
 
 def get_bank_accounts(user: TelegramUser) -> QuerySet[BankAccount]:
-    return BankAccount.objects.filter(owner=user.id).all()
+    return user.bank_accounts.all()

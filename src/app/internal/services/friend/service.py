@@ -17,7 +17,7 @@ def get_friend(user: TelegramUser, identifier: Union[int, str]) -> Optional[Tele
         else {TelegramUserFields.USERNAME: str(identifier)}
     )
 
-    return get_friends(user).filter(**param).first()
+    return user.friends.filter(**param).first()
 
 
 def get_friends(user: TelegramUser) -> QuerySet[TelegramUser]:
@@ -29,4 +29,4 @@ def get_friends_with_enums(user: TelegramUser) -> Dict[int, TelegramUser]:
 
 
 def is_friend_exist(user: TelegramUser, friend: TelegramUser) -> bool:
-    return friend in get_friends(user)
+    return user.friends.filter(pk=friend.pk).exists()

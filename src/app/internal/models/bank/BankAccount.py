@@ -17,7 +17,7 @@ class BankAccount(models.Model, BankObject):
     balance = models.DecimalField(
         decimal_places=DECIMAL_PLACES, max_digits=DIGITS_COUNT, default=0, validators=[MinValueValidator(0)]
     )
-    owner = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    owner = models.ForeignKey(TelegramUser, on_delete=models.CASCADE, related_name="bank_accounts")
 
     def __str__(self):
         return self.pretty_number
