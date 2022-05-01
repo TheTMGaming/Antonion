@@ -5,6 +5,7 @@ balance - информация о балансах
 friends - список друзей
 add_friend - [id|username] - добавить друга
 rm_friend - [id|username] - удалить друга
+relations - пользователи, с которыми вы взаимодействовали
 transfer - совершить перевод
-cancel - отменить операцию
 history - выписка из счёта/карты
+cancel - отменить операцию

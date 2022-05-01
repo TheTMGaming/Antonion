@@ -12,7 +12,7 @@ from app.internal.services.utils import (
     get_transfer_history_filename,
     remove_temp_file,
 )
-from app.internal.transport.bot.decorators import if_update_message_exist, if_user_exist, if_phone_is_set
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 from app.internal.transport.bot.modules.cancel import cancel
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import INT

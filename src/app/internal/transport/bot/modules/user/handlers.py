@@ -4,7 +4,7 @@ from telegram.ext import CallbackContext, CommandHandler
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_accounts
 from app.internal.services.bank.card import get_cards
-from app.internal.services.user import get_user, try_add_or_update_user, try_set_phone
+from app.internal.services.user import get_relations, get_user, try_add_or_update_user, try_set_phone
 from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
@@ -21,6 +21,9 @@ _DETAILS = (
 
 _UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
 _INVALID_PHONE = "Я не могу сохранить эти кракозябры. Проверьте их, пожалуйста!"
+
+_RELATIONS_DETAILS = "Вот с этими людьми вы взаимодействовали:\n\n{usernames}"
+_RELATION_POINT = "{number}) {username}"
 
 
 @if_update_message_exist
@@ -58,6 +61,17 @@ def handle_me(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
+@if_update_message_exist
+@if_user_exist
+@if_phone_is_set
+def handle_relations(update: Update, context: CallbackContext) -> None:
+    usernames = enumerate(get_relations(update.effective_user.id), start=1)
+
+    username_list = "\n".join(_RELATION_POINT.format(number=num, username=username) for num, username in usernames)
+
+    update.message.reply_text(_RELATIONS_DETAILS.format(usernames=username_list))
+
+
 def get_user_details(user: TelegramUser) -> str:
     bank_accounts, cards = get_bank_accounts(user), get_cards(user)
 
@@ -76,4 +90,5 @@ user_commands = [
     CommandHandler("start", handle_start),
     CommandHandler("set_phone", handle_set_phone),
     CommandHandler("me", handle_me),
+    CommandHandler("relations", handle_relations),
 ]
