@@ -46,7 +46,7 @@ def test_if_phone_is_set(update: MagicMock, context: MagicMock, telegram_user_wi
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_if_phone_is_set(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
+def test_if_phone_is_not_set(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
     assert if_phone_is_set(_handler)(update, context) == ConversationHandler.END
     update.message.reply_text.assert_called_once_with(_UNDEFINED_PHONE)
 

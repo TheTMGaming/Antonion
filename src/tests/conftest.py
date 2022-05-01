@@ -90,19 +90,5 @@ def another_card(cards: List[BankCard]) -> BankCard:
 
 
 @pytest.fixture(scope="function")
-def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+78005553535") -> List[TelegramUser]:
-    for user in telegram_users:
-        user.phone = phone
-        user.save()
-
-    return telegram_users
-
-
-@pytest.fixture(scope="function")
-def telegram_user_with_phone(telegram_users_with_phone: List[TelegramUser]):
-    return telegram_users_with_phone[0]
-
-
-@pytest.fixture(scope="function")
 def friends(telegram_user: TelegramUser, telegram_users: List[TelegramUser]) -> List[TelegramUser]:
     return [friend for friend in telegram_users if friend != telegram_user]

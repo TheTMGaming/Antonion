@@ -5,14 +5,18 @@ from app.internal.models.bank import BankObject
 from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transaction import get_transactions
 from app.internal.services.bank.transfer import get_documents_with_enums
-from app.internal.services.utils import build_transfer_history, create_temp_file, remove_temp_file, \
-    get_transfer_history_filename
 from app.internal.services.user import get_user
+from app.internal.services.utils import (
+    build_transfer_history,
+    create_temp_file,
+    get_transfer_history_filename,
+    remove_temp_file,
+)
+from app.internal.transport.bot.decorators import if_update_message_exist, if_user_exist, if_phone_is_set
 from app.internal.transport.bot.modules.cancel import cancel
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import INT
 from app.internal.transport.bot.modules.history.HistoryStates import HistoryStates
-
 
 _WELCOME = "Выберите счёт или карту:\n"
 _STUPID_CHOICE = "Ммм. Я в банке работаю и то считать умею. Нет такого в списке! Повторите попытку, либо /cancel"
@@ -21,6 +25,9 @@ _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни сч
 _DOCUMENTS_SESSION = "documents"
 
 
+@if_update_message_exist
+@if_user_exist
+@if_phone_is_set
 def handle_history_start(update: Update, context: CallbackContext) -> int:
     user = get_user(update.effective_user.id)
 
@@ -37,6 +44,7 @@ def handle_history_start(update: Update, context: CallbackContext) -> int:
     return HistoryStates.DOCUMENT
 
 
+@if_update_message_exist
 def handle_history_document(update: Update, context: CallbackContext) -> int:
     document: BankObject = context.user_data[_DOCUMENTS_SESSION].get(int(update.message.text))
 
