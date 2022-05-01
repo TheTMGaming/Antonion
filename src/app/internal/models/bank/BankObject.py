@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from decimal import Decimal
+from typing import List
 
 from app.internal.models.user import TelegramUser
 
@@ -20,10 +21,14 @@ class BankObject:
         pass
 
     @property
-    def pretty_number(self):
-        group = self.group_number_count
-        str_ = str(self.number_field)
-        return " ".join([str_[i * group : (i + 1) * group] for i in range(len(str_) // group)])
+    def pretty_number(self) -> str:
+        return " ".join(self.__get_groups())
+
+    @property
+    def short_number(self) -> str:
+        groups = self.__get_groups()
+
+        return " ".join([groups[0], "*" * self.group_number_count, groups[-1]])
 
     @abstractmethod
     def get_owner(self) -> TelegramUser:
@@ -32,3 +37,9 @@ class BankObject:
     @abstractmethod
     def get_balance(self) -> Decimal:
         pass
+
+    def __get_groups(self) -> List[str]:
+        group = self.group_number_count
+        str_ = str(self.number_field)
+
+        return [str_[i * group : (i + 1) * group] for i in range(len(str_) // group)]

@@ -65,8 +65,8 @@ def get_user_details(user: TelegramUser) -> str:
         first_name=user.first_name,
         last_name=user.last_name,
         phone=user.phone,
-        bank_accounts="\n\t\t\t".join(map(str, bank_accounts)),
-        cards="\n\t\t\t".join(map(str, cards)),
+        bank_accounts="\n\t\t\t".join(account.short_number for account in bank_accounts),
+        cards="\n\t\t\t".join(card.short_number for card in cards),
     )
 
 

@@ -219,7 +219,7 @@ def _send_transfer_details(update: Update, context: CallbackContext) -> None:
     accrual: int = context.user_data[_ACCRUAL_SESSION]
 
     details = _TRANSFER_DETAILS.format(
-        source=str(source),
+        source=source.short_number,
         source_type=_type_to_string(source),
         balance=source.get_balance(),
         destination=destination,

@@ -48,7 +48,7 @@ def handle_balance_choice(update: Update, context: CallbackContext) -> int:
         return BalanceStates.CHOICE
 
     details = (_BALANCE_BY_BANK_ACCOUNT if isinstance(document, BankAccount) else _BALANCE_BY_CARD).format(
-        number=document.pretty_number, balance=document.get_balance()
+        number=document.short_number, balance=document.get_balance()
     )
 
     update.message.reply_text(details)
