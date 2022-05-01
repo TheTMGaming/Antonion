@@ -1,11 +1,12 @@
-from telegram import ParseMode, Update
+from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.models.bank import BankObject
 from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transaction import get_transactions
 from app.internal.services.bank.transfer import get_documents_with_enums
-from app.internal.services.table import build_transfer_history
+from app.internal.services.utils import build_transfer_history, create_temp_file, remove_temp_file, \
+    get_transfer_history_filename
 from app.internal.services.user import get_user
 from app.internal.transport.bot.modules.cancel import cancel
 from app.internal.transport.bot.modules.document import send_document_list
@@ -47,7 +48,11 @@ def handle_history_document(update: Update, context: CallbackContext) -> int:
     transactions = get_transactions(account)
 
     history = build_transfer_history(account, transactions)
-    update.message.reply_text(f"<pre>{history}</pre>", parse_mode=ParseMode.HTML)
+    file = create_temp_file(history)
+
+    update.message.reply_document(file, get_transfer_history_filename(document.pretty_number))
+
+    remove_temp_file(file)
 
     return ConversationHandler.END
 

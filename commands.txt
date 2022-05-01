@@ -7,3 +7,4 @@ add_friend - [id|username] - добавить друга
 rm_friend - [id|username] - удалить друга
 transfer - совершить перевод
 cancel - отменить операцию
+history - выписка из счёта/карты
