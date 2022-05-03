@@ -1,1 +1,1 @@
-from app.internal.transport.bot.modules.history.handlers import history_conversation
+from .handlers import history_conversation

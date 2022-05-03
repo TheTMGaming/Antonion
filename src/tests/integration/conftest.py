@@ -28,20 +28,18 @@ def context() -> MagicMock:
     context.args = []
     context.user_data = dict()
 
+    bot = MagicMock()
+    bot.send_message.return_value = None
+    context.bot = bot
+
     return context
 
 
 @pytest.fixture(scope="function")
-def friend(telegram_user_with_phone: TelegramUser, friends: List[TelegramUser]) -> TelegramUser:
-    telegram_user_with_phone.friends.add(friends[0])
+def friend(friends: List[TelegramUser]) -> TelegramUser:
     return friends[0]
 
 
 @pytest.fixture(scope="function")
 def friend_with_account(friend: TelegramUser, friend_account: BankAccount) -> TelegramUser:
     return friend
-
-
-@pytest.fixture(scope="function")
-def friend_account(friend: TelegramUser) -> BankAccount:
-    return BankAccount.objects.create(balance=BALANCE, owner=friend)

@@ -2,10 +2,11 @@ from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.models.user import TelegramUser
-from app.internal.services.bank.account import get_bank_accounts
-from app.internal.services.bank.card import get_cards
-from app.internal.services.user import get_relations, get_user, try_add_or_update_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
+from app.internal.services.bank import get_documents
+from app.internal.services.bank.transaction import get_usernames_relations
+from app.internal.services.user import get_user, try_add_or_update_user
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
+    if_user_is_not_in_conversation
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
 _UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"
@@ -21,6 +22,7 @@ _DETAILS = (
 
 _RELATIONS_DETAILS = "Вот с этими людьми вы взаимодействовали:\n\n{usernames}"
 _RELATION_POINT = "{number}) {username}"
+_RELATION_LIST_EMPTY = "Похоже, что вы в танке... и ни с кеми не взаимодействовали"
 
 
 @if_update_message_exist
@@ -37,6 +39,7 @@ def handle_start(update: Update, context: CallbackContext) -> None:
 @if_update_message_exist
 @if_user_exist
 @if_phone_is_set
+@if_user_is_not_in_conversation
 def handle_me(update: Update, context: CallbackContext) -> None:
     user = get_user(update.effective_user.id)
 
@@ -48,8 +51,13 @@ def handle_me(update: Update, context: CallbackContext) -> None:
 @if_update_message_exist
 @if_user_exist
 @if_phone_is_set
+@if_user_is_not_in_conversation
 def handle_relations(update: Update, context: CallbackContext) -> None:
-    usernames = enumerate(get_relations(update.effective_user.id), start=1)
+    usernames = list(enumerate(get_usernames_relations(update.effective_user.id), start=1))
+
+    if not usernames:
+        update.message.reply_text(_RELATION_LIST_EMPTY)
+        return
 
     username_list = "\n".join(_RELATION_POINT.format(number=num, username=username) for num, username in usernames)
 
@@ -57,7 +65,7 @@ def handle_relations(update: Update, context: CallbackContext) -> None:
 
 
 def get_user_details(user: TelegramUser) -> str:
-    bank_accounts, cards = get_bank_accounts(user), get_cards(user)
+    bank_accounts, cards = get_documents(user)
 
     return _DETAILS.format(
         id=user.id,

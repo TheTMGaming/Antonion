@@ -1,1 +1,1 @@
-from .service import declare_transaction, get_transactions, separate_transfer_transactions
+from .service import declare_transaction, get_transactions, get_usernames_relations

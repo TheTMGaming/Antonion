@@ -1,9 +1,10 @@
 from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, Filters, MessageHandler
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.services.user import try_set_phone
-from app.internal.transport.bot.decorators import if_update_message_exist, if_user_exist
-from app.internal.transport.bot.modules.cancel import cancel
+from app.internal.transport.bot.decorators import if_update_message_exist, if_user_exist, if_user_is_not_in_conversation
+from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
+from app.internal.transport.bot.modules.filters import TEXT
 from app.internal.transport.bot.modules.user.PhoneStates import PhoneStates
 
 _WELCOME = "Введите, пожалуйста, номер телефона"
@@ -13,7 +14,10 @@ _INVALID_PHONE = "Я не могу сохранить эти кракозябр�
 
 @if_update_message_exist
 @if_user_exist
+@if_user_is_not_in_conversation
 def handle_phone_start(update: Update, context: CallbackContext) -> int:
+    mark_begin_conversation(context, entry_point.command)
+
     update.message.reply_text(_WELCOME)
 
     return PhoneStates.INPUT
@@ -30,9 +34,14 @@ def handle_phone(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_text(_UPDATING_PHONE)
 
+    return ConversationHandler.END
+
+
+entry_point = CommandHandler("phone", handle_phone_start)
+
 
 phone_conversation = ConversationHandler(
-    entry_points=[CommandHandler("phone", handle_phone_start)],
-    states={PhoneStates.INPUT: [MessageHandler(Filters.text & ~Filters.command, handle_phone)]},
+    entry_points=[entry_point],
+    states={PhoneStates.INPUT: [MessageHandler(TEXT, handle_phone)]},
     fallbacks=[cancel],
 )

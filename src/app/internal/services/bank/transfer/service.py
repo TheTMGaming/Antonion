@@ -11,7 +11,7 @@ from app.internal.services.bank.card import get_cards
 from app.internal.services.bank.transaction import declare_transaction
 
 
-def get_documents_with_enums(user: TelegramUser) -> dict:
+def get_documents_order(user: TelegramUser) -> dict:
     return dict(
         (number, document) for number, document in enumerate(chain(get_bank_accounts(user), get_cards(user)), start=1)
     )

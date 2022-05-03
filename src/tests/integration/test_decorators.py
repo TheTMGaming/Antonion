@@ -9,8 +9,9 @@ from app.internal.transport.bot.decorators import (
     _USER_DOESNT_EXIST,
     if_phone_is_set,
     if_update_message_exist,
-    if_user_exist,
+    if_user_exist, if_user_is_not_in_conversation,
 )
+from app.internal.transport.bot.modules.general import mark_begin_conversation
 
 
 @pytest.mark.integration
@@ -49,6 +50,20 @@ def test_if_phone_is_set(update: MagicMock, context: MagicMock, telegram_user_wi
 def test_if_phone_is_not_set(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
     assert if_phone_is_set(_handler)(update, context) == ConversationHandler.END
     update.message.reply_text.assert_called_once_with(_UNDEFINED_PHONE)
+
+
+@pytest.mark.django_db
+@pytest.mark.integration
+def test_if_user_is_not_in_conversation(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
+    assert if_user_is_not_in_conversation(_handler)(update, context) == _handler(update, context)
+
+
+@pytest.mark.django_db
+@pytest.mark.integration
+def test_if_user_is_in_conversation(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
+    mark_begin_conversation(context)
+
+    assert if_user_is_not_in_conversation(_handler)(update, context) is None
 
 
 def _handler(update: MagicMock, context: MagicMock) -> int:

@@ -4,7 +4,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.models.bank import BankObject
 from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transaction import get_transactions
-from app.internal.services.bank.transfer import get_documents_with_enums
+from app.internal.services.bank.transfer import get_documents_order
 from app.internal.services.user import get_user
 from app.internal.services.utils import (
     build_transfer_history,
@@ -12,8 +12,9 @@ from app.internal.services.utils import (
     get_transfer_history_filename,
     remove_temp_file,
 )
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
-from app.internal.transport.bot.modules.cancel import cancel
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
+    if_user_is_not_in_conversation
+from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import INT
 from app.internal.transport.bot.modules.history.HistoryStates import HistoryStates
@@ -28,10 +29,13 @@ _DOCUMENTS_SESSION = "documents"
 @if_update_message_exist
 @if_user_exist
 @if_phone_is_set
+@if_user_is_not_in_conversation
 def handle_history_start(update: Update, context: CallbackContext) -> int:
+    mark_begin_conversation(context, entry_point.command)
+
     user = get_user(update.effective_user.id)
 
-    documents = get_documents_with_enums(user)
+    documents = get_documents_order(user)
 
     if not documents:
         update.message.reply_text(_LIST_EMPTY_MESSAGE)
@@ -65,8 +69,11 @@ def handle_history_document(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
+entry_point = CommandHandler("history", handle_history_start)
+
+
 history_conversation = ConversationHandler(
-    entry_points=[CommandHandler("history", handle_history_start)],
+    entry_points=[entry_point],
     states={
         HistoryStates.DOCUMENT: [MessageHandler(INT, handle_history_document)],
     },

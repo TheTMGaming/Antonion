@@ -6,12 +6,13 @@ from telegram.ext import ConversationHandler
 
 from app.internal.models.bank import BankAccount, BankCard
 from app.internal.models.user import TelegramUser
-from app.internal.transport.bot.modules.balance import BalanceStates, handle_balance_start
+from app.internal.transport.bot.modules.balance.BalanceStates import BalanceStates
 from app.internal.transport.bot.modules.balance.handlers import (
     _DOCUMENTS_SESSION,
     _LIST_EMPTY_MESSAGE,
     _STUPID_CHOICE,
     handle_balance_choice,
+    handle_balance_start
 )
 
 

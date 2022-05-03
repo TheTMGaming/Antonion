@@ -1,13 +1,10 @@
-from collections import namedtuple
 from decimal import Decimal
-from typing import Iterable, NamedTuple, Tuple
+from typing import Union
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
 from app.internal.models.bank import BankAccount, Transaction, TransactionTypes
-
-SeparatedTransactions = namedtuple("SeparatedTransactions", ["to", "me"])
 
 
 def declare_transaction(
@@ -23,9 +20,8 @@ def get_transactions(account: BankAccount) -> QuerySet[Transaction]:
     return Transaction.objects.filter(Q(source=account) | Q(destination=account)).all()
 
 
-def separate_transfer_transactions(account: BankAccount, transactions: Iterable[Transaction]) -> SeparatedTransactions:
-    to, from_ = [], []
-    for transaction in transactions:
-        (from_ if transaction.source == account else to).append(transaction)
+def get_usernames_relations(user_id: Union[int, str]) -> QuerySet[str]:
+    from_ = Transaction.objects.filter(source__owner_id=user_id).values_list("destination__owner__username", flat=True)
+    to = Transaction.objects.filter(destination__owner_id=user_id).values_list("source__owner__username", flat=True)
 
-    return SeparatedTransactions(to, from_)
+    return from_.union(to)

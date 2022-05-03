@@ -1,3 +1,5 @@
+from .accept_conversation import accept_conversation
 from .add_conversation import add_friend_conversation
-from .commands import friends_commands, handle_friends
+from .commands import friends_commands
+from .reject_conversation import reject_conversation
 from .rm_conversation import rm_friend_conversation

@@ -9,15 +9,16 @@ from app.internal.models.user import TelegramUser
 from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transfer import (
     can_extract_from,
-    get_documents_with_enums,
+    get_documents_order,
     is_balance_zero,
     parse_accrual,
     try_transfer,
 )
 from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
-from app.internal.transport.bot.modules.cancel import cancel
+from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
+    if_user_is_not_in_conversation
+from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import FLOATING, INT
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
@@ -68,7 +69,10 @@ _ACCRUAL_SESSION = "accrual"
 @if_update_message_exist
 @if_user_exist
 @if_phone_is_set
+@if_user_is_not_in_conversation
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
+    mark_begin_conversation(context, entry_point.command)
+
     user = get_user(update.effective_user.id)
 
     friends = get_friends_with_enums(user)
@@ -76,7 +80,7 @@ def handle_transfer_start(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_FRIEND_LIST_EMPTY_ERROR)
         return ConversationHandler.END
 
-    documents = get_documents_with_enums(user)
+    documents = get_documents_order(user)
     if len(documents) == 0:
         update.message.reply_text(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
         return ConversationHandler.END
@@ -99,7 +103,7 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
 
     context.user_data[_CHOSEN_FRIEND_SESSION] = friend
 
-    documents = get_documents_with_enums(friend)
+    documents = get_documents_order(friend)
 
     return _save_and_send_friend_document_list(update, context, documents)
 
@@ -234,8 +238,11 @@ def _type_to_string(document: BankObject) -> str:
     return _ACCOUNT_TYPE if isinstance(document, BankAccount) else _CARD_TYPE
 
 
+entry_point = CommandHandler("transfer", handle_transfer_start)
+
+
 transfer_conversation = ConversationHandler(
-    entry_points=[CommandHandler("transfer", handle_transfer_start)],
+    entry_points=[entry_point],
     states={
         TransferStates.DESTINATION: [MessageHandler(INT, handle_transfer_destination)],
         TransferStates.DESTINATION_DOCUMENT: [MessageHandler(INT, handle_transfer_destination_document)],

@@ -1,11 +1,9 @@
 from typing import Union
 
 from django.conf import settings
-from django.db.models import QuerySet
 from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, is_valid_number_for_region, parse
 from telegram import User
 
-from app.internal.models.bank import Transaction
 from app.internal.models.user import TelegramUser
 from app.internal.services.user.TelegramUserFields import TelegramUserFields
 
@@ -49,10 +47,3 @@ def try_set_phone(user_id: Union[int, str], value: str) -> bool:
     TelegramUser.objects.filter(id=user_id).update(phone=format_number(phone, PhoneNumberFormat.E164))
 
     return True
-
-
-def get_relations(user_id: Union[int, str]) -> QuerySet[str]:
-    from_ = Transaction.objects.filter(source__owner_id=user_id).values_list("destination__owner__username", flat=True)
-    to = Transaction.objects.filter(destination__owner_id=user_id).values_list("source__owner__username", flat=True)
-
-    return from_.union(to)

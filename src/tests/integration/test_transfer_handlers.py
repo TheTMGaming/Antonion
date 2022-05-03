@@ -8,14 +8,8 @@ from telegram.ext import ConversationHandler
 from app.internal.models.bank import BankAccount
 from app.internal.models.user import TelegramUser
 from app.internal.services.bank.transfer import parse_accrual
-from app.internal.transport.bot.modules.transfer import (
-    TransferStates,
-    handle_transfer_accrual,
-    handle_transfer_destination,
-    handle_transfer_destination_document,
-    handle_transfer_source_document,
-    handle_transfer_start,
-)
+from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
+
 from app.internal.transport.bot.modules.transfer.handlers import (
     _ACCRUAL_GREATER_BALANCE_ERROR,
     _ACCRUAL_PARSE_ERROR,
@@ -34,6 +28,11 @@ from app.internal.transport.bot.modules.transfer.handlers import (
     _TRANSFER_FAIL,
     _TRANSFER_SUCCESS,
     handle_transfer,
+    handle_transfer_accrual,
+    handle_transfer_destination,
+    handle_transfer_destination_document,
+    handle_transfer_source_document,
+    handle_transfer_start,
 )
 from tests.conftest import BALANCE
 
@@ -44,7 +43,7 @@ def test_start(
     update: MagicMock,
     context: MagicMock,
     telegram_user_with_phone: TelegramUser,
-    friend: TelegramUser,
+    friends: List[TelegramUser],
     bank_accounts: List[BankAccount],
 ) -> None:
     next_state = handle_transfer_start(update, context)
@@ -53,7 +52,7 @@ def test_start(
     assert _SOURCE_DOCUMENTS_SESSION in context.user_data
     assert _FRIEND_VARIANTS_SESSION in context.user_data
     assert list(context.user_data[_SOURCE_DOCUMENTS_SESSION].values()) == bank_accounts
-    assert list(context.user_data[_FRIEND_VARIANTS_SESSION].values()) == [friend]
+    assert list(context.user_data[_FRIEND_VARIANTS_SESSION].values()) == friends
 
 
 @pytest.mark.django_db

@@ -41,8 +41,18 @@ def telegram_users(users: List[User]) -> List[TelegramUser]:
 
 
 @pytest.fixture(scope="function")
-def telegram_user(user: User, telegram_users: List[TelegramUser]) -> TelegramUser:
+def telegram_user(telegram_users: List[TelegramUser]) -> TelegramUser:
     return telegram_users[0]
+
+
+@pytest.fixture(scope="function")
+def another_telegram_user(telegram_users: List[TelegramUser]) -> TelegramUser:
+    return telegram_users[1]
+
+
+@pytest.fixture(scope="function")
+def another_telegram_users(telegram_users: List[TelegramUser]) -> List[TelegramUser]:
+    return telegram_users[1:]
 
 
 @pytest.fixture(scope="function")
@@ -91,4 +101,20 @@ def another_card(cards: List[BankCard]) -> BankCard:
 
 @pytest.fixture(scope="function")
 def friends(telegram_user: TelegramUser, telegram_users: List[TelegramUser]) -> List[TelegramUser]:
-    return [friend for friend in telegram_users if friend != telegram_user]
+    friends = [friend for friend in telegram_users if friend != telegram_user]
+
+    telegram_user.friends.add(*friends)
+    for friend in friends:
+        friend.friends.add(telegram_user)
+
+    return friends
+
+
+@pytest.fixture(scope="function")
+def friend_accounts(friends: List[TelegramUser]) -> List[BankAccount]:
+    return [BankAccount.objects.create(balance=BALANCE, owner=friend) for friend in friends]
+
+
+@pytest.fixture(scope="function")
+def friend_account(friend_accounts: List[BankAccount]) -> BankAccount:
+    return friend_accounts[0]
