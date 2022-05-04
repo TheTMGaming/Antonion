@@ -7,8 +7,8 @@ from app.internal.models.user import TelegramUser
 from app.internal.transport.bot.modules.friends.commands import (
     _FRIENDSHIPS_EMPTY,
     _LIST_EMPTY_ERROR,
+    handle_friends,
     handle_friendships,
-    handle_friends
 )
 
 
@@ -29,7 +29,6 @@ def test_friends__not_exist(
 ) -> None:
     handle_friends(update, context)
 
-    assert update.message.reply_text.call_count == 1
     update.message.reply_text.assert_called_once_with(_LIST_EMPTY_ERROR)
 
 

@@ -4,11 +4,15 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.models.user import TelegramUser
 from app.internal.services.friend import get_friends_with_enums, try_remove_from_friends
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
-from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.filters import INT
 from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 
 _WELCOME = "Выберите пользователя, который плохо себя ведёт:\n\n"
 _LIST_EMPTY = "К сожалению, у вас нет друзей :("
@@ -27,7 +31,7 @@ _USER_SESSION = "user"
 @if_phone_is_set
 @if_user_is_not_in_conversation
 def handle_rm_friend_start(update: Update, context: CallbackContext) -> int:
-    mark_begin_conversation(context, entry_point.command)
+    mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
     friends = get_friends_with_enums(user)
@@ -35,7 +39,10 @@ def handle_rm_friend_start(update: Update, context: CallbackContext) -> int:
     context.user_data[_USERNAMES_SESSION] = friends
     context.user_data[_USER_SESSION] = user
 
-    update.message.reply_text(_WELCOME + "\n".join(_FRIEND_VARIANT.format(num=num, username=friend.username) for num, friend in friends.items()))
+    update.message.reply_text(
+        _WELCOME
+        + "\n".join(_FRIEND_VARIANT.format(num=num, username=friend.username) for num, friend in friends.items())
+    )
 
     return FriendStates.INPUT
 
@@ -51,15 +58,13 @@ def handle_rm_friend(update: Update, context: CallbackContext) -> int:
 
     if not try_remove_from_friends(user, friend):
         update.message.reply_text(_REMOVE_ERROR)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
     update.message.reply_text(_REMOVE_SUCCESS)
 
     context.bot.send_message(chat_id=friend.id, text=get_notification(user))
 
-    context.user_data.clear()
-
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
 def get_notification(source: TelegramUser) -> str:

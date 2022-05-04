@@ -11,14 +11,18 @@ COMMAND = "command"
 def handle_cancel(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(_CANCEL_OPERATION)
 
-    context.user_data.clear()
-
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
-def mark_begin_conversation(context: CallbackContext, command: List[str]) -> None:
+def mark_conversation_start(context: CallbackContext, command: List[str]) -> None:
     context.user_data[IN_CONVERSATION] = True
     context.user_data[COMMAND] = "".join(command)
+
+
+def mark_conversation_end(contex: CallbackContext) -> int:
+    contex.user_data.clear()
+
+    return ConversationHandler.END
 
 
 cancel = CommandHandler("cancel", handle_cancel)

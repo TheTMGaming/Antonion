@@ -4,11 +4,15 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.models.user import TelegramUser
 from app.internal.services.friend import is_friend_exist, try_create_friend_request
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
-from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.filters import TEXT
 from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 
 _WELCOME = "Введите никнейм или идентификатор пользователя"
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль! Повторите попытку, либо /cancel"
@@ -26,7 +30,7 @@ _NOTIFICATION_MESSAGE = "С вами хочет познакомиться {user
 @if_phone_is_set
 @if_user_is_not_in_conversation
 def handle_add_friend_start(update: Update, context: CallbackContext) -> int:
-    mark_begin_conversation(context, entry_point.command)
+    mark_conversation_start(context, entry_point.command)
 
     update.message.reply_text(_WELCOME)
 
@@ -63,7 +67,7 @@ def handle_add_friend(update: Update, context: CallbackContext) -> int:
         text=get_notification(user),
     )
 
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
 def get_notification(source: TelegramUser) -> str:

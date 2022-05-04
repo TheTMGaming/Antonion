@@ -7,6 +7,7 @@ from telegram.ext import ConversationHandler
 from app.internal.models.user import FriendRequest, TelegramUser
 from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
 from app.internal.transport.bot.modules.friends.username_list_sender import send_username_list
+from tests.integration.general import assert_conversation_end
 
 _WELCOME = "abc"
 _LIST_EMPTY = "ops"
@@ -30,7 +31,9 @@ def test_send_username_list(
     assert next_state == FriendStates.INPUT
     assert _USERNAMES_SESSION in context.user_data
     assert type(context.user_data[_USERNAMES_SESSION]) is dict
-    assert context.user_data[_USERNAMES_SESSION] == dict((num, user.username) for num, user in enumerate(another_telegram_users, start=1))
+    assert context.user_data[_USERNAMES_SESSION] == dict(
+        (num, user.username) for num, user in enumerate(another_telegram_users, start=1)
+    )
 
 
 @pytest.mark.django_db
@@ -43,6 +46,6 @@ def test_send_username_list__empty(
 ) -> None:
     next_state = send_username_list(update, context, _LIST_EMPTY, _USERNAMES_SESSION, _WELCOME)
 
-    assert next_state == ConversationHandler.END
+    assert_conversation_end(next_state, context)
     assert _USERNAMES_SESSION not in context.user_data
     update.message.reply_text.assert_called_once_with(_LIST_EMPTY)

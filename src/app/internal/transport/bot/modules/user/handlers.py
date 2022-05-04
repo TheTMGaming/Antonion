@@ -5,8 +5,12 @@ from app.internal.models.user import TelegramUser
 from app.internal.services.bank import get_documents
 from app.internal.services.bank.transaction import get_usernames_relations
 from app.internal.services.user import get_user, try_add_or_update_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
 _UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"

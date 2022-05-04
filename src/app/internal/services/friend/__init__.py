@@ -7,5 +7,5 @@ from .service import (
     reject_friend_request,
     try_accept_friend,
     try_create_friend_request,
-    try_remove_from_friends
+    try_remove_from_friends,
 )

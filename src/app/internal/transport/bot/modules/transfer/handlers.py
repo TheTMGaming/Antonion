@@ -16,11 +16,15 @@ from app.internal.services.bank.transfer import (
 )
 from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
-from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import FLOATING, INT
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
@@ -71,19 +75,19 @@ _ACCRUAL_SESSION = "accrual"
 @if_phone_is_set
 @if_user_is_not_in_conversation
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
-    mark_begin_conversation(context, entry_point.command)
+    mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
 
     friends = get_friends_with_enums(user)
     if len(friends) == 0:
         update.message.reply_text(_FRIEND_LIST_EMPTY_ERROR)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
     documents = get_documents_order(user)
     if len(documents) == 0:
         update.message.reply_text(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = documents
 
@@ -177,11 +181,13 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
 
     update.message.reply_text(message)
-    context.bot.send_message(chat_id=destination.get_owner().id, text=_get_accrual_detail(source, destination, accrual))
 
-    context.user_data.clear()
+    if is_success:
+        context.bot.send_message(
+            chat_id=destination.get_owner().id, text=_get_accrual_detail(source, destination, accrual)
+        )
 
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
 def _get_accrual_detail(source: BankObject, destination: BankObject, accrual: Decimal) -> str:

@@ -118,3 +118,13 @@ def friend_accounts(friends: List[TelegramUser]) -> List[BankAccount]:
 @pytest.fixture(scope="function")
 def friend_account(friend_accounts: List[BankAccount]) -> BankAccount:
     return friend_accounts[0]
+
+
+@pytest.fixture(scope="function")
+def friend_cards(friend_accounts: List[BankAccount]) -> List[BankCard]:
+    return [BankCard.objects.create(bank_account=account) for account in friend_accounts]
+
+
+@pytest.fixture(scope="function")
+def friend_card(friend_cards: List[BankCard]) -> BankCard:
+    return friend_cards[0]

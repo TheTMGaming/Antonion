@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from app.internal.models.bank import BankCard, BankAccount
+from app.internal.models.bank import BankAccount, BankCard
 from app.internal.models.user import TelegramUser
 
 

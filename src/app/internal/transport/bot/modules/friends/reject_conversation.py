@@ -4,12 +4,16 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.models.user import TelegramUser
 from app.internal.services.friend import reject_friend_request
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
-from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.filters import INT
 from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
 from app.internal.transport.bot.modules.friends.username_list_sender import send_username_list
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 
 _WELCOME = "Выберите из списка того, с кем не хотите иметь дело:\n\n"
 _LIST_EMPTY = "На данный момент нет заявок в друзья :("
@@ -26,7 +30,7 @@ _USERNAMES_SESSION = "username_list"
 @if_phone_is_set
 @if_user_is_not_in_conversation
 def handle_reject_start(update: Update, context: CallbackContext) -> int:
-    mark_begin_conversation(context, entry_point.command)
+    mark_conversation_start(context, entry_point.command)
 
     return send_username_list(update, context, _LIST_EMPTY, _USERNAMES_SESSION, _WELCOME)
 
@@ -34,7 +38,6 @@ def handle_reject_start(update: Update, context: CallbackContext) -> int:
 @if_update_message_exist
 def handle_reject(update: Update, context: CallbackContext) -> int:
     username = context.user_data[_USERNAMES_SESSION].get(int(update.message.text))
-    context.user_data.clear()
 
     if not username:
         update.message.reply_text(_STUPID_CHOICE)
@@ -48,7 +51,7 @@ def handle_reject(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(_REJECT_SUCCESS)
     context.bot.send_message(chat_id=friend.id, text=get_notification(user))
 
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
 def get_notification(source: TelegramUser) -> str:

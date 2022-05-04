@@ -12,11 +12,15 @@ from app.internal.services.utils import (
     get_transfer_history_filename,
     remove_temp_file,
 )
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
-from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import INT
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_start
 from app.internal.transport.bot.modules.history.HistoryStates import HistoryStates
 
 _WELCOME = "Выберите счёт или карту:\n"
@@ -31,7 +35,7 @@ _DOCUMENTS_SESSION = "documents"
 @if_phone_is_set
 @if_user_is_not_in_conversation
 def handle_history_start(update: Update, context: CallbackContext) -> int:
-    mark_begin_conversation(context, entry_point.command)
+    mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
 

@@ -4,12 +4,16 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.models.bank import BankAccount, BankObject
 from app.internal.services.bank.transfer import get_documents_order
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist, \
-    if_user_is_not_in_conversation
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.balance.BalanceStates import BalanceStates
-from app.internal.transport.bot.modules.general import cancel, mark_begin_conversation
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import INT
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 _WELCOME = "Выберите банковский счёт или карту, либо /cancel\n"
@@ -26,14 +30,14 @@ _DOCUMENTS_SESSION = "documents"
 @if_phone_is_set
 @if_user_is_not_in_conversation
 def handle_balance_start(update: Update, context: CallbackContext) -> int:
-    mark_begin_conversation(context, entry_point.command)
+    mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
     documents = get_documents_order(user)
 
     if len(documents) == 0:
         update.message.reply_text(_LIST_EMPTY_MESSAGE)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
     context.user_data[_DOCUMENTS_SESSION] = documents
 
@@ -57,7 +61,7 @@ def handle_balance_choice(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_text(details)
 
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
 entry_point = CommandHandler("balance", handle_balance_start)
