@@ -4,12 +4,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.services.user import try_set_phone
 from app.internal.transport.bot.decorators import if_update_message_exist, if_user_exist, if_user_is_not_in_conversation
 from app.internal.transport.bot.modules.filters import TEXT
-from app.internal.transport.bot.modules.general import (
-    IN_CONVERSATION,
-    cancel,
-    mark_conversation_end,
-    mark_conversation_start,
-)
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.transport.bot.modules.user.PhoneStates import PhoneStates
 
 _WELCOME = "Введите, пожалуйста, номер телефона"

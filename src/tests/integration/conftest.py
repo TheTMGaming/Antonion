@@ -6,13 +6,13 @@ from telegram import User
 
 from app.internal.models.bank import BankAccount
 from app.internal.models.user import TelegramUser
-from tests.conftest import BALANCE
 
 
 @pytest.fixture(scope="function")
 def update(user: User) -> MagicMock:
     message = MagicMock()
     message.reply_text.return_value = None
+    message.reply_document.return_value = None
     message.text = ""
 
     update = MagicMock()

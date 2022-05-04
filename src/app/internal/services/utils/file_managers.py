@@ -2,8 +2,6 @@ from datetime import datetime
 from tempfile import TemporaryFile
 from typing import Union
 
-from django.conf import settings
-
 _TRANSFER_FILE_NAME = "Выписка для {number} к {date}.txt"
 
 

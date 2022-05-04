@@ -18,11 +18,9 @@ _WELCOME = "Введите никнейм или идентификатор по
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль! Повторите попытку, либо /cancel"
 _USER_NOT_FOUND_ERROR = "В нашей базе нет такого пользователя! Повторите попытку, либо /cancel"
 _ALREADY_EXIST_ERROR = "Так он уже твой друг! Смысл было меня отвлекать от важных дел! Повторите попытку, либо /cancel"
-_REQUEST_ALREADY_EXIST_ERROR = (
-    "Вы уже отправили заявку данному пользователю! Не отвлекайте меня, пожалуйста, от важных дела"
-)
+_REQUEST_ALREADY_EXIST_ERROR = "Вы уже отправили заявку данному пользователю! Введите другой никнейм, либо /cancel"
 _REQUEST_SUCCESS = "Заявка отправлена! Да прибудет денюж... в смысле дружба!"
-_NOTIFICATION_MESSAGE = "С вами хочет познакомиться {username} ({name}). Используйте команду /friendships"
+_NOTIFICATION_MESSAGE = "С вами хочет познакомиться {username} ({name}). Используйте команду /accept"
 
 
 @if_update_message_exist

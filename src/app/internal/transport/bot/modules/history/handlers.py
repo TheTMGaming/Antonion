@@ -20,7 +20,7 @@ from app.internal.transport.bot.decorators import (
 )
 from app.internal.transport.bot.modules.document import send_document_list
 from app.internal.transport.bot.modules.filters import INT
-from app.internal.transport.bot.modules.general import cancel, mark_conversation_start
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.transport.bot.modules.history.HistoryStates import HistoryStates
 
 _WELCOME = "Выберите счёт или карту:\n"
@@ -43,7 +43,7 @@ def handle_history_start(update: Update, context: CallbackContext) -> int:
 
     if not documents:
         update.message.reply_text(_LIST_EMPTY_MESSAGE)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
     send_document_list(update, documents, _WELCOME)
 
@@ -70,7 +70,7 @@ def handle_history_document(update: Update, context: CallbackContext) -> int:
 
     remove_temp_file(file)
 
-    return ConversationHandler.END
+    return mark_conversation_end(context)
 
 
 entry_point = CommandHandler("history", handle_history_start)

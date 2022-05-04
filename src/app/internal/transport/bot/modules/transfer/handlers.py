@@ -194,7 +194,7 @@ def _get_accrual_detail(source: BankObject, destination: BankObject, accrual: De
     type_ = _CARD_TYPE if isinstance(destination, BankCard) else _ACCOUNT_TYPE
 
     return _ACCRUAL_DETAILS.format(
-        type=type_, number=destination.pretty_number, accrual=accrual, username=source.get_owner().username
+        type=type_, number=destination.short_number, accrual=accrual, username=source.get_owner().username
     )
 
 
