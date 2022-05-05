@@ -2,7 +2,8 @@ from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.models.user import TelegramUser
-from app.internal.services.bank import get_documents
+from app.internal.services.bank.account import get_bank_accounts
+from app.internal.services.bank.card import get_cards
 from app.internal.services.bank.transaction import get_usernames_relations
 from app.internal.services.user import get_user, try_add_or_update_user
 from app.internal.transport.bot.decorators import (
@@ -69,7 +70,7 @@ def handle_relations(update: Update, context: CallbackContext) -> None:
 
 
 def get_user_details(user: TelegramUser) -> str:
-    bank_accounts, cards = get_documents(user)
+    bank_accounts, cards = get_bank_accounts(user), get_cards(user)
 
     return _DETAILS.format(
         id=user.id,
