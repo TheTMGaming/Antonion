@@ -1,7 +1,7 @@
 from telegram import Bot, Update
 from telegram.ext import Dispatcher
 
-from app.internal.transport.bot.handlers import handlers
+from app.internal.transport.bot import handlers
 
 
 class BotWebhookService:

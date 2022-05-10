@@ -10,14 +10,10 @@ from app.internal.services.bank.card import get_card, get_cards
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_card_by_number(telegram_user: TelegramUser, cards: List[BankCard]) -> None:
-    actual = [get_card(card.number) for card in cards]
-
-    assert actual == list(BankCard.objects.filter(bank_account__owner=telegram_user))
+    assert all(get_card(card.number).bank_account.owner == telegram_user for card in cards)
 
 
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_cards_by_user(telegram_user: TelegramUser, cards: List[BankCard]) -> None:
-    actual = get_cards(telegram_user)
-
-    assert actual == list(BankCard.objects.filter(bank_account__owner=telegram_user))
+    assert all(card.bank_account.owner == telegram_user for card in get_cards(telegram_user))

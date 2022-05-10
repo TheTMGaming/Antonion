@@ -25,7 +25,7 @@ def build_details(
     return "\t" * 3 + "\n\t\t\t".join(
         pattern.format(
             number=num,
-            document=str(document),
+            document=document.short_number,
             balance=document.get_balance(),
         )
         for num, document in documents.items()

@@ -2,21 +2,29 @@ from decimal import Decimal
 from typing import Dict
 
 from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.models.bank import BankAccount, BankObject
+from app.internal.models.bank import BankAccount, BankCard, BankObject
 from app.internal.models.user import TelegramUser
+from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transfer import (
     can_extract_from,
-    get_documents_with_enums,
+    get_documents_order,
     is_balance_zero,
     parse_accrual,
     try_transfer,
 )
 from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import if_phone_is_set, if_update_message_exist, if_user_exist
+from app.internal.transport.bot.decorators import (
+    if_phone_is_set,
+    if_update_message_exist,
+    if_user_exist,
+    if_user_is_not_in_conversation,
+)
 from app.internal.transport.bot.modules.document import send_document_list
+from app.internal.transport.bot.modules.filters import FLOATING, INT
+from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
@@ -43,6 +51,8 @@ _TRANSFER_DETAILS = (
     "Куда ({dest_type}): {destination}\n\n"
     "Сумма: {accrual}\n\n"
 )
+_ACCRUAL_DETAILS = "{type} {number} зачислено {accrual} от {username}"
+
 _CARD_TYPE = "Карта"
 _ACCOUNT_TYPE = "Счёт"
 _TRANSFER_SUCCESS = "Ваш платёж успешно выполнен!"
@@ -52,8 +62,8 @@ _TRANSFER_FAIL = "Произошла непредвиденная ошибка!"
 _SOURCE_DOCUMENTS_SESSION = "source_documents"
 _DESTINATION_DOCUMENTS_SESSION = "destination_documents"
 
-_DESTINATION_DOCUMENT_SESSION = "destination_document"
-_SOURCE_DOCUMENT_SESSION = "source_document"
+_DESTINATION_SESSION = "destination_document"
+_SOURCE_SESSION = "source_document"
 
 _CHOSEN_FRIEND_SESSION = "chosen_friend"
 _FRIEND_VARIANTS_SESSION = "friend_variants"
@@ -63,18 +73,21 @@ _ACCRUAL_SESSION = "accrual"
 @if_update_message_exist
 @if_user_exist
 @if_phone_is_set
+@if_user_is_not_in_conversation
 def handle_transfer_start(update: Update, context: CallbackContext) -> int:
+    mark_conversation_start(context, entry_point.command)
+
     user = get_user(update.effective_user.id)
 
     friends = get_friends_with_enums(user)
     if len(friends) == 0:
         update.message.reply_text(_FRIEND_LIST_EMPTY_ERROR)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
-    documents = get_documents_with_enums(user)
+    documents = get_documents_order(user)
     if len(documents) == 0:
         update.message.reply_text(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
-        return ConversationHandler.END
+        return mark_conversation_end(context)
 
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = documents
 
@@ -86,6 +99,7 @@ def handle_transfer_start(update: Update, context: CallbackContext) -> int:
 @if_update_message_exist
 def handle_transfer_destination(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
+
     friend: TelegramUser = context.user_data[_FRIEND_VARIANTS_SESSION].get(number)
     if not friend:
         update.message.reply_text(_STUPID_CHOICE_ERROR)
@@ -93,7 +107,7 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
 
     context.user_data[_CHOSEN_FRIEND_SESSION] = friend
 
-    documents = get_documents_with_enums(friend)
+    documents = get_documents_order(friend)
 
     return _save_and_send_friend_document_list(update, context, documents)
 
@@ -107,7 +121,7 @@ def handle_transfer_destination_document(update: Update, context: CallbackContex
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.DESTINATION_DOCUMENT
 
-    context.user_data[_DESTINATION_DOCUMENT_SESSION] = destination
+    context.user_data[_DESTINATION_SESSION] = get_bank_account_from_document(destination)
 
     source_documents: Dict[int, BankObject] = context.user_data[_SOURCE_DOCUMENTS_SESSION]
     send_document_list(update, source_documents, _TRANSFER_SOURCE_WELCOME, show_balance=True)
@@ -124,11 +138,13 @@ def handle_transfer_source_document(update: Update, context: CallbackContext) ->
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
+    source: BankAccount = get_bank_account_from_document(source)
+
     if is_balance_zero(source):
         update.message.reply_text(_BALANCE_ZERO_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
-    context.user_data[_SOURCE_DOCUMENT_SESSION] = source
+    context.user_data[_SOURCE_SESSION] = source
 
     update.message.reply_text(_ACCRUAL_WELCOME)
 
@@ -143,7 +159,7 @@ def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_ACCRUAL_PARSE_ERROR)
         return TransferStates.ACCRUAL
 
-    source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
+    source: BankAccount = context.user_data[_SOURCE_SESSION]
     if not can_extract_from(source, accrual):
         update.message.reply_text(_ACCRUAL_GREATER_BALANCE_ERROR)
         return TransferStates.ACCRUAL
@@ -157,8 +173,8 @@ def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
 
 @if_update_message_exist
 def handle_transfer(update: Update, context: CallbackContext) -> int:
-    source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
-    destination: BankObject = context.user_data[_DESTINATION_DOCUMENT_SESSION]
+    source: BankAccount = context.user_data[_SOURCE_SESSION]
+    destination: BankAccount = context.user_data[_DESTINATION_SESSION]
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
 
     is_success = try_transfer(source, destination, accrual)
@@ -166,9 +182,20 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_text(message)
 
-    context.user_data.clear()
+    if is_success:
+        context.bot.send_message(
+            chat_id=destination.get_owner().id, text=_get_accrual_detail(source, destination, accrual)
+        )
 
-    return ConversationHandler.END
+    return mark_conversation_end(context)
+
+
+def _get_accrual_detail(source: BankObject, destination: BankObject, accrual: Decimal) -> str:
+    type_ = _CARD_TYPE if isinstance(destination, BankCard) else _ACCOUNT_TYPE
+
+    return _ACCRUAL_DETAILS.format(
+        type=type_, number=destination.short_number, accrual=accrual, username=source.get_owner().username
+    )
 
 
 def _save_and_send_friend_list(update: Update, context: CallbackContext, friends: Dict[int, TelegramUser]) -> None:
@@ -197,12 +224,12 @@ def _save_and_send_friend_document_list(
 
 
 def _send_transfer_details(update: Update, context: CallbackContext) -> None:
-    source: BankObject = context.user_data[_SOURCE_DOCUMENT_SESSION]
-    destination: BankObject = context.user_data[_DESTINATION_DOCUMENT_SESSION]
+    source: BankObject = context.user_data[_SOURCE_SESSION]
+    destination: BankObject = context.user_data[_DESTINATION_SESSION]
     accrual: int = context.user_data[_ACCRUAL_SESSION]
 
     details = _TRANSFER_DETAILS.format(
-        source=str(source),
+        source=source.short_number,
         source_type=_type_to_string(source),
         balance=source.get_balance(),
         destination=destination,
@@ -215,3 +242,19 @@ def _send_transfer_details(update: Update, context: CallbackContext) -> None:
 
 def _type_to_string(document: BankObject) -> str:
     return _ACCOUNT_TYPE if isinstance(document, BankAccount) else _CARD_TYPE
+
+
+entry_point = CommandHandler("transfer", handle_transfer_start)
+
+
+transfer_conversation = ConversationHandler(
+    entry_points=[entry_point],
+    states={
+        TransferStates.DESTINATION: [MessageHandler(INT, handle_transfer_destination)],
+        TransferStates.DESTINATION_DOCUMENT: [MessageHandler(INT, handle_transfer_destination_document)],
+        TransferStates.SOURCE_DOCUMENT: [MessageHandler(INT, handle_transfer_source_document)],
+        TransferStates.ACCRUAL: [MessageHandler(FLOATING, handle_transfer_accrual)],
+        TransferStates.CONFIRM: [CommandHandler("confirm", handle_transfer)],
+    },
+    fallbacks=[cancel],
+)

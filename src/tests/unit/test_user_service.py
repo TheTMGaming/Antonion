@@ -5,6 +5,7 @@ from typing import List
 import pytest
 from telegram import User
 
+from app.internal.models.bank import BankAccount, Transaction
 from app.internal.models.user import TelegramUser
 from app.internal.services.user import get_user, is_user_exist, try_add_or_update_user, try_set_phone
 

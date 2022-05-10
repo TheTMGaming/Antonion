@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from telegram.ext import ConversationHandler
 
-from app.internal.transport.bot.handlers.conversations.cancel import _CANCEL_OPERATION, handle_cancel
+from app.internal.transport.bot.modules.general import _CANCEL_OPERATION, handle_cancel
 
 
 @pytest.mark.integration

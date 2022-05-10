@@ -2,6 +2,7 @@ from decimal import Decimal
 from itertools import chain
 
 from django.db import IntegrityError, transaction
+from django.db.models import F
 
 from app.internal.models.bank import BankAccount, BankObject, TransactionTypes
 from app.internal.models.user import TelegramUser
@@ -10,7 +11,7 @@ from app.internal.services.bank.card import get_cards
 from app.internal.services.bank.transaction import declare_transaction
 
 
-def get_documents_with_enums(user: TelegramUser) -> dict:
+def get_documents_order(user: TelegramUser) -> dict:
     return dict(
         (number, document) for number, document in enumerate(chain(get_bank_accounts(user), get_cards(user)), start=1)
     )
@@ -43,24 +44,21 @@ def can_extract_from(document: BankObject, accrual: Decimal) -> bool:
     return accrual <= document.get_balance()
 
 
-def try_transfer(source: BankObject, destination: BankObject, accrual: Decimal) -> bool:
+def try_transfer(source: BankAccount, destination: BankAccount, accrual: Decimal) -> bool:
     if not validate_accrual(accrual):
         raise ValueError()
 
-    is_extract = source.try_extract(accrual)
-    is_add = destination.try_add(accrual)
+    try:
+        with transaction.atomic():
+            source.balance = F("balance") - accrual
+            destination.balance = F("balance") + accrual
 
-    if is_extract and is_add:
-        try:
-            with transaction.atomic():
-                source.save_operation()
-                destination.save_operation()
+            source.save(update_fields=("balance",))
+            destination.save(update_fields=("balance",))
 
-            declare_transaction(source.get_owner(), destination.get_owner(), TransactionTypes.TRANSFER, accrual)
+        declare_transaction(source, destination, TransactionTypes.TRANSFER, accrual)
 
-            return True
+        return True
 
-        except IntegrityError:
-            return False
-
-    return False
+    except IntegrityError:
+        return False

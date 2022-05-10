@@ -6,6 +6,7 @@ from typing import List, Type
 import pytest
 
 from app.internal.models.bank import BankAccount, BankCard, BankObject, Transaction
+from app.internal.services.bank.account import get_bank_account_from_document
 from app.internal.services.bank.transfer import can_extract_from, is_balance_zero, parse_accrual, try_transfer
 from tests.conftest import BALANCE
 
@@ -170,6 +171,9 @@ def test_transfer_card_to_card(
 def _assert_documents_transfer(
     source: BankObject, destination: BankObject, accrual: Decimal, error_type: TransferError
 ) -> None:
+
+    source, destination = get_bank_account_from_document(source), get_bank_account_from_document(destination)
+
     if error_type == TransferError.VALIDATION:
         with pytest.raises(ValueError):
             try_transfer(source, destination, accrual)
@@ -185,9 +189,7 @@ def _assert_documents_transfer(
 
     is_transfer = try_transfer(source, destination, accrual)
 
-    transactions = Transaction.objects.filter(
-        source=source.get_owner(), destination=destination.get_owner(), accrual=accrual
-    ).all()
+    transactions = Transaction.objects.filter(source=source, destination=destination, accrual=accrual).all()
     actual_source, actual_destination = _get_actual(source), _get_actual(destination)
 
     assert is_transfer != is_error

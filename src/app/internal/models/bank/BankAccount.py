@@ -17,7 +17,7 @@ class BankAccount(models.Model, BankObject):
     balance = models.DecimalField(
         decimal_places=DECIMAL_PLACES, max_digits=DIGITS_COUNT, default=0, validators=[MinValueValidator(0)]
     )
-    owner = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    owner = models.ForeignKey(TelegramUser, on_delete=models.CASCADE, related_name="bank_accounts")
 
     def __str__(self):
         return self.pretty_number
@@ -40,28 +40,11 @@ class BankAccount(models.Model, BankObject):
 
         return str(int(last.number) + 1 if last else BankAccount._MIN_NUMBER_VALUE)
 
-    def get_balance(self) -> Decimal:
-        return Decimal(self.balance)
-
-    def try_add(self, value: Decimal) -> bool:
-        if value <= 0:
-            return False
-
-        self.balance += value
-        return True
-
-    def try_extract(self, value: Decimal) -> bool:
-        if value <= 0:
-            return False
-
-        self.balance -= value
-        return True
-
-    def save_operation(self) -> None:
-        self.save()
-
     def get_owner(self) -> TelegramUser:
         return self.owner
+
+    def get_balance(self) -> Decimal:
+        return self.balance
 
     class Meta:
         db_table = "bank_accounts"
