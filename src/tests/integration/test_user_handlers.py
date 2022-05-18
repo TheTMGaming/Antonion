@@ -6,6 +6,7 @@ from telegram.ext import ConversationHandler
 
 from app.internal.models.bank import BankAccount, Transaction
 from app.internal.models.user import TelegramUser
+from app.internal.transport.bot.modules.user.FriendStates import FriendStates
 from app.internal.transport.bot.modules.user.handlers import (
     _RELATION_LIST_EMPTY,
     _UPDATING_DETAILS,
@@ -21,7 +22,6 @@ from app.internal.transport.bot.modules.user.phone_conversation import (
     handle_phone,
     handle_phone_start,
 )
-from app.internal.transport.bot.modules.user.PhoneStates import PhoneStates
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 
@@ -55,17 +55,17 @@ def test_start__updating(update: MagicMock, telegram_user: TelegramUser, user: U
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_me(update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser) -> None:
+def test_me(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
     handle_me(update, context)
     update.message.reply_text.assert_called_once()
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_phone_start(update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser) -> None:
+def test_phone_start(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
     next_state = handle_phone_start(update, context)
 
-    assert next_state == PhoneStates.INPUT
+    assert next_state == FriendStates.INPUT
     assert_conversation_start(context)
     update.message.reply_text.assert_called_once_with(_WELCOME)
 
@@ -107,7 +107,7 @@ def test_phone(update: MagicMock, context: MagicMock, telegram_user: TelegramUse
     if is_set:
         assert_conversation_end(next_state, context)
     else:
-        assert next_state == PhoneStates.INPUT
+        assert next_state == FriendStates.INPUT
 
 
 @pytest.mark.django_db
@@ -115,7 +115,7 @@ def test_phone(update: MagicMock, context: MagicMock, telegram_user: TelegramUse
 def test_getting_relations(
     update: MagicMock,
     context: MagicMock,
-    telegram_user_with_phone: TelegramUser,
+    telegram_user_with_phone,
     bank_account: BankAccount,
     another_account: BankAccount,
 ) -> None:
@@ -128,9 +128,7 @@ def test_getting_relations(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_getting_relations__list_is_empty(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser
-) -> None:
+def test_getting_relations__list_is_empty(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
     handle_relations(update, context)
 
     update.message.reply_text.assert_called_once_with(_RELATION_LIST_EMPTY)

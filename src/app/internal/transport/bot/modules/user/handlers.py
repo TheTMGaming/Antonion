@@ -8,7 +8,7 @@ from app.internal.services.bank.transaction import get_usernames_relations
 from app.internal.services.user import get_user, try_add_or_update_user
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -30,7 +30,7 @@ _RELATION_POINT = "{number}) {username}"
 _RELATION_LIST_EMPTY = "Похоже, что вы в танке... и ни с кеми не взаимодействовали"
 
 
-@if_update_message_exist
+@if_update_message_exists
 def handle_start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
 
@@ -41,7 +41,7 @@ def handle_start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
@@ -53,7 +53,7 @@ def handle_me(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation

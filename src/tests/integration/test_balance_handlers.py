@@ -5,7 +5,6 @@ import pytest
 from telegram.ext import ConversationHandler
 
 from app.internal.models.bank import BankAccount, BankCard, BankObject
-from app.internal.models.user import TelegramUser
 from app.internal.transport.bot.modules.balance.BalanceStates import BalanceStates
 from app.internal.transport.bot.modules.balance.handlers import (
     _BALANCE_BY_BANK_ACCOUNT,
@@ -13,21 +12,21 @@ from app.internal.transport.bot.modules.balance.handlers import (
     _DOCUMENTS_SESSION,
     _LIST_EMPTY_MESSAGE,
     _STUPID_CHOICE,
-    handle_balance_choice,
-    handle_balance_start,
+    handle_choice,
+    handle_start,
 )
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_balance_start(
+def test_start(
     update: MagicMock,
     context: MagicMock,
-    telegram_user_with_phone: TelegramUser,
+    telegram_user_with_phone,
     bank_accounts: List[BankAccount],
     cards: List[BankCard],
 ) -> None:
-    next_state = handle_balance_start(update, context)
+    next_state = handle_start(update, context)
 
     assert next_state == BalanceStates.CHOICE
     assert _DOCUMENTS_SESSION in context.user_data
@@ -37,10 +36,8 @@ def test_balance_start(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_balance_start__documents_len_is_zero(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser
-) -> None:
-    next_state = handle_balance_start(update, context)
+def test_start__documents_len_is_zero(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+    next_state = handle_start(update, context)
 
     assert next_state == ConversationHandler.END
     assert _DOCUMENTS_SESSION not in context.user_data
@@ -50,13 +47,13 @@ def test_balance_start__documents_len_is_zero(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_balance_choice__bank_account(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_choice__bank_account(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
     _test_balance__bank_object(update, context, bank_account, _BALANCE_BY_BANK_ACCOUNT)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_balance_choice__card(update: MagicMock, context: MagicMock, card: BankCard) -> None:
+def test_choice__card(update: MagicMock, context: MagicMock, card: BankCard) -> None:
     _test_balance__bank_object(update, context, card, _BALANCE_BY_CARD)
 
 
@@ -64,7 +61,7 @@ def _test_balance__bank_object(update: MagicMock, context: MagicMock, obj: BankO
     update.message.text = "1"
     context.user_data[_DOCUMENTS_SESSION] = {1: obj}
 
-    next_state = handle_balance_choice(update, context)
+    next_state = handle_choice(update, context)
 
     assert next_state == ConversationHandler.END
     update.message.reply_text.assert_called_once_with(
@@ -75,11 +72,11 @@ def _test_balance__bank_object(update: MagicMock, context: MagicMock, obj: BankO
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_balance__stupid_choice(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_choice__stupid(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
     update.message.text = "-1"
     context.user_data[_DOCUMENTS_SESSION] = {1: bank_account}
 
-    next_state = handle_balance_choice(update, context)
+    next_state = handle_choice(update, context)
 
     assert next_state == BalanceStates.CHOICE
     update.message.reply_text.assert_called_once_with(_STUPID_CHOICE)

@@ -16,6 +16,10 @@ isort = "*"
 black = "*"
 pytest-django = "==4.5.2"
 prettytable = "*"
+djangorestframework = "*"
+markdown = "*"
+django-filter = "*"
+pyjwt = "*"
 
 [dev-packages]
 psycopg2 = "*"

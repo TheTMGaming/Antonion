@@ -19,7 +19,7 @@ _USERNAMES_SESSION = "usernames"
 def test_send_username_list(
     update: MagicMock,
     context: MagicMock,
-    telegram_user_with_phone: TelegramUser,
+    telegram_user_with_phone,
     another_telegram_users: List[TelegramUser],
 ) -> None:
     FriendRequest.objects.bulk_create(
@@ -41,7 +41,7 @@ def test_send_username_list(
 def test_send_username_list__empty(
     update: MagicMock,
     context: MagicMock,
-    telegram_user_with_phone: TelegramUser,
+    telegram_user_with_phone,
     another_telegram_users: List[TelegramUser],
 ) -> None:
     next_state = send_username_list(update, context, _LIST_EMPTY, _USERNAMES_SESSION, _WELCOME)

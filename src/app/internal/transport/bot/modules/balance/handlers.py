@@ -6,7 +6,7 @@ from app.internal.services.bank.transfer import get_documents_order
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -25,11 +25,11 @@ _BALANCE_BY_CARD = "На карточке {number} лежит {balance}"
 _DOCUMENTS_SESSION = "documents"
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
-def handle_balance_start(update: Update, context: CallbackContext) -> int:
+def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
@@ -46,8 +46,8 @@ def handle_balance_start(update: Update, context: CallbackContext) -> int:
     return BalanceStates.CHOICE
 
 
-@if_update_message_exist
-def handle_balance_choice(update: Update, context: CallbackContext) -> int:
+@if_update_message_exists
+def handle_choice(update: Update, context: CallbackContext) -> int:
     choice = int(update.message.text)
     document: BankObject = context.user_data[_DOCUMENTS_SESSION].get(choice)
 
@@ -64,13 +64,13 @@ def handle_balance_choice(update: Update, context: CallbackContext) -> int:
     return mark_conversation_end(context)
 
 
-entry_point = CommandHandler("balance", handle_balance_start)
+entry_point = CommandHandler("balance", handle_start)
 
 
 balance_conversation = ConversationHandler(
     entry_points=[entry_point],
     states={
-        BalanceStates.CHOICE: [MessageHandler(INT, handle_balance_choice)],
+        BalanceStates.CHOICE: [MessageHandler(INT, handle_choice)],
     },
     fallbacks=[cancel],
 )

@@ -10,7 +10,7 @@ class Transaction(models.Model):
     source = models.ForeignKey(BankAccount, on_delete=models.CASCADE, related_name="transactions_from_me")
     destination = models.ForeignKey(BankAccount, on_delete=models.CASCADE, related_name="transactions_to_me")
     accrual = models.DecimalField(decimal_places=2, max_digits=20, default=0, validators=[MinValueValidator(0)])
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("created_at",)

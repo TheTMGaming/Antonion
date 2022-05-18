@@ -1,1 +1,1 @@
-from .UserDetailsView import UserDetailsView
+from .ProfileViewSet import ProfileViewSet

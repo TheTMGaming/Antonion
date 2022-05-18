@@ -6,7 +6,7 @@ from app.internal.services.friend import get_friends_with_enums, try_remove_from
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -26,7 +26,7 @@ _USERNAMES_SESSION = "usernames"
 _USER_SESSION = "user"
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
@@ -47,7 +47,7 @@ def handle_rm_friend_start(update: Update, context: CallbackContext) -> int:
     return FriendStates.INPUT
 
 
-@if_update_message_exist
+@if_update_message_exists
 def handle_rm_friend(update: Update, context: CallbackContext) -> int:
     user: TelegramUser = context.user_data[_USER_SESSION]
     friend: TelegramUser = context.user_data[_USERNAMES_SESSION].get(int(update.message.text))

@@ -18,7 +18,7 @@ from app.internal.services.friend import get_friends_with_enums
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -70,11 +70,11 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
-def handle_transfer_start(update: Update, context: CallbackContext) -> int:
+def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
@@ -96,8 +96,8 @@ def handle_transfer_start(update: Update, context: CallbackContext) -> int:
     return TransferStates.DESTINATION
 
 
-@if_update_message_exist
-def handle_transfer_destination(update: Update, context: CallbackContext) -> int:
+@if_update_message_exists
+def handle_getting_destination(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
 
     friend: TelegramUser = context.user_data[_FRIEND_VARIANTS_SESSION].get(number)
@@ -112,8 +112,8 @@ def handle_transfer_destination(update: Update, context: CallbackContext) -> int
     return _save_and_send_friend_document_list(update, context, documents)
 
 
-@if_update_message_exist
-def handle_transfer_destination_document(update: Update, context: CallbackContext) -> int:
+@if_update_message_exists
+def handle_getting_destination_document(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     destination: BankObject = context.user_data[_DESTINATION_DOCUMENTS_SESSION].get(number)
 
@@ -129,8 +129,8 @@ def handle_transfer_destination_document(update: Update, context: CallbackContex
     return TransferStates.SOURCE_DOCUMENT
 
 
-@if_update_message_exist
-def handle_transfer_source_document(update: Update, context: CallbackContext) -> int:
+@if_update_message_exists
+def handle_getting_source_document(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     source: BankObject = context.user_data[_SOURCE_DOCUMENTS_SESSION].get(number)
 
@@ -151,8 +151,8 @@ def handle_transfer_source_document(update: Update, context: CallbackContext) ->
     return TransferStates.ACCRUAL
 
 
-@if_update_message_exist
-def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
+@if_update_message_exists
+def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
     try:
         accrual = parse_accrual(update.message.text)
     except ValueError:
@@ -171,7 +171,7 @@ def handle_transfer_accrual(update: Update, context: CallbackContext) -> int:
     return TransferStates.CONFIRM
 
 
-@if_update_message_exist
+@if_update_message_exists
 def handle_transfer(update: Update, context: CallbackContext) -> int:
     source: BankAccount = context.user_data[_SOURCE_SESSION]
     destination: BankAccount = context.user_data[_DESTINATION_SESSION]
@@ -244,16 +244,16 @@ def _type_to_string(document: BankObject) -> str:
     return _ACCOUNT_TYPE if isinstance(document, BankAccount) else _CARD_TYPE
 
 
-entry_point = CommandHandler("transfer", handle_transfer_start)
+entry_point = CommandHandler("transfer", handle_start)
 
 
 transfer_conversation = ConversationHandler(
     entry_points=[entry_point],
     states={
-        TransferStates.DESTINATION: [MessageHandler(INT, handle_transfer_destination)],
-        TransferStates.DESTINATION_DOCUMENT: [MessageHandler(INT, handle_transfer_destination_document)],
-        TransferStates.SOURCE_DOCUMENT: [MessageHandler(INT, handle_transfer_source_document)],
-        TransferStates.ACCRUAL: [MessageHandler(FLOATING, handle_transfer_accrual)],
+        TransferStates.DESTINATION: [MessageHandler(INT, handle_getting_destination)],
+        TransferStates.DESTINATION_DOCUMENT: [MessageHandler(INT, handle_getting_destination_document)],
+        TransferStates.SOURCE_DOCUMENT: [MessageHandler(INT, handle_getting_source_document)],
+        TransferStates.ACCRUAL: [MessageHandler(FLOATING, handle_getting_accrual)],
         TransferStates.CONFIRM: [CommandHandler("confirm", handle_transfer)],
     },
     fallbacks=[cancel],

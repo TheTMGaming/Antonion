@@ -5,7 +5,7 @@ from app.internal.services.friend import get_friends, get_friendship_username_li
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -19,7 +19,7 @@ _FRIENDSHIP_WELCOME = "Список заявок в друзья:\n\n"
 _FRIENDSHIPS_EMPTY = "На данный момент нет заявок в друзья :("
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
@@ -35,7 +35,7 @@ def handle_friends(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(details)
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation

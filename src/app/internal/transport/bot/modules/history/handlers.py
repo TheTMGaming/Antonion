@@ -14,7 +14,7 @@ from app.internal.services.utils import (
 )
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -30,11 +30,11 @@ _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни сч
 _DOCUMENTS_SESSION = "documents"
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
-def handle_history_start(update: Update, context: CallbackContext) -> int:
+def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
     user = get_user(update.effective_user.id)
@@ -52,8 +52,8 @@ def handle_history_start(update: Update, context: CallbackContext) -> int:
     return HistoryStates.DOCUMENT
 
 
-@if_update_message_exist
-def handle_history_document(update: Update, context: CallbackContext) -> int:
+@if_update_message_exists
+def handle_getting_document(update: Update, context: CallbackContext) -> int:
     document: BankObject = context.user_data[_DOCUMENTS_SESSION].get(int(update.message.text))
 
     if not document:
@@ -73,13 +73,13 @@ def handle_history_document(update: Update, context: CallbackContext) -> int:
     return mark_conversation_end(context)
 
 
-entry_point = CommandHandler("history", handle_history_start)
+entry_point = CommandHandler("history", handle_start)
 
 
 history_conversation = ConversationHandler(
     entry_points=[entry_point],
     states={
-        HistoryStates.DOCUMENT: [MessageHandler(INT, handle_history_document)],
+        HistoryStates.DOCUMENT: [MessageHandler(INT, handle_getting_document)],
     },
     fallbacks=[cancel],
 )

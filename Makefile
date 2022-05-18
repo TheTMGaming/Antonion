@@ -11,7 +11,7 @@ migrate:
 	make command c="migrate ${o}"
 
 migration:
-	make command c="makemigrations ${o}"
+	make command c="makemigrations -n ${n}"
 
 superuser:
 	make command c="createsuperuser"
@@ -73,7 +73,7 @@ test_build:
 	docker-compose run --rm app make test
 
 test:
-	cd src && pipenv run pytest --disable-warnings --no-summary
+	cd src && pipenv run pytest --disable-warnings
 
 unit:
 	cd src && pipenv run pytest -m unit --disable-warnings

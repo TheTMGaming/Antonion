@@ -11,7 +11,7 @@ _UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей м
 _MUST_CONVERSATION_END = "Вы не завершили команду /{command}. Это можно сделать с помощью /cancel"
 
 
-def if_update_message_exist(handler: Callable) -> Callable:
+def if_update_message_exists(handler: Callable) -> Callable:
     def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
         if update.message is None:
             return

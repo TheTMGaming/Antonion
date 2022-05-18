@@ -5,9 +5,14 @@ import pytest
 from telegram import User
 
 from app.internal.models.bank import BankAccount, BankCard
-from app.internal.models.user import TelegramUser
+from app.internal.models.user import SecretKey, TelegramUser
 
 BALANCE = Decimal(10**4)
+PASSWORD = "1337<PrO>228"
+WRONG_PASSWORD = "0>Spyric<0"
+KEY = "noob"
+WRONG_KEY = "pro"
+TIP = "Who am i?"
 
 
 @pytest.fixture(scope="function")
@@ -59,9 +64,28 @@ def another_telegram_users(telegram_users: List[TelegramUser]) -> List[TelegramU
 def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+78005553535") -> List[TelegramUser]:
     for user in telegram_users:
         user.phone = phone
-        user.save()
+
+    TelegramUser.objects.bulk_update(telegram_users, fields=["phone"])
 
     return telegram_users
+
+
+@pytest.fixture(scope="function")
+def telegram_users_with_password(
+    telegram_users_with_phone: List[TelegramUser]
+) -> List[TelegramUser]:
+    for user in telegram_users_with_phone:
+        user.password = PASSWORD
+        SecretKey.objects.create(telegram_user=user, value=KEY, tip=TIP)
+
+    TelegramUser.objects.bulk_update(telegram_users_with_phone, fields=["password"])
+
+    return telegram_users_with_phone
+
+
+@pytest.fixture(scope="function")
+def telegram_user_with_password(telegram_users_with_password: List[TelegramUser]) -> TelegramUser:
+    return telegram_users_with_password[0]
 
 
 @pytest.fixture(scope="function")

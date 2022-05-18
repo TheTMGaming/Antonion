@@ -19,7 +19,7 @@ from tests.integration.general import assert_conversation_end, assert_conversati
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_accept_start(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, another_telegram_user: TelegramUser
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, another_telegram_user: TelegramUser
 ) -> None:
     FriendRequest.objects.create(source=another_telegram_user, destination=telegram_user_with_phone)
 
@@ -35,7 +35,7 @@ def test_accept_start(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_accept(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, another_telegram_user: TelegramUser
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, another_telegram_user: TelegramUser
 ) -> None:
     update.message.text = "1"
     context.user_data[_USERNAMES_SESSION] = {int(update.message.text): another_telegram_user}
@@ -56,7 +56,7 @@ def test_accept(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_accept__stupid_choice(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, another_telegram_user: TelegramUser
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, another_telegram_user: TelegramUser
 ) -> None:
     update.message.text = "-1"
     context.user_data[_USERNAMES_SESSION] = {1: another_telegram_user}
@@ -74,7 +74,7 @@ def test_accept__stupid_choice(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_accept__friend_canceled(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, another_telegram_user: TelegramUser
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, another_telegram_user: TelegramUser
 ) -> None:
     update.message.text = "1"
     context.user_data[_USERNAMES_SESSION] = {int(update.message.text): another_telegram_user}

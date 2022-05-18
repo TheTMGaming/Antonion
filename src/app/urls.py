@@ -1,5 +1,5 @@
 from django.urls import path
 
-from app.internal.transport.rest import UserDetailsView
+from app.internal.transport.rest import ProfileViewSet
 
-urlpatterns = [path("me/<int:user_id>", UserDetailsView.as_view(), name="me")]
+urlpatterns = [path("profile/", ProfileViewSet.as_view(), name="me")]

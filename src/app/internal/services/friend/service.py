@@ -51,7 +51,6 @@ def try_accept_friend(source: TelegramUser, destination: TelegramUser) -> bool:
     try:
         with transaction.atomic():
             source.friends.add(destination)
-            destination.friends.add(source)
             request.delete()
     except IntegrityError:
         return False
@@ -67,7 +66,6 @@ def try_remove_from_friends(first: TelegramUser, second: TelegramUser) -> bool:
     try:
         with transaction.atomic():
             first.friends.remove(second)
-            second.friends.remove(first)
         return True
     except IntegrityError:
         return False

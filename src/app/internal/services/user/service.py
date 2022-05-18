@@ -27,7 +27,7 @@ def get_user(identifier: Union[int, str]) -> TelegramUser:
         else {TelegramUserFields.USERNAME: str(identifier)}
     )
 
-    return TelegramUser.objects.filter(**param).first()
+    return TelegramUser.objects.filter(**param).select_related("secret_key").first()
 
 
 def is_user_exist(user_id: Union[int, str]) -> bool:
@@ -47,3 +47,6 @@ def try_set_phone(user_id: Union[int, str], value: str) -> bool:
     TelegramUser.objects.filter(id=user_id).update(phone=format_number(phone, PhoneNumberFormat.E164))
 
     return True
+
+
+# def is_password_exist

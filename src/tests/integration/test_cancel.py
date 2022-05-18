@@ -1,13 +1,12 @@
-from unittest.mock import MagicMock
-
 import pytest
-from telegram.ext import ConversationHandler
+from telegram import Update
+from telegram.ext import ConversationHandler, CallbackContext
 
 from app.internal.transport.bot.modules.general import _CANCEL_OPERATION, handle_cancel
 
 
 @pytest.mark.integration
-def test_cancel(update: MagicMock, context: MagicMock) -> None:
+def test_cancel(update: Update, context: CallbackContext) -> None:
     for i in range(10):
         context.user_data[str(i)] = None
 

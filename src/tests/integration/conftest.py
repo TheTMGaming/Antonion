@@ -10,10 +10,14 @@ from app.internal.models.user import TelegramUser
 
 @pytest.fixture(scope="function")
 def update(user: User) -> MagicMock:
+    delete = MagicMock()
+    delete.return_value = None
+
     message = MagicMock()
     message.reply_text.return_value = None
     message.reply_document.return_value = None
     message.text = ""
+    message.delete = delete
 
     update = MagicMock()
     update.effective_user = user

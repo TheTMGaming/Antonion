@@ -27,11 +27,11 @@ from app.internal.transport.bot.modules.transfer.handlers import (
     _TRANSFER_FAIL,
     _TRANSFER_SUCCESS,
     handle_transfer,
-    handle_transfer_accrual,
-    handle_transfer_destination,
-    handle_transfer_destination_document,
-    handle_transfer_source_document,
-    handle_transfer_start,
+    handle_getting_accrual,
+    handle_getting_destination,
+    handle_getting_destination_document,
+    handle_getting_source_document,
+    handle_start,
 )
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 from tests.conftest import BALANCE
@@ -40,14 +40,14 @@ from tests.integration.general import assert_conversation_end, assert_conversati
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_start(
+def test_start(
     update: MagicMock,
     context: MagicMock,
-    telegram_user_with_phone: TelegramUser,
+    telegram_user_with_phone,
     friends: List[TelegramUser],
     bank_accounts: List[BankAccount],
 ) -> None:
-    next_state = handle_transfer_start(update, context)
+    next_state = handle_start(update, context)
 
     assert_conversation_start(context)
     assert next_state == TransferStates.DESTINATION
@@ -62,13 +62,13 @@ def test_transfer_start(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_start__friends_list_is_empty(
+def test_start__friends_list_is_empty(
     update: MagicMock,
     context: MagicMock,
-    telegram_user_with_phone: TelegramUser,
+    telegram_user_with_phone,
     bank_accounts: List[BankAccount],
 ) -> None:
-    next_state = handle_transfer_start(update, context)
+    next_state = handle_start(update, context)
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_once_with(_FRIEND_LIST_EMPTY_ERROR)
@@ -76,10 +76,10 @@ def test_transfer_start__friends_list_is_empty(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_start__source_documents_list_is_empty(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, friend: TelegramUser
+def test_start__source_documents_list_is_empty(
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, friend: TelegramUser
 ) -> None:
-    next_state = handle_transfer_start(update, context)
+    next_state = handle_start(update, context)
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_once_with(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
@@ -87,7 +87,7 @@ def test_transfer_start__source_documents_list_is_empty(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_destination(
+def test_getting_destination(
     update: MagicMock,
     context: MagicMock,
     telegram_user: TelegramUser,
@@ -97,7 +97,7 @@ def test_transfer_destination(
     context.user_data[_FRIEND_VARIANTS_SESSION] = {1: friend_with_account}
     update.message.text = "1"
 
-    next_state = handle_transfer_destination(update, context)
+    next_state = handle_getting_destination(update, context)
 
     assert next_state == TransferStates.DESTINATION_DOCUMENT
     assert _CHOSEN_FRIEND_SESSION in context.user_data
@@ -110,10 +110,10 @@ def test_transfer_destination(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_destination__stupid_choice(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
+def test_getting_destination__stupid_choice(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
     context.user_data[_FRIEND_VARIANTS_SESSION] = {}
     update.message.text = "1"
-    next_state = handle_transfer_destination(update, context)
+    next_state = handle_getting_destination(update, context)
 
     assert next_state == TransferStates.DESTINATION
     update.message.reply_text.assert_called_once_with(_STUPID_CHOICE_ERROR)
@@ -123,13 +123,13 @@ def test_destination__stupid_choice(update: MagicMock, context: MagicMock, teleg
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_destination__friend_documents_list_is_empty(
+def test_getting_destination__friend_documents_list_is_empty(
     update: MagicMock, context: MagicMock, telegram_user: TelegramUser, friend: TelegramUser
 ) -> None:
     context.user_data[_FRIEND_VARIANTS_SESSION] = {1: friend}
     update.message.text = "1"
 
-    next_state = handle_transfer_destination(update, context)
+    next_state = handle_getting_destination(update, context)
 
     assert next_state == TransferStates.DESTINATION
     update.message.reply_text.assert_called_once_with(_FRIEND_DOCUMENT_LIST_EMPTY_ERROR)
@@ -140,28 +140,28 @@ def test_transfer_destination__friend_documents_list_is_empty(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_destination_document__bank_account(
+def test_getting_destination_document__bank_account(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
-    _test_transfer_destination_document__bank_object(update, context, bank_account, friend_account)
+    _test_getting_destination_document__bank_object(update, context, bank_account, friend_account)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_destination_document__card(
+def test_getting_destination_document__card(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_card: BankCard
 ) -> None:
-    _test_transfer_destination_document__bank_object(update, context, bank_account, friend_card)
+    _test_getting_destination_document__bank_object(update, context, bank_account, friend_card)
 
 
-def _test_transfer_destination_document__bank_object(
+def _test_getting_destination_document__bank_object(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, obj: BankObject
 ) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
     context.user_data[_DESTINATION_DOCUMENTS_SESSION] = {1: obj}
 
-    next_state = handle_transfer_destination_document(update, context)
+    next_state = handle_getting_destination_document(update, context)
 
     assert next_state == TransferStates.SOURCE_DOCUMENT
     assert _DESTINATION_SESSION in context.user_data
@@ -172,13 +172,13 @@ def _test_transfer_destination_document__bank_object(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_destination_document__stupid_choice(
+def test_getting_destination_document__stupid_choice(
     update: MagicMock, context: MagicMock, friend_account: BankAccount
 ) -> None:
     update.message.text = "-1"
     context.user_data[_DESTINATION_DOCUMENTS_SESSION] = {1: friend_account}
 
-    next_state = handle_transfer_destination_document(update, context)
+    next_state = handle_getting_destination_document(update, context)
 
     assert next_state == TransferStates.DESTINATION_DOCUMENT
     update.message.reply_text.assert_called_once_with(_STUPID_CHOICE_ERROR)
@@ -187,21 +187,21 @@ def test_destination_document__stupid_choice(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_source_document__bank_account(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
-    _test_source_document__bank_object(update, context, bank_account)
+def test_getting_source_document__bank_account(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+    _test_getting_source_document__bank_object(update, context, bank_account)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_source_document__card(update: MagicMock, context: MagicMock, card: BankCard) -> None:
-    _test_source_document__bank_object(update, context, card)
+def test_getting_source_document__card(update: MagicMock, context: MagicMock, card: BankCard) -> None:
+    _test_getting_source_document__bank_object(update, context, card)
 
 
-def _test_source_document__bank_object(update: MagicMock, context: MagicMock, obj: BankObject) -> None:
+def _test_getting_source_document__bank_object(update: MagicMock, context: MagicMock, obj: BankObject) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: obj}
 
-    next_state = handle_transfer_source_document(update, context)
+    next_state = handle_getting_source_document(update, context)
 
     assert next_state == TransferStates.ACCRUAL
     assert _SOURCE_SESSION in context.user_data
@@ -211,11 +211,11 @@ def _test_source_document__bank_object(update: MagicMock, context: MagicMock, ob
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_source_document__stupid_choice(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_getting_source_document__stupid_choice(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
     update.message.text = "-1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
 
-    next_state = handle_transfer_source_document(update, context)
+    next_state = handle_getting_source_document(update, context)
 
     assert next_state == TransferStates.SOURCE_DOCUMENT
     update.message.reply_text.assert_called_once_with(_STUPID_CHOICE_ERROR)
@@ -224,13 +224,13 @@ def test_source_document__stupid_choice(update: MagicMock, context: MagicMock, b
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_source_document__balance_is_zero(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_getting_source_document__balance_is_zero(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
     bank_account.balance = 0
     bank_account.save()
 
-    next_state = handle_transfer_source_document(update, context)
+    next_state = handle_getting_source_document(update, context)
 
     assert next_state == TransferStates.SOURCE_DOCUMENT
     update.message.reply_text.assert_called_once_with(_BALANCE_ZERO_ERROR)
@@ -239,7 +239,7 @@ def test_source_document__balance_is_zero(update: MagicMock, context: MagicMock,
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_accrual(
+def test_getting_accrual(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = str(bank_account.balance)
@@ -247,7 +247,7 @@ def test_transfer_accrual(
     context.user_data[_SOURCE_SESSION] = bank_account
     context.user_data[_DESTINATION_SESSION] = friend_account
 
-    next_state = handle_transfer_accrual(update, context)
+    next_state = handle_getting_accrual(update, context)
 
     assert next_state == TransferStates.CONFIRM
     assert _ACCRUAL_SESSION in context.user_data
@@ -257,12 +257,12 @@ def test_transfer_accrual(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_accrual__parse_error(
+def test_getting_accrual__parse_error(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = "0"
 
-    next_state = handle_transfer_accrual(update, context)
+    next_state = handle_getting_accrual(update, context)
 
     assert next_state == TransferStates.ACCRUAL
     update.message.reply_text.assert_called_once_with(_ACCRUAL_PARSE_ERROR)
@@ -271,13 +271,13 @@ def test_transfer_accrual__parse_error(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_transfer_accrual__extracting_error(
+def test_getting_accrual__extracting_error(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = str(bank_account.balance * 2)
     context.user_data[_SOURCE_SESSION] = bank_account
 
-    next_state = handle_transfer_accrual(update, context)
+    next_state = handle_getting_accrual(update, context)
 
     assert next_state == TransferStates.ACCRUAL
     update.message.reply_text.assert_called_once_with(_ACCRUAL_GREATER_BALANCE_ERROR)

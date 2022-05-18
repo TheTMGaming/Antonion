@@ -6,7 +6,7 @@ from app.internal.services.friend import try_accept_friend
 from app.internal.services.user import get_user
 from app.internal.transport.bot.decorators import (
     if_phone_is_set,
-    if_update_message_exist,
+    if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
@@ -25,7 +25,7 @@ _ACCEPT_SUCCESS = "Ураа. Теперь вы друзья с {username}"
 _USERNAMES_SESSION = "username_list"
 
 
-@if_update_message_exist
+@if_update_message_exists
 @if_user_exist
 @if_phone_is_set
 @if_user_is_not_in_conversation
@@ -35,7 +35,7 @@ def handle_accept_start(update: Update, context: CallbackContext) -> int:
     return send_username_list(update, context, _LIST_EMPTY, _USERNAMES_SESSION, _WELCOME)
 
 
-@if_update_message_exist
+@if_update_message_exists
 def handle_accept(update: Update, context: CallbackContext) -> int:
     username = context.user_data[_USERNAMES_SESSION].get(int(update.message.text))
 

@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import base64
 import os
+from datetime import timedelta
 from pathlib import Path
 
+from django.contrib.auth.hashers import BCryptSHA256PasswordHasher
 from environ import Env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "debug_toolbar",
+    "rest_framework",
     "app",
 ]
 
@@ -61,6 +65,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "app.internal.middlewares.JWTAuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -137,6 +142,13 @@ PHONE_REGION = "RU"
 DATETIME_PARSE_FORMAT = "%Y-%m-%d %H:%m:%S"
 DATETIME_FORMAT = DATETIME_INPUT_FORMATS = "Y-m-d H:m:s"
 
+# JWT Authentication
+
+ACCESS_TOKEN_TTL = timedelta(days=3)
+REFRESH_TOKEN_TTL = timedelta(days=10)
+
+HASHER = BCryptSHA256PasswordHasher()
+SALT = b"$2b$12$" + base64.b64encode(SECRET_KEY.encode("utf-8"))
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

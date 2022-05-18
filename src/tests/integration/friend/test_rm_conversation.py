@@ -22,7 +22,7 @@ from tests.integration.general import assert_conversation_end, assert_conversati
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_rm_friend__start(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, friends: List[TelegramUser]
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, friends: List[TelegramUser]
 ) -> None:
     next_state = handle_rm_friend_start(update, context)
 
@@ -37,9 +37,7 @@ def test_rm_friend__start(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_rm_friend(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, friend: TelegramUser
-) -> None:
+def test_rm_friend(update: MagicMock, context: MagicMock, telegram_user_with_phone, friend: TelegramUser) -> None:
     update.message.text = "1"
     context.user_data[_USER_SESSION] = telegram_user_with_phone
     context.user_data[_USERNAMES_SESSION] = {int(update.message.text): friend}
@@ -56,7 +54,7 @@ def test_rm_friend(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_rm_friend__stupid_choice(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone: TelegramUser, friend: TelegramUser
+    update: MagicMock, context: MagicMock, telegram_user_with_phone, friend: TelegramUser
 ) -> None:
     update.message.text = "-1"
     context.user_data[_USER_SESSION] = telegram_user_with_phone
