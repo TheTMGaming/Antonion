@@ -1,3 +1,4 @@
+from collections import Counter
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
@@ -28,13 +29,17 @@ def from_timestamp(value: float) -> datetime:
 
 
 def get_authenticated_telegram_user(payload: Dict[str, Any]) -> Optional[TelegramUser]:
-    return TelegramUser.objects.filter(id=payload[TELEGRAM_ID]).first()
+    return TelegramUser.objects.filter(id=payload.get(TELEGRAM_ID)).first()
 
 
 def generate_token(telegram_id: int, token_type: TokenTypes) -> str:
     payload = {TOKEN_TYPE: token_type.value, TELEGRAM_ID: telegram_id, CREATED_AT: now().timestamp()}
 
     return encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)
+
+
+def is_payload_valid(payload: Dict[str, Any]) -> bool:
+    return bool(payload) and Counter(payload.keys()) == Counter(PAYLOAD_FIELDS)
 
 
 def try_get_payload(token: str) -> Dict[str, Any]:
@@ -44,10 +49,7 @@ def try_get_payload(token: str) -> Dict[str, Any]:
         return {}
 
 
-def is_token_valid(payload: Dict[str, Any], token_type: TokenTypes, ttl: timedelta) -> bool:
-    if not payload or not all(field in payload for field in PAYLOAD_FIELDS):
-        return False
-
+def is_token_alive(payload: Dict[str, Any], token_type: TokenTypes, ttl: timedelta) -> bool:
     lifetime = now() - from_timestamp(float(payload[CREATED_AT]))
 
     return payload.get(TOKEN_TYPE) == token_type.value and lifetime < ttl

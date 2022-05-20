@@ -3,9 +3,9 @@ from django.http import HttpRequest
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.internal.authentication.service import get_refresh_token_from_db, update_access_and_refresh_tokens
 from app.internal.authentication.TokenTypes import TokenTypes
-from app.internal.authentication.service import update_access_and_refresh_tokens, get_refresh_token_from_db
-from app.internal.authentication.utils import try_get_payload, is_token_valid
+from app.internal.authentication.utils import is_payload_valid, is_token_alive, try_get_payload
 
 
 class RefreshView(APIView):
@@ -13,7 +13,8 @@ class RefreshView(APIView):
 
     NO_TOKEN_COOKIE = {"error": "Refresh token was not found in cookies"}
     TOKEN_WAS_BE_REVOKED = {"error": "Refresh token was be revoked"}
-    INVALID_SIGNATURE_OR_TTL = {"error": "Invalid signature or ttl is zero"}
+    ZERO_TTL = {"error": "TTL is zero"}
+    INVALID_TOKEN = {"error": "Invalid signature or payload"}
     UNKNOWN_TOKEN = {"error": "Unknown refresh token"}
 
     def post(self, request: HttpRequest) -> Response:
@@ -21,8 +22,12 @@ class RefreshView(APIView):
         if not refresh_token:
             return Response(data=self.NO_TOKEN_COOKIE, status=400)
 
-        if not is_token_valid(try_get_payload(refresh_token), TokenTypes.REFRESH, settings.REFRESH_TOKEN_TTL):
-            return Response(data=self.INVALID_SIGNATURE_OR_TTL, status=400)
+        payload = try_get_payload(refresh_token)
+        if not is_payload_valid(payload):
+            return Response(data=self.INVALID_TOKEN, status=400)
+
+        if not is_token_alive(payload, TokenTypes.REFRESH, settings.REFRESH_TOKEN_TTL):
+            return Response(data=self.ZERO_TTL, status=400)
 
         token = get_refresh_token_from_db(refresh_token)
         if not token:

@@ -1,2 +1,2 @@
-from .JWTAuthenticationMiddleware import JWTAuthenticationMiddleware
 from .IsAuthenticated import IsAuthenticated
+from .JWTAuthenticationMiddleware import JWTAuthenticationMiddleware
