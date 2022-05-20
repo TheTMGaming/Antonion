@@ -65,10 +65,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "app.internal.middlewares.JWTAuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "app.internal.authentication.JWTAuthenticationMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -149,6 +149,8 @@ REFRESH_TOKEN_TTL = timedelta(days=10)
 
 HASHER = BCryptSHA256PasswordHasher()
 SALT = b"$2b$12$" + base64.b64encode(SECRET_KEY.encode("utf-8"))
+
+REFRESH_TOKEN_COOKIE = "refresh_token"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

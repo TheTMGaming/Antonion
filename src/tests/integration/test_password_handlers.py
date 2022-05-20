@@ -4,20 +4,32 @@ from telegram.ext import CallbackContext
 
 from app.internal.models.user import TelegramUser
 from app.internal.transport.bot.modules.user.password_conversation import (
+    _CONFIRM_PASSWORD,
+    _CREATE_TIP,
+    _CREATING_SUCCESS,
+    _INPUT_PASSWORD,
     _INPUT_SECRET_IF_EXISTS,
     _INPUT_SECRET_KEY,
     _PASSWORD_SESSION,
+    _SECRET_KEY_ERROR,
+    _SECRET_KEY_SESSION,
+    _TIP_SESSION,
+    _UPDATING_SUCCESS,
     _WRONG_PASSWORD,
     _handle_confirmation,
-    handle_start, handle_confirmation_secret_key, _INPUT_PASSWORD, _SECRET_KEY_ERROR,
-    _CONFIRM_PASSWORD,
-    handle_entering_in_updating, handle_confirmation_in_updating, _handle_entering, _UPDATING_SUCCESS,
-    _handle_saving_secret_parameter, handle_creating_secret_key, _CREATE_TIP, _SECRET_KEY_SESSION,
-    handle_creating_tip, _TIP_SESSION, handle_entering_in_creating,
-    handle_confirmation_in_creating, _CREATING_SUCCESS,
+    _handle_entering,
+    _handle_saving_secret_parameter,
+    handle_confirmation_in_creating,
+    handle_confirmation_in_updating,
+    handle_confirmation_secret_key,
+    handle_creating_secret_key,
+    handle_creating_tip,
+    handle_entering_in_creating,
+    handle_entering_in_updating,
+    handle_start,
 )
 from app.internal.transport.bot.modules.user.PasswordStates import PasswordStates
-from tests.conftest import KEY, WRONG_KEY, PASSWORD, WRONG_PASSWORD, TIP
+from tests.conftest import KEY, PASSWORD, TIP, WRONG_KEY, WRONG_PASSWORD
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 
@@ -31,9 +43,7 @@ def test_start(update: Update, context: CallbackContext, telegram_user_with_pass
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_start__exists(
-    update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser
-) -> None:
+def test_start__exists(update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser) -> None:
     next_state = handle_start(update, context)
 
     assert next_state == PasswordStates.SECRET_CONFIRMATION
@@ -85,7 +95,9 @@ def test_entering_in_updating(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_in_updating__ok(update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser) -> None:
+def test_confirmation_in_updating__ok(
+    update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser
+) -> None:
     update.message.text = context.user_data[_PASSWORD_SESSION] = PASSWORD
     next_state = handle_confirmation_in_updating(update, context)
 
@@ -95,7 +107,9 @@ def test_confirmation_in_updating__ok(update: Update, context: CallbackContext, 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_in_updating__wrong(update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser) -> None:
+def test_confirmation_in_updating__wrong(
+    update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser
+) -> None:
     context.user_data[_PASSWORD_SESSION] = PASSWORD
     update.message.text = WRONG_PASSWORD
     next_state = handle_confirmation_in_updating(update, context)
@@ -106,9 +120,7 @@ def test_confirmation_in_updating__wrong(update: Update, context: CallbackContex
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_start__undefined(
-    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
-) -> None:
+def test_start__undefined(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     next_state = handle_start(update, context)
 
     assert next_state == PasswordStates.SECRET_CREATING
@@ -139,9 +151,7 @@ def test_creating_tip(update: Update, context: CallbackContext, telegram_user_wi
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_entering_in_creating(
-    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
-) -> None:
+def test_entering_in_creating(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     update.message.text = PASSWORD
     next_state = handle_entering_in_creating(update, context)
 
@@ -152,7 +162,9 @@ def test_entering_in_creating(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_in_creating__ok(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
+def test_confirmation_in_creating__ok(
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
+) -> None:
     update.message.text = context.user_data[_PASSWORD_SESSION] = PASSWORD
     context.user_data[_SECRET_KEY_SESSION] = KEY
     context.user_data[_TIP_SESSION] = TIP
@@ -165,7 +177,9 @@ def test_confirmation_in_creating__ok(update: Update, context: CallbackContext, 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_in_creating__wrong(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
+def test_confirmation_in_creating__wrong(
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
+) -> None:
     update.message.text = WRONG_PASSWORD
     context.user_data[_PASSWORD_SESSION] = PASSWORD
     context.user_data[_SECRET_KEY_SESSION] = KEY
@@ -227,4 +241,3 @@ def test_saving_secret_parameter(update: Update, context: CallbackContext) -> No
     update.message.delete.assert_called_once()
     assert context.user_data.get(session_key) == value
     update.message.reply_text.assert_called_once_with(next_message)
-

@@ -84,9 +84,7 @@ def handle_confirmation_in_updating(update: Update, context: CallbackContext) ->
 
 @if_update_message_exists
 def handle_creating_secret_key(update: Update, context: CallbackContext) -> int:
-    _handle_saving_secret_parameter(
-        update, context, _SECRET_KEY_SESSION, update.message.text, _CREATE_TIP
-    )
+    _handle_saving_secret_parameter(update, context, _SECRET_KEY_SESSION, update.message.text, _CREATE_TIP)
 
     return PasswordStates.TIP_CREATING
 
@@ -157,15 +155,11 @@ password_conversation = ConversationHandler(
     states={
         PasswordStates.SECRET_CONFIRMATION: [MessageHandler(TEXT, handle_confirmation_secret_key)],
         PasswordStates.PASSWORD_ENTERING_IN_UPDATING: [MessageHandler(TEXT, handle_entering_in_updating)],
-        PasswordStates.PASSWORD_CONFIRMATION_IN_UPDATING: [
-            MessageHandler(TEXT, handle_confirmation_in_updating)
-        ],
+        PasswordStates.PASSWORD_CONFIRMATION_IN_UPDATING: [MessageHandler(TEXT, handle_confirmation_in_updating)],
         PasswordStates.SECRET_CREATING: [MessageHandler(TEXT, handle_creating_secret_key)],
         PasswordStates.TIP_CREATING: [MessageHandler(TEXT, handle_creating_tip)],
         PasswordStates.PASSWORD_ENTERING_IN_CREATING: [MessageHandler(TEXT, handle_entering_in_creating)],
-        PasswordStates.PASSWORD_CONFIRMATION_IN_CREATING: [
-            MessageHandler(TEXT, handle_confirmation_in_creating)
-        ],
+        PasswordStates.PASSWORD_CONFIRMATION_IN_CREATING: [MessageHandler(TEXT, handle_confirmation_in_creating)],
     },
     fallbacks=[cancel],
 )

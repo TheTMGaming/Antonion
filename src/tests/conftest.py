@@ -71,9 +71,7 @@ def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+780055
 
 
 @pytest.fixture(scope="function")
-def telegram_users_with_password(
-    telegram_users_with_phone: List[TelegramUser]
-) -> List[TelegramUser]:
+def telegram_users_with_password(telegram_users_with_phone: List[TelegramUser]) -> List[TelegramUser]:
     for user in telegram_users_with_phone:
         user.password = PASSWORD
         SecretKey.objects.create(telegram_user=user, value=KEY, tip=TIP)

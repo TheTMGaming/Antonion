@@ -5,8 +5,7 @@ import pytest
 from telegram import User
 
 from app.internal.models.user import SecretKey, TelegramUser
-from app.internal.services.user import try_create_password, try_update_password, \
-    is_secret_key_correct
+from app.internal.services.user import is_secret_key_correct, try_create_password, try_update_password
 from tests.conftest import KEY, TIP, WRONG_KEY
 
 chars = string.printable

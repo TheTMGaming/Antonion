@@ -1,6 +1,6 @@
 import pytest
 from telegram import Update
-from telegram.ext import ConversationHandler, CallbackContext
+from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.transport.bot.modules.general import _CANCEL_OPERATION, handle_cancel
 

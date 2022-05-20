@@ -26,12 +26,12 @@ from app.internal.transport.bot.modules.transfer.handlers import (
     _STUPID_CHOICE_ERROR,
     _TRANSFER_FAIL,
     _TRANSFER_SUCCESS,
-    handle_transfer,
     handle_getting_accrual,
     handle_getting_destination,
     handle_getting_destination_document,
     handle_getting_source_document,
     handle_start,
+    handle_transfer,
 )
 from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
 from tests.conftest import BALANCE
@@ -187,7 +187,9 @@ def test_getting_destination_document__stupid_choice(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_getting_source_document__bank_account(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_getting_source_document__bank_account(
+    update: MagicMock, context: MagicMock, bank_account: BankAccount
+) -> None:
     _test_getting_source_document__bank_object(update, context, bank_account)
 
 
@@ -211,7 +213,9 @@ def _test_getting_source_document__bank_object(update: MagicMock, context: Magic
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_getting_source_document__stupid_choice(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_getting_source_document__stupid_choice(
+    update: MagicMock, context: MagicMock, bank_account: BankAccount
+) -> None:
     update.message.text = "-1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
 
@@ -224,7 +228,9 @@ def test_getting_source_document__stupid_choice(update: MagicMock, context: Magi
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_getting_source_document__balance_is_zero(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_getting_source_document__balance_is_zero(
+    update: MagicMock, context: MagicMock, bank_account: BankAccount
+) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
     bank_account.balance = 0

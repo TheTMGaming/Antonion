@@ -1,1 +1,0 @@
-from .IsAuthenticated import IsAuthenticated

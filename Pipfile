@@ -20,6 +20,7 @@ djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
 pyjwt = "*"
+freezegun = "*"
 
 [dev-packages]
 psycopg2 = "*"
