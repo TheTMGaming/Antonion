@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from app.internal.bank.db.models import BankAccount
 from app.internal.bank.db.models.TransactionTypes import TransactionTypes
-from app.internal.models.bank import BankAccount
 
 
 class Transaction(models.Model):

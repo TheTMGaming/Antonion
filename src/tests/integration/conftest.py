@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 import pytest
 from telegram import User
 
-from app.internal.models.bank import BankAccount
-from app.internal.models.user import TelegramUser
+from app.internal.bank.db.models import BankAccount
+from app.internal.users.db.models import TelegramUser
 
 
 @pytest.fixture(scope="function")

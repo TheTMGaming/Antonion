@@ -4,7 +4,9 @@ from unittest.mock import MagicMock
 import pytest
 from telegram.ext import ConversationHandler
 
-from app.internal.bot.modules.balance import (
+from app.internal.bank.db.models import BankAccount, BankCard, BankObject
+from app.internal.bot.modules.balance.BalanceStates import BalanceStates
+from app.internal.bot.modules.balance.handlers import (
     _BALANCE_BY_BANK_ACCOUNT,
     _BALANCE_BY_CARD,
     _DOCUMENTS_SESSION,
@@ -13,8 +15,6 @@ from app.internal.bot.modules.balance import (
     handle_choice,
     handle_start,
 )
-from app.internal.bot.modules.balance.BalanceStates import BalanceStates
-from app.internal.models.bank import BankAccount, BankCard, BankObject
 
 
 @pytest.mark.django_db

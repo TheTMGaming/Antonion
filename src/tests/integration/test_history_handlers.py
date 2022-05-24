@@ -3,7 +3,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.internal.bot import (
+from app.internal.bank.db.models import BankAccount
+from app.internal.bot.modules.history.handlers import (
     _DOCUMENTS_SESSION,
     _LIST_EMPTY_MESSAGE,
     _STUPID_CHOICE,
@@ -11,7 +12,6 @@ from app.internal.bot import (
     handle_start,
 )
 from app.internal.bot.modules.history.HistoryStates import HistoryStates
-from app.internal.models.bank import BankAccount
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

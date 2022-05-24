@@ -2,7 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.internal.bot.modules import (
+from app.internal.bot.modules.friends.FriendStates import FriendStates
+from app.internal.bot.modules.friends.reject_conversation import (
     _REJECT_SUCCESS,
     _STUPID_CHOICE,
     _USERNAMES_SESSION,
@@ -10,8 +11,7 @@ from app.internal.bot.modules import (
     handle_reject,
     handle_reject_start,
 )
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.models.user import FriendRequest, TelegramUser
+from app.internal.users.db.models import FriendRequest, TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

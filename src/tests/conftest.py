@@ -4,9 +4,9 @@ from typing import List
 import pytest
 from telegram import User
 
-from app.internal.models.bank import BankAccount, BankCard
-from app.internal.models.user import SecretKey, TelegramUser
-from app.internal.users.db.models import TelegramUserManager
+from app.internal.bank.db.models import BankAccount, BankCard
+from app.internal.users.db.models import SecretKey, TelegramUser
+from app.internal.users.db.models.TelegramUserManager import TelegramUserManager
 
 BALANCE = Decimal(10**4)
 PASSWORD = "1337<PrO>228"

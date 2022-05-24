@@ -20,7 +20,7 @@ class TransactionRepository(ITransactionRepository):
     def get_transactions(self, account: BankAccount) -> QuerySet[Transaction]:
         return Transaction.objects.filter(Q(source=account) | Q(destination=account)).all()
 
-    def get_usernames_relations(self, user_id: Union[int, str]) -> QuerySet[str]:
+    def get_related_usernames(self, user_id: Union[int, str]) -> QuerySet[str]:
         from_ = Transaction.objects.filter(source__owner_id=user_id).values_list(
             "destination__owner__username", flat=True
         )

@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from app.internal.models.bank import BankCard
+from app.internal.bank.db.models import BankCard
 
 
 @register(BankCard)

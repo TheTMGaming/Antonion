@@ -5,14 +5,8 @@ from app.internal.bot.decorators import if_update_message_exists, if_user_exist,
 from app.internal.bot.modules.filters import TEXT
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.bot.modules.user.PasswordStates import PasswordStates
-from app.internal.services.user import (
-    confirm_password,
-    get_user,
-    is_password_exists,
-    is_secret_key_correct,
-    try_create_password,
-    try_update_password,
-)
+from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
+from app.internal.users.domain.services import TelegramUserService
 
 _INPUT_SECRET_IF_EXISTS = "Введите секретное слово, либо /cancel\n\nПодсказка: {tip}"
 _SECRET_KEY_ERROR = "Неправильное секретной слово. Поки"
@@ -29,6 +23,10 @@ _SECRET_KEY_SESSION = "secret_key_hash"
 _TIP_SESSION = "tip"
 _PASSWORD_SESSION = "password"
 
+_user_repo = TelegramUserRepository()
+_secret_key_repo = SecretKeyRepository()
+_user_service = TelegramUserService(user_repo=_user_repo, secret_key_repo=_secret_key_repo)
+
 
 @if_update_message_exists
 @if_user_exist
@@ -36,9 +34,9 @@ _PASSWORD_SESSION = "password"
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = get_user(update.effective_user.id)
+    user = _user_repo.get_user(update.effective_user.id)
 
-    if is_password_exists(user):
+    if user.password is not None:
         update.message.reply_text(_INPUT_SECRET_IF_EXISTS.format(tip=user.secret_key.tip))
         return PasswordStates.SECRET_CONFIRMATION
 
@@ -50,7 +48,7 @@ def handle_start(update: Update, context: CallbackContext) -> int:
 def handle_confirmation_secret_key(update: Update, context: CallbackContext) -> int:
     update.message.delete()
 
-    if not is_secret_key_correct(update.message.text, update.effective_user):
+    if not _secret_key_repo.is_secret_key_correct(update.message.text, update.effective_user):
         update.message.reply_text(_SECRET_KEY_ERROR)
 
         return mark_conversation_end(context)
@@ -71,7 +69,7 @@ def handle_confirmation_in_updating(update: Update, context: CallbackContext) ->
     status = _handle_confirmation(update, context)
 
     if status == PasswordStates.CONFIRMATION_OK:
-        is_success = try_update_password(update.effective_user, context.user_data[_PASSWORD_SESSION])
+        is_success = _user_service.try_update_password(update.effective_user, context.user_data[_PASSWORD_SESSION])
 
         update.message.reply_text(_UPDATING_SUCCESS if is_success else _SERVER_ERROR)
 
@@ -108,7 +106,7 @@ def handle_confirmation_in_creating(update: Update, context: CallbackContext) ->
         tip: str = context.user_data[_TIP_SESSION]
         password: str = context.user_data[_PASSWORD_SESSION]
 
-        is_success = try_create_password(update.effective_user, password, key, tip)
+        is_success = _user_service.try_create_password(update.effective_user, password, key, tip)
 
         update.message.reply_text(_CREATING_SUCCESS if is_success else _SERVER_ERROR)
 
@@ -126,7 +124,7 @@ def _handle_entering(update: Update, context: CallbackContext):
 def _handle_confirmation(update: Update, context: CallbackContext) -> int:
     password = context.user_data[_PASSWORD_SESSION]
 
-    if not confirm_password(update.message.text, password):
+    if update.message.text != password:
         update.message.reply_text(_WRONG_PASSWORD)
 
         return mark_conversation_end(context)

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.internal.bot.modules import (
+from app.internal.bot.modules.friends.add_conversation import (
     _ALREADY_EXIST_ERROR,
     _REQUEST_ALREADY_EXIST_ERROR,
     _REQUEST_SUCCESS,
@@ -14,7 +14,7 @@ from app.internal.bot.modules import (
     handle_add_friend_start,
 )
 from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.models.user import FriendRequest, TelegramUser
+from app.internal.users.db.models import FriendRequest, TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

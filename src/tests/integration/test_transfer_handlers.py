@@ -4,7 +4,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.internal.bot import (
+from app.internal.bank.db.models import BankAccount, BankCard, BankObject
+from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
+from app.internal.bank.domain.services import TransferService
+from app.internal.bot.modules.transfer.handlers import (
     _ACCRUAL_GREATER_BALANCE_ERROR,
     _ACCRUAL_PARSE_ERROR,
     _ACCRUAL_SESSION,
@@ -30,11 +33,13 @@ from app.internal.bot import (
     handle_transfer,
 )
 from app.internal.bot.modules.transfer.TransferStates import TransferStates
-from app.internal.models.bank import BankAccount, BankCard, BankObject
-from app.internal.models.user import TelegramUser
-from app.internal.services.bank.transfer import parse_accrual
+from app.internal.users.db.models import TelegramUser
 from tests.conftest import BALANCE
 from tests.integration.general import assert_conversation_end, assert_conversation_start
+
+transfer_service = TransferService(
+    account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
+)
 
 
 @pytest.mark.django_db
@@ -248,7 +253,7 @@ def test_getting_accrual(
     update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = str(bank_account.balance)
-    accrual = parse_accrual(update.message.text)
+    accrual = transfer_service.parse_accrual(update.message.text)
     context.user_data[_SOURCE_SESSION] = bank_account
     context.user_data[_DESTINATION_SESSION] = friend_account
 

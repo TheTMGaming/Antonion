@@ -1,19 +1,20 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.models.bank import BankAccount, BankObject
-from app.internal.services.bank.transfer import get_documents_order
-from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import (
+from app.internal.bank.db.models import BankAccount, BankObject
+from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository
+from app.internal.bank.domain.services import BankObjectService
+from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
-from app.internal.transport.bot.modules.balance.BalanceStates import BalanceStates
-from app.internal.transport.bot.modules.document import send_document_list
-from app.internal.transport.bot.modules.filters import INT
-from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.bot.modules.balance.BalanceStates import BalanceStates
+from app.internal.bot.modules.document import send_document_list
+from app.internal.bot.modules.filters import INT
+from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.users.db.repositories import TelegramUserRepository
 
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 _WELCOME = "Выберите банковский счёт или карту, либо /cancel\n"
@@ -24,6 +25,9 @@ _BALANCE_BY_CARD = "На карточке {number} лежит {balance}"
 
 _DOCUMENTS_SESSION = "documents"
 
+_user_repo = TelegramUserRepository()
+_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+
 
 @if_update_message_exists
 @if_user_exist
@@ -32,8 +36,8 @@ _DOCUMENTS_SESSION = "documents"
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = get_user(update.effective_user.id)
-    documents = get_documents_order(user)
+    user = _user_repo.get_user(update.effective_user.id)
+    documents = _bank_object_service.get_documents_order(user)
 
     if len(documents) == 0:
         update.message.reply_text(_LIST_EMPTY_MESSAGE)

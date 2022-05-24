@@ -8,5 +8,5 @@ from app.internal.users.db.models import TelegramUser
 
 class IFriendRepository(ABC):
     @abstractmethod
-    def get_friends(self, user_id: Union[int, str]) -> QuerySet[TelegramUser]:
+    def get_friends(self, user: TelegramUser) -> QuerySet[TelegramUser]:
         pass

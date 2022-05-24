@@ -24,14 +24,12 @@ class TelegramUserService:
             return False
 
         self._user_repo.update_phone(user_id, format_number(phone, PhoneNumberFormat.E164))
-        # TelegramUser.objects.filter(id=user_id).update(phone=format_number(phone, PhoneNumberFormat.E164))
 
         return True
 
     def try_update_password(self, user: User, password: str) -> bool:
         try:
             self._user_repo.update_password(user.id, password)
-            # TelegramUser.objects.update_password(user.id, password)
 
             return True
         except IntegrityError:
@@ -41,10 +39,8 @@ class TelegramUserService:
         try:
             with transaction.atomic():
                 self._secret_key_repo.create(user.id, key, tip)
-                # SecretKey.objects.create(telegram_user_id=user.id, value=key, tip=tip)
 
                 self._user_repo.update_password(user.id, password)
-                # TelegramUser.objects.update_password(user.id, password)
 
             return True
         except IntegrityError:

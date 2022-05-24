@@ -19,14 +19,6 @@ class TransferService:
         self._card_repo = card_repo
         self._transaction_repo = transaction_repo
 
-    def get_documents_order(self, user: TelegramUser) -> dict:
-        return dict(
-            (number, document)
-            for number, document in enumerate(
-                chain(self._account_repo.get_bank_accounts(user), self._card_repo.get_cards(user)), start=1
-            )
-        )
-
     def is_balance_zero(self, document: BankObject) -> bool:
         return document.get_balance() == 0
 

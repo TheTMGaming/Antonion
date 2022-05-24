@@ -12,7 +12,7 @@ class FriendService:
         self._request_repo = request_repo
 
     def get_friends_as_dict(self, user: TelegramUser) -> Dict[int, TelegramUser]:
-        return dict((num, friend) for num, friend in enumerate(self._friend_repo.get_friends(user.id), 1))
+        return dict((num, friend) for num, friend in enumerate(self._friend_repo.get_friends(user), 1))
 
     def try_create_friend_request(self, source: TelegramUser, destination: TelegramUser) -> bool:
         if self._request_repo.exists(source, destination):

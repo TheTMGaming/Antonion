@@ -1,14 +1,13 @@
 from decimal import Decimal
-from itertools import chain
 from typing import List
 
 import pytest
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
 
-from app.internal.models.bank import BankAccount, Transaction, TransactionTypes
-from app.internal.models.user import TelegramUser
-from app.internal.services.bank.transaction import declare_transaction, get_usernames_relations
+from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
+from app.internal.bank.db.repositories import TransactionRepository
+
+transaction_repo = TransactionRepository()
 
 
 @pytest.mark.django_db
@@ -19,9 +18,9 @@ def test_transaction_declaration(bank_accounts: List[BankAccount]) -> None:
     for accrual in map(Decimal, range(-1, 2)):
         if accrual < 0:
             with pytest.raises(ValidationError):
-                declare_transaction(source, destination, TransactionTypes.TRANSFER, accrual)
+                transaction_repo.declare(source, destination, TransactionTypes.TRANSFER, accrual)
         else:
-            transaction = declare_transaction(source, destination, TransactionTypes.TRANSFER, accrual)
+            transaction = transaction_repo.declare(source, destination, TransactionTypes.TRANSFER, accrual)
             assert transaction.source == source
             assert transaction.destination == destination
             assert transaction.accrual == accrual
@@ -38,7 +37,7 @@ def test_getting_usernames_of_relations(bank_account: BankAccount, friend_accoun
         Transaction(source=another, destination=bank_account) for another in friend_accounts[half:]
     )
 
-    actual = sorted(get_usernames_relations(bank_account.owner.id))
+    actual = sorted(transaction_repo.get_related_usernames(bank_account.owner.id))
     expected = sorted(account.owner.username for account in friend_accounts)
 
     assert actual == expected

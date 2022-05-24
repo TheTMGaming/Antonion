@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from app.internal.models.user import TelegramUser
+from app.internal.users.db.models import TelegramUser
 
 
 @admin.register(TelegramUser)

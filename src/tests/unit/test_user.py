@@ -1,3 +1,5 @@
+import random
+import string
 from itertools import chain
 from re import sub
 from typing import List
@@ -5,9 +7,15 @@ from typing import List
 import pytest
 from telegram import User
 
-from app.internal.models.bank import BankAccount, Transaction
-from app.internal.models.user import TelegramUser
-from app.internal.services.user import get_user, is_user_exist, try_add_or_update_user, try_set_phone
+from app.internal.users.db.models import SecretKey, TelegramUser
+from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
+from app.internal.users.domain.services import TelegramUserService
+from tests.conftest import KEY, TIP, WRONG_KEY
+
+chars = string.printable
+secret_key_repo = SecretKeyRepository()
+user_repo = TelegramUserRepository()
+user_service = TelegramUserService(user_repo=user_repo, secret_key_repo=secret_key_repo)
 
 _CORRECTED_PHONE_NUMBERS = list(
     chain(
@@ -42,7 +50,7 @@ _WRONG_PHONE_NUMBERS = [
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_adding_user_to_db(user: User) -> None:
-    was_added = try_add_or_update_user(user)
+    was_added = user_repo.try_add_or_update_user(user)
     assert was_added
 
     _assert_telegram_user(user)
@@ -59,7 +67,7 @@ def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
         is_bot=False,
     )
 
-    was_added = try_add_or_update_user(user)
+    was_added = user_repo.try_add_or_update_user(user)
     assert not was_added
 
     _assert_telegram_user(user)
@@ -68,13 +76,16 @@ def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_user_by_identifier(users: List[User], telegram_users: List[TelegramUser]) -> None:
-    assert all(telegram_users[i] == get_user(users[i].id) == get_user(users[i].username) for i in range(len(users)))
+    assert all(
+        telegram_users[i] == user_repo.get_user(users[i].id) == user_repo.get_user(users[i].username)
+        for i in range(len(users))
+    )
 
 
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_check_existing_of_user_by_id(users: List[User], telegram_users: List[TelegramUser]) -> None:
-    assert all(is_user_exist(user.id) for user in users)
+    assert all(user_repo.is_user_exist(user.id) for user in users)
 
 
 @pytest.mark.django_db
@@ -83,7 +94,7 @@ def test_check_existing_of_user_by_id(users: List[User], telegram_users: List[Te
 def test_setting_phone(telegram_user: TelegramUser, number: str) -> None:
     expected = "+7" + sub("[^0-9]", "", number)[1:]
 
-    was_set = try_set_phone(telegram_user.id, number)
+    was_set = user_service.try_set_phone(telegram_user.id, number)
     user = TelegramUser.objects.filter(id=telegram_user.id).first()
 
     assert was_set and user.phone == expected or not was_set and user.phone is None
@@ -98,3 +109,34 @@ def _assert_telegram_user(expected: User) -> None:
     assert actual[0].first_name == expected.first_name
     assert actual[0].last_name == expected.last_name
     assert actual[0].phone is None
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_updating_password(user: User, telegram_user_with_password: TelegramUser) -> None:
+    was = telegram_user_with_password.password
+    is_updated = user_service.try_update_password(user, "".join(random.choice(chars) for _ in range(5)))
+
+    actual = TelegramUser.objects.filter(pk=telegram_user_with_password.pk).first()
+
+    assert is_updated
+    assert actual.password != was
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_creating_password(user: User, telegram_user: TelegramUser) -> None:
+    password = "a" * 5
+
+    is_created = user_service.try_create_password(user, password, KEY, TIP)
+
+    assert is_created
+    assert TelegramUser.objects.filter(pk=telegram_user.pk).first().password is not None
+    assert SecretKey.objects.filter(telegram_user=telegram_user).exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_confirmation_secret_key(user: User, telegram_user_with_password: TelegramUser) -> None:
+    assert secret_key_repo.is_secret_key_correct(KEY, user) is True
+    assert secret_key_repo.is_secret_key_correct(WRONG_KEY, user) is False

@@ -2,15 +2,17 @@ from typing import List
 
 import pytest
 
-from app.internal.models.bank import BankAccount
-from app.internal.models.user import TelegramUser
-from app.internal.services.bank.account import get_bank_account, get_bank_accounts
+from app.internal.bank.db.models import BankAccount
+from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository
+from app.internal.users.db.models import TelegramUser
+
+account_repo = BankAccountRepository()
 
 
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_account_by_number(telegram_user: TelegramUser, bank_accounts: List[BankAccount]) -> None:
-    actual = [get_bank_account(account.number) for account in bank_accounts]
+    actual = [account_repo.get_bank_account(account.number) for account in bank_accounts]
 
     assert actual == list(BankAccount.objects.filter(owner=telegram_user))
 
@@ -18,6 +20,6 @@ def test_getting_account_by_number(telegram_user: TelegramUser, bank_accounts: L
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_accounts_by_user(telegram_user: TelegramUser, bank_accounts: List[BankAccount]) -> None:
-    actual = list(get_bank_accounts(telegram_user))
+    actual = list(account_repo.get_bank_accounts(telegram_user))
 
     assert actual == list(BankAccount.objects.filter(owner=telegram_user))

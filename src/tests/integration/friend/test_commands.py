@@ -9,7 +9,7 @@ from app.internal.bot.modules.friends.commands import (
     handle_friends,
     handle_friendships,
 )
-from app.internal.models.user import TelegramUser
+from app.internal.users.db.models import TelegramUser
 
 
 @pytest.mark.django_db

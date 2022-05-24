@@ -5,9 +5,10 @@ from telegram import User
 
 from app.internal.users.db.models import TelegramUser
 from app.internal.users.db.repositories.TelegramUserFields import TelegramUserFields
+from app.internal.users.domain.interfaces import IFriendRepository, ITelegramUserRepository
 
 
-class TelegramUserRepository:
+class TelegramUserRepository(ITelegramUserRepository, IFriendRepository):
     def try_add_or_update_user(self, user: User) -> bool:
         attributes = {
             TelegramUserFields.USERNAME: user.username,
@@ -48,3 +49,9 @@ class TelegramUserRepository:
 
     def is_friend_exists(self, user: TelegramUser, friend: TelegramUser) -> bool:
         return user.friends.filter(pk=friend.pk).exists()
+
+    def update_phone(self, user_id: Union[int, str], value: str) -> None:
+        TelegramUser.objects.filter(id=user_id).update(phone=value)
+
+    def update_password(self, user_id: Union[int, str], value: str) -> None:
+        TelegramUser.objects.update_password(user_id, value)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from app.internal.models.admin import AdminUser
+from app.internal.authentication.db.models import AdminUser
 
 
 @admin.register(AdminUser)

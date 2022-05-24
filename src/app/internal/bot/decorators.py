@@ -4,11 +4,14 @@ from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.bot.modules.general import COMMAND, IN_CONVERSATION
-from app.internal.services.user import get_user
+from app.internal.users.db.repositories import TelegramUserRepository
 
 _USER_DOESNT_EXIST = "Моя вас не знать. Моя предложить знакомиться с вами! (команда /start)"
 _UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей мобилке. Пожалуйста, продиктуйте! (команда /phone)"
 _MUST_CONVERSATION_END = "Вы не завершили команду /{command}. Это можно сделать с помощью /cancel"
+
+
+user_repo = TelegramUserRepository()
 
 
 def if_update_message_exists(handler: Callable) -> Callable:
@@ -23,7 +26,7 @@ def if_update_message_exists(handler: Callable) -> Callable:
 
 def if_user_exist(handler: Callable) -> Callable:
     def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
-        user = get_user(update.effective_user.id)
+        user = user_repo.get_user(update.effective_user.id)
 
         if user:
             return handler(update, context)
@@ -37,7 +40,7 @@ def if_user_exist(handler: Callable) -> Callable:
 
 def if_phone_is_set(handler: Callable) -> Callable:
     def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
-        user = get_user(update.effective_user.id)
+        user = user_repo.get_user(update.effective_user.id)
 
         if user.phone:
             return handler(update, context)

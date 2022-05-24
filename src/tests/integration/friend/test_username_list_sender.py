@@ -5,7 +5,7 @@ import pytest
 
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.friends.username_list_sender import send_username_list
-from app.internal.models.user import FriendRequest, TelegramUser
+from app.internal.users.db.models import FriendRequest, TelegramUser
 from tests.integration.general import assert_conversation_end
 
 _WELCOME = "abc"

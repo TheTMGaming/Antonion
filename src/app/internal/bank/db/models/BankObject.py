@@ -2,7 +2,7 @@ from abc import abstractmethod
 from decimal import Decimal
 from typing import List
 
-from app.internal.models.user import TelegramUser
+from app.internal.users.db.models import TelegramUser
 
 
 class BankObject:

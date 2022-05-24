@@ -5,10 +5,16 @@ from typing import List, Type
 
 import pytest
 
-from app.internal.models.bank import BankAccount, BankCard, BankObject, Transaction
-from app.internal.services.bank.account import get_bank_account_from_document
-from app.internal.services.bank.transfer import can_extract_from, is_balance_zero, parse_accrual, try_transfer
+from app.internal.bank.db.models import BankAccount, BankCard, BankObject, Transaction
+from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
+from app.internal.bank.domain.services import BankObjectService, TransferService
 from tests.conftest import BALANCE
+
+account_repo = BankAccountRepository()
+card_repo = BankCardRepository()
+transaction_repo = TransactionRepository()
+bank_object_service = BankObjectService(account_repo=account_repo, card_repo=card_repo)
+transfer_service = TransferService(account_repo=account_repo, card_repo=card_repo, transaction_repo=transaction_repo)
 
 
 class TransferError(IntEnum):
@@ -25,8 +31,8 @@ def test_checking_balance_zero(bank_account: BankAccount, cards: List[BankCard])
 
     card = BankCard.objects.filter(bank_account=bank_account).first()
 
-    assert is_balance_zero(bank_account)
-    assert is_balance_zero(card)
+    assert bank_object_service.is_balance_zero(bank_account)
+    assert bank_object_service.is_balance_zero(card)
 
 
 @pytest.mark.unit
@@ -68,9 +74,9 @@ def test_checking_balance_zero(bank_account: BankAccount, cards: List[BankCard])
 def test_parsing_accrual(digits: str, expected: str):
     if expected is None:
         with pytest.raises(ValueError):
-            parse_accrual(digits)
+            transfer_service.parse_accrual(digits)
     else:
-        assert parse_accrual(digits) == Decimal(expected)
+        assert transfer_service.parse_accrual(digits) == Decimal(expected)
 
 
 @pytest.mark.django_db
@@ -96,8 +102,8 @@ def test_parsing_accrual(digits: str, expected: str):
 def test_checking_extract(bank_account: BankAccount, card: BankCard, subtracted_value: Decimal, expected: bool):
     accrual = Decimal(bank_account.balance - subtracted_value)
 
-    assert can_extract_from(bank_account, accrual) == expected
-    assert can_extract_from(card, accrual) == expected
+    assert transfer_service.can_extract_from(bank_account, accrual) == expected
+    assert transfer_service.can_extract_from(card, accrual) == expected
 
 
 TRANSFER_PARAMETERS = [
@@ -172,11 +178,12 @@ def _assert_documents_transfer(
     source: BankObject, destination: BankObject, accrual: Decimal, error_type: TransferError
 ) -> None:
 
-    source, destination = get_bank_account_from_document(source), get_bank_account_from_document(destination)
+    source = bank_object_service.get_bank_account_from_document(source)
+    destination = bank_object_service.get_bank_account_from_document(destination)
 
     if error_type == TransferError.VALIDATION:
         with pytest.raises(ValueError):
-            try_transfer(source, destination, accrual)
+            transfer_service.try_transfer(source, destination, accrual)
 
         return
 
@@ -187,7 +194,7 @@ def _assert_documents_transfer(
         (source_start - accrual, destination_start + accrual) if not is_error else (source_start, destination_start)
     )
 
-    is_transfer = try_transfer(source, destination, accrual)
+    is_transfer = transfer_service.try_transfer(source, destination, accrual)
 
     transactions = Transaction.objects.filter(source=source, destination=destination, accrual=accrual).all()
     actual_source, actual_destination = _get_actual(source), _get_actual(destination)

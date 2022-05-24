@@ -4,28 +4,22 @@ from typing import Dict
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.models.bank import BankAccount, BankCard, BankObject
-from app.internal.models.user import TelegramUser
-from app.internal.services.bank.account import get_bank_account_from_document
-from app.internal.services.bank.transfer import (
-    can_extract_from,
-    get_documents_order,
-    is_balance_zero,
-    parse_accrual,
-    try_transfer,
-)
-from app.internal.services.friend import get_friends_with_enums
-from app.internal.services.user import get_user
-from app.internal.transport.bot.decorators import (
+from app.internal.bank.db.models import BankAccount, BankCard, BankObject
+from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
+from app.internal.bank.domain.services import BankObjectService, TransferService
+from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
     if_user_exist,
     if_user_is_not_in_conversation,
 )
-from app.internal.transport.bot.modules.document import send_document_list
-from app.internal.transport.bot.modules.filters import FLOATING, INT
-from app.internal.transport.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.bot.modules.document import send_document_list
+from app.internal.bot.modules.filters import FLOATING, INT
+from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.users.db.models import TelegramUser
+from app.internal.users.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
+from app.internal.users.domain.services import FriendService, TelegramUserService
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
@@ -70,6 +64,17 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
+_user_repo = TelegramUserRepository()
+_account_repo = BankAccountRepository()
+_card_repo = BankCardRepository()
+_friend_service = FriendService(friend_repo=_user_repo, request_repo=FriendRequestRepository())
+_user_service = TelegramUserService(user_repo=_user_repo, secret_key_repo=SecretKeyRepository())
+_bank_object_service = BankObjectService(account_repo=_account_repo, card_repo=_card_repo)
+_transfer_service = TransferService(
+    account_repo=_account_repo, card_repo=_card_repo, transaction_repo=TransactionRepository()
+)
+
+
 @if_update_message_exists
 @if_user_exist
 @if_phone_is_set
@@ -77,14 +82,14 @@ _ACCRUAL_SESSION = "accrual"
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = get_user(update.effective_user.id)
+    user = _user_repo.get_user(update.effective_user.id)
 
-    friends = get_friends_with_enums(user)
+    friends = _friend_service.get_friends_as_dict(user)
     if len(friends) == 0:
         update.message.reply_text(_FRIEND_LIST_EMPTY_ERROR)
         return mark_conversation_end(context)
 
-    documents = get_documents_order(user)
+    documents = _bank_object_service.get_documents_order(user)
     if len(documents) == 0:
         update.message.reply_text(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
         return mark_conversation_end(context)
@@ -107,7 +112,7 @@ def handle_getting_destination(update: Update, context: CallbackContext) -> int:
 
     context.user_data[_CHOSEN_FRIEND_SESSION] = friend
 
-    documents = get_documents_order(friend)
+    documents = _bank_object_service.get_documents_order(friend)
 
     return _save_and_send_friend_document_list(update, context, documents)
 
@@ -121,7 +126,7 @@ def handle_getting_destination_document(update: Update, context: CallbackContext
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.DESTINATION_DOCUMENT
 
-    context.user_data[_DESTINATION_SESSION] = get_bank_account_from_document(destination)
+    context.user_data[_DESTINATION_SESSION] = _bank_object_service.get_bank_account_from_document(destination)
 
     source_documents: Dict[int, BankObject] = context.user_data[_SOURCE_DOCUMENTS_SESSION]
     send_document_list(update, source_documents, _TRANSFER_SOURCE_WELCOME, show_balance=True)
@@ -138,9 +143,9 @@ def handle_getting_source_document(update: Update, context: CallbackContext) -> 
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
-    source: BankAccount = get_bank_account_from_document(source)
+    source: BankAccount = _bank_object_service.get_bank_account_from_document(source)
 
-    if is_balance_zero(source):
+    if _bank_object_service.is_balance_zero(source):
         update.message.reply_text(_BALANCE_ZERO_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
@@ -154,13 +159,13 @@ def handle_getting_source_document(update: Update, context: CallbackContext) -> 
 @if_update_message_exists
 def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
     try:
-        accrual = parse_accrual(update.message.text)
+        accrual = _transfer_service.parse_accrual(update.message.text)
     except ValueError:
         update.message.reply_text(_ACCRUAL_PARSE_ERROR)
         return TransferStates.ACCRUAL
 
     source: BankAccount = context.user_data[_SOURCE_SESSION]
-    if not can_extract_from(source, accrual):
+    if not _transfer_service.can_extract_from(source, accrual):
         update.message.reply_text(_ACCRUAL_GREATER_BALANCE_ERROR)
         return TransferStates.ACCRUAL
 
@@ -177,7 +182,7 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     destination: BankAccount = context.user_data[_DESTINATION_SESSION]
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
 
-    is_success = try_transfer(source, destination, accrual)
+    is_success = _transfer_service.try_transfer(source, destination, accrual)
     message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
 
     update.message.reply_text(message)

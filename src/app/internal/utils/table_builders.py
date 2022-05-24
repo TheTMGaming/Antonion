@@ -2,8 +2,8 @@ from typing import Iterable
 
 from django.conf import settings
 
-from app.internal.models.bank import BankAccount, Transaction
-from app.internal.utils import Table
+from app.internal.bank.db.models import BankAccount, Transaction
+from app.internal.utils.Table import Table
 from app.internal.utils.OperationNames import OperationNames
 
 

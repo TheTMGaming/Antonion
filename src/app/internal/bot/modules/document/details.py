@@ -2,7 +2,7 @@ from typing import Dict, Type
 
 from telegram import Update
 
-from app.internal.models.bank import BankAccount, BankCard, BankObject
+from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 
 _DOCUMENT_GROUPS = "Счета:\n{accounts}\nКарты:\n{cards}\n"
 _DOCUMENT_VARIANT = "{number}) {document}"

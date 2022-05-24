@@ -11,7 +11,7 @@ from app.internal.bot.decorators import (
     if_user_is_not_in_conversation,
 )
 from app.internal.bot.modules.general import mark_conversation_start
-from app.internal.models.user import TelegramUser
+from app.internal.users.db.models import TelegramUser
 
 
 @pytest.mark.integration

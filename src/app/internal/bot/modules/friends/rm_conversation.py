@@ -10,9 +10,9 @@ from app.internal.bot.decorators import (
 from app.internal.bot.modules.filters import INT
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.models.user import TelegramUser
-from app.internal.services.friend import get_friends_as_dict, try_remove_from_friends
-from app.internal.services.user import get_user
+from app.internal.users.db.models import TelegramUser
+from app.internal.users.db.repositories import FriendRequestRepository, TelegramUserRepository
+from app.internal.users.domain.services import FriendService
 
 _WELCOME = "Выберите пользователя, который плохо себя ведёт:\n\n"
 _LIST_EMPTY = "К сожалению, у вас нет друзей :("
@@ -26,6 +26,10 @@ _USERNAMES_SESSION = "usernames"
 _USER_SESSION = "user"
 
 
+_user_repo = TelegramUserRepository()
+_friend_service = FriendService(friend_repo=_user_repo, request_repo=FriendRequestRepository())
+
+
 @if_update_message_exists
 @if_user_exist
 @if_phone_is_set
@@ -33,8 +37,8 @@ _USER_SESSION = "user"
 def handle_rm_friend_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = get_user(update.effective_user.id)
-    friends = get_friends_as_dict(user)
+    user = _user_repo.get_user(update.effective_user.id)
+    friends = _friend_service.get_friends_as_dict(user)
 
     context.user_data[_USERNAMES_SESSION] = friends
     context.user_data[_USER_SESSION] = user
@@ -56,7 +60,7 @@ def handle_rm_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_STUPID_CHOICE)
         return FriendStates.INPUT
 
-    if not try_remove_from_friends(user, friend):
+    if not _friend_service.try_remove_from_friends(user, friend):
         update.message.reply_text(_REMOVE_ERROR)
         return mark_conversation_end(context)
 
