@@ -1,10 +1,8 @@
 from unittest.mock import MagicMock
 
 import pytest
-from telegram.ext import ConversationHandler
 
-from app.internal.models.user import FriendRequest, TelegramUser
-from app.internal.transport.bot.modules.friends.accept_conversation import (
+from app.internal.bot.modules import (
     _FRIEND_CANCEL,
     _STUPID_CHOICE,
     _USERNAMES_SESSION,
@@ -12,7 +10,8 @@ from app.internal.transport.bot.modules.friends.accept_conversation import (
     handle_accept,
     handle_accept_start,
 )
-from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
+from app.internal.bot.modules.friends.FriendStates import FriendStates
+from app.internal.models.user import FriendRequest, TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

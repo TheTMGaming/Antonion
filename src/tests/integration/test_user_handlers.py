@@ -2,12 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 from telegram import User
-from telegram.ext import ConversationHandler
 
-from app.internal.models.bank import BankAccount, Transaction
-from app.internal.models.user import TelegramUser
-from app.internal.transport.bot.modules.user.FriendStates import FriendStates
-from app.internal.transport.bot.modules.user.handlers import (
+from app.internal.bot import (
     _RELATION_LIST_EMPTY,
     _UPDATING_DETAILS,
     _WELCOME as welcome_user,
@@ -15,13 +11,16 @@ from app.internal.transport.bot.modules.user.handlers import (
     handle_relations,
     handle_start,
 )
-from app.internal.transport.bot.modules.user.phone_conversation import (
+from app.internal.bot.modules import FriendStates
+from app.internal.bot.modules.user.phone_conversation import (
     _INVALID_PHONE,
     _UPDATING_PHONE,
     _WELCOME,
     handle_phone,
     handle_phone_start,
 )
+from app.internal.models.bank import BankAccount, Transaction
+from app.internal.models.user import TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

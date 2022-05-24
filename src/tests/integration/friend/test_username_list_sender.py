@@ -2,11 +2,10 @@ from typing import List
 from unittest.mock import MagicMock
 
 import pytest
-from telegram.ext import ConversationHandler
 
+from app.internal.bot.modules.friends.FriendStates import FriendStates
+from app.internal.bot.modules.friends.username_list_sender import send_username_list
 from app.internal.models.user import FriendRequest, TelegramUser
-from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
-from app.internal.transport.bot.modules.friends.username_list_sender import send_username_list
 from tests.integration.general import assert_conversation_end
 
 _WELCOME = "abc"

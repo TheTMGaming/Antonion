@@ -3,13 +3,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.internal.models.user import TelegramUser
-from app.internal.transport.bot.modules.friends.commands import (
+from app.internal.bot.modules.friends.commands import (
     _FRIENDSHIPS_EMPTY,
     _LIST_EMPTY_ERROR,
     handle_friends,
     handle_friendships,
 )
+from app.internal.models.user import TelegramUser
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 import pytest
 
-from app.internal.services.utils import create_temp_file, remove_temp_file
+from app.internal.utils import create_temp_file, remove_temp_file
 
 
 @pytest.mark.unit

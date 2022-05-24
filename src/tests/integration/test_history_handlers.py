@@ -3,15 +3,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.internal.models.bank import BankAccount
-from app.internal.transport.bot.modules.history.handlers import (
+from app.internal.bot import (
     _DOCUMENTS_SESSION,
     _LIST_EMPTY_MESSAGE,
     _STUPID_CHOICE,
     handle_getting_document,
     handle_start,
 )
-from app.internal.transport.bot.modules.history.HistoryStates import HistoryStates
+from app.internal.bot.modules.history.HistoryStates import HistoryStates
+from app.internal.models.bank import BankAccount
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

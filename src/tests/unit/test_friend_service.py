@@ -6,8 +6,8 @@ from django.db import IntegrityError
 from app.internal.models.user import FriendRequest, TelegramUser
 from app.internal.services.friend import (
     get_friend,
-    get_friendship_username_list,
-    is_friend_exist,
+    get_usernames_to_friends,
+    is_friend_exists,
     reject_friend_request,
     try_accept_friend,
     try_create_friend_request,
@@ -26,7 +26,7 @@ def test_getting_friend(telegram_user: TelegramUser, friends: List[TelegramUser]
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_checking_friend_exist(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
-    assert all(is_friend_exist(telegram_user, friend) for friend in friends)
+    assert all(is_friend_exists(telegram_user, friend) for friend in friends)
 
 
 @pytest.mark.django_db
@@ -56,7 +56,7 @@ def test_creating_friend_request__already_exist(
 def test_getting_friendship_username_list(
     telegram_user: TelegramUser, another_telegram_users: List[TelegramUser], friend_requests: List[FriendRequest]
 ) -> None:
-    actual = list(get_friendship_username_list(telegram_user.id))
+    actual = list(get_usernames_to_friends(telegram_user.id))
     expected = [user.username for user in another_telegram_users]
 
     assert actual == expected

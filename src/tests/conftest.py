@@ -6,7 +6,7 @@ from telegram import User
 
 from app.internal.models.bank import BankAccount, BankCard
 from app.internal.models.user import SecretKey, TelegramUser
-from app.internal.models.user.TelegramUserManager import TelegramUserManager
+from app.internal.users.db.models import TelegramUserManager
 
 BALANCE = Decimal(10**4)
 PASSWORD = "1337<PrO>228"

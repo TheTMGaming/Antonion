@@ -7,7 +7,7 @@ from django.conf import settings
 from freezegun import freeze_time
 
 from app.internal.authentication import IsAuthenticated
-from app.internal.authentication.TokenTypes import TokenTypes
+from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.authentication.utils import (
     CREATED_AT,
     TELEGRAM_ID,

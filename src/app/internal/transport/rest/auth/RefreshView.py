@@ -3,8 +3,8 @@ from django.http import HttpRequest
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.authentication.service import get_refresh_token_from_db, update_access_and_refresh_tokens
-from app.internal.authentication.TokenTypes import TokenTypes
 from app.internal.authentication.utils import is_payload_valid, is_token_alive, try_get_payload
 
 

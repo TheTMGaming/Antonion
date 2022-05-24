@@ -1,6 +1,6 @@
 from telegram.ext import CallbackContext, ConversationHandler
 
-from app.internal.transport.bot.modules.general import COMMAND, IN_CONVERSATION
+from app.internal.bot.modules.general import COMMAND, IN_CONVERSATION
 
 
 def assert_conversation_end(next_state: int, contex: CallbackContext) -> None:

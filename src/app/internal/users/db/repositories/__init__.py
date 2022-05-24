@@ -1,0 +1,3 @@
+from .FriendRequestRepository import FriendRequestRepository
+from .SecretKeyRepository import SecretKeyRepository
+from .TelegramUserRepository import TelegramUserRepository

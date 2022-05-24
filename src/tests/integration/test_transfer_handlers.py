@@ -3,12 +3,8 @@ from typing import List
 from unittest.mock import MagicMock
 
 import pytest
-from telegram.ext import ConversationHandler
 
-from app.internal.models.bank import BankAccount, BankCard, BankObject
-from app.internal.models.user import TelegramUser
-from app.internal.services.bank.transfer import parse_accrual
-from app.internal.transport.bot.modules.transfer.handlers import (
+from app.internal.bot import (
     _ACCRUAL_GREATER_BALANCE_ERROR,
     _ACCRUAL_PARSE_ERROR,
     _ACCRUAL_SESSION,
@@ -33,7 +29,10 @@ from app.internal.transport.bot.modules.transfer.handlers import (
     handle_start,
     handle_transfer,
 )
-from app.internal.transport.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.models.bank import BankAccount, BankCard, BankObject
+from app.internal.models.user import TelegramUser
+from app.internal.services.bank.transfer import parse_accrual
 from tests.conftest import BALANCE
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 

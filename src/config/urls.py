@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 
-from app.internal.transport.bot.webhook import BotWebhook
+from app.internal.bot.webhook import BotWebhook
 from app.internal.transport.rest.auth import LoginView, RefreshView
 
 urlpatterns = [

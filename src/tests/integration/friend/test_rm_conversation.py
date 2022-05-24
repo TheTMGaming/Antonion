@@ -2,12 +2,9 @@ from typing import List
 from unittest.mock import MagicMock
 
 import pytest
-from telegram.ext import ConversationHandler
 
-from app.internal.models.user import TelegramUser
-from app.internal.transport.bot.modules.friends.FriendStates import FriendStates
-from app.internal.transport.bot.modules.friends.rm_conversation import (
-    _REMOVE_ERROR,
+from app.internal.bot.modules.friends.FriendStates import FriendStates
+from app.internal.bot.modules.friends.rm_conversation import (
     _REMOVE_SUCCESS,
     _STUPID_CHOICE,
     _USER_SESSION,
@@ -16,6 +13,7 @@ from app.internal.transport.bot.modules.friends.rm_conversation import (
     handle_rm_friend,
     handle_rm_friend_start,
 )
+from app.internal.models.user import TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

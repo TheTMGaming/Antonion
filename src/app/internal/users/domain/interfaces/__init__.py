@@ -1,0 +1,4 @@
+from .IFriendRepository import IFriendRepository
+from .IFriendRequestRepository import IFriendRequestRepository
+from .ISecretKeyRepository import ISecretKeyRepository
+from .ITelegramUserRepository import ITelegramUserRepository

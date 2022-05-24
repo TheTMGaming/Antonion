@@ -1,15 +1,14 @@
 from datetime import datetime
 
 import pytest
-from django.db.models import QuerySet
 from freezegun import freeze_time
 
+from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.authentication.service import (
     create_access_and_refresh_tokens,
     get_user_by_credentials,
     update_access_and_refresh_tokens,
 )
-from app.internal.authentication.TokenTypes import TokenTypes
 from app.internal.authentication.utils import CREATED_AT, TELEGRAM_ID, TOKEN_TYPE, try_get_payload
 from app.internal.models.user import RefreshToken, TelegramUser
 from tests.conftest import PASSWORD

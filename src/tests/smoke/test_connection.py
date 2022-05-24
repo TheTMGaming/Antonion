@@ -5,8 +5,8 @@ from django.conf import settings
 from django.urls import reverse
 from telegram import TelegramError
 
+from app.internal.bot.webhook.BotWebhookService import BotWebhookService
 from app.internal.models.user import TelegramUser
-from app.internal.transport.bot.webhook.BotWebhookService import BotWebhookService
 
 
 @pytest.mark.django_db
