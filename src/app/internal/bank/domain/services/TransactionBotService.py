@@ -12,7 +12,9 @@ class TransactionBotService:
     def __init__(self, transaction_repo: ITransactionRepository):
         self._transaction_repo = transaction_repo
 
-    def declare(self, source: BankAccount, destination: BankAccount, type_: TransactionTypes, accrual: Decimal) -> Transaction:
+    def declare(
+        self, source: BankAccount, destination: BankAccount, type_: TransactionTypes, accrual: Decimal
+    ) -> Transaction:
         return self._transaction_repo.declare(source.number, destination.number, type_, accrual)
 
     def get_transactions(self, account: BankAccount) -> QuerySet[Transaction]:

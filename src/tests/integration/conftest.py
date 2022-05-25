@@ -1,7 +1,8 @@
-from typing import List
+from typing import Callable, List
 from unittest.mock import MagicMock
 
 import pytest
+from django.http import HttpRequest
 from telegram import User
 
 from app.internal.bank.db.models import BankAccount
@@ -24,6 +25,14 @@ def update(user: User) -> MagicMock:
     update.message = message
 
     return update
+
+
+@pytest.fixture(scope="function")
+def http_request() -> HttpRequest:
+    request = MagicMock()
+    request.headers = {}
+
+    return request
 
 
 @pytest.fixture(scope="function")

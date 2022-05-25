@@ -11,8 +11,7 @@ from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.users.db.models import TelegramUser
 
-repo = AuthRepository()
-service = JWTService(auth_repo=repo)
+service = JWTService(auth_repo=AuthRepository())
 CREATED_AT, TELEGRAM_ID, TOKEN_TYPE = service.CREATED_AT, service.TELEGRAM_ID, service.TOKEN_TYPE
 
 
@@ -91,7 +90,7 @@ def test_getting_authenticated_user(telegram_user: TelegramUser) -> None:
 
 @pytest.mark.django_db
 @pytest.mark.unit
-def test_getting_authenticated_user() -> None:
+def test_getting_authenticated_user__not_exists() -> None:
     payload = {TELEGRAM_ID: 1337}
     actual = service.get_authenticated_telegram_user(payload)
 
