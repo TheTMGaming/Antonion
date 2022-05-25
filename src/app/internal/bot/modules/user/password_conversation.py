@@ -6,7 +6,7 @@ from app.internal.bot.modules.filters import TEXT
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.bot.modules.user.PasswordStates import PasswordStates
 from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import TelegramUserService
+from app.internal.users.domain.services import TelegramUserBotService
 
 _INPUT_SECRET_IF_EXISTS = "Введите секретное слово, либо /cancel\n\nПодсказка: {tip}"
 _SECRET_KEY_ERROR = "Неправильное секретной слово. Поки"
@@ -23,9 +23,7 @@ _SECRET_KEY_SESSION = "secret_key_hash"
 _TIP_SESSION = "tip"
 _PASSWORD_SESSION = "password"
 
-_user_repo = TelegramUserRepository()
-_secret_key_repo = SecretKeyRepository()
-_user_service = TelegramUserService(user_repo=_user_repo, secret_key_repo=_secret_key_repo)
+_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 
 
 @if_update_message_exists
@@ -34,7 +32,7 @@ _user_service = TelegramUserService(user_repo=_user_repo, secret_key_repo=_secre
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = _user_repo.get_user(update.effective_user.id)
+    user = _user_service.get_user(update.effective_user.id)
 
     if user.password is not None:
         update.message.reply_text(_INPUT_SECRET_IF_EXISTS.format(tip=user.secret_key.tip))
@@ -48,7 +46,7 @@ def handle_start(update: Update, context: CallbackContext) -> int:
 def handle_confirmation_secret_key(update: Update, context: CallbackContext) -> int:
     update.message.delete()
 
-    if not _secret_key_repo.is_secret_key_correct(update.message.text, update.effective_user):
+    if not _user_service.is_secret_key_correct(update.effective_user, update.message.text):
         update.message.reply_text(_SECRET_KEY_ERROR)
 
         return mark_conversation_end(context)

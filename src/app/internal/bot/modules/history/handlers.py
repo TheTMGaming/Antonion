@@ -3,7 +3,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 
 from app.internal.bank.db.models import BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectService
+from app.internal.bank.domain.services import BankObjectBotService, TransactionBotService
 from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
@@ -14,7 +14,8 @@ from app.internal.bot.modules.document import send_document_list
 from app.internal.bot.modules.filters import INT
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.bot.modules.history.HistoryStates import HistoryStates
-from app.internal.users.db.repositories import TelegramUserRepository
+from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
+from app.internal.users.domain.services import TelegramUserBotService
 from app.internal.utils.file_managers import create_temp_file, get_transfer_history_filename, remove_temp_file
 from app.internal.utils.table_builders import build_transfer_history
 
@@ -24,10 +25,9 @@ _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни сч
 
 _DOCUMENTS_SESSION = "documents"
 
-
-_user_repo = TelegramUserRepository()
-_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
-_transaction_repo = TransactionRepository()
+_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+_transaction_service = TransactionBotService(transaction_repo=TransactionRepository())
 
 
 @if_update_message_exists
@@ -37,7 +37,7 @@ _transaction_repo = TransactionRepository()
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = _user_repo.get_user(update.effective_user.id)
+    user = _user_service.get_user(update.effective_user.id)
 
     documents = _bank_object_service.get_documents_order(user)
 
@@ -61,7 +61,7 @@ def handle_getting_document(update: Update, context: CallbackContext) -> int:
         return HistoryStates.DOCUMENT
 
     account = _bank_object_service.get_bank_account_from_document(document)
-    transactions = _transaction_repo.get_transactions(account)
+    transactions = _transaction_service.get_transactions(account)
 
     history = build_transfer_history(account, transactions)
     file = create_temp_file(history)

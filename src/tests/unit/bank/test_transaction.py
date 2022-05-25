@@ -6,8 +6,9 @@ from django.core.exceptions import ValidationError
 
 from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
 from app.internal.bank.db.repositories import TransactionRepository
+from app.internal.bank.domain.services import TransactionBotService
 
-transaction_repo = TransactionRepository()
+transaction_service = TransactionBotService(transaction_repo=TransactionRepository())
 
 
 @pytest.mark.django_db
@@ -18,9 +19,9 @@ def test_transaction_declaration(bank_accounts: List[BankAccount]) -> None:
     for accrual in map(Decimal, range(-1, 2)):
         if accrual < 0:
             with pytest.raises(ValidationError):
-                transaction_repo.declare(source, destination, TransactionTypes.TRANSFER, accrual)
+                transaction_service.declare(source, destination, TransactionTypes.TRANSFER, accrual)
         else:
-            transaction = transaction_repo.declare(source, destination, TransactionTypes.TRANSFER, accrual)
+            transaction = transaction_service.declare(source, destination, TransactionTypes.TRANSFER, accrual)
             assert transaction.source == source
             assert transaction.destination == destination
             assert transaction.accrual == accrual
@@ -37,7 +38,7 @@ def test_getting_usernames_of_relations(bank_account: BankAccount, friend_accoun
         Transaction(source=another, destination=bank_account) for another in friend_accounts[half:]
     )
 
-    actual = sorted(transaction_repo.get_related_usernames(bank_account.owner.id))
+    actual = sorted(transaction_service.get_related_usernames(bank_account.owner.id))
     expected = sorted(account.owner.username for account in friend_accounts)
 
     assert actual == expected

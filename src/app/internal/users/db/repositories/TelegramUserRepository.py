@@ -1,7 +1,6 @@
 from typing import Optional, Union
 
 from django.db.models import QuerySet
-from telegram import User
 
 from app.internal.users.db.models import TelegramUser
 from app.internal.users.db.repositories.TelegramUserFields import TelegramUserFields
@@ -9,14 +8,14 @@ from app.internal.users.domain.interfaces import IFriendRepository, ITelegramUse
 
 
 class TelegramUserRepository(ITelegramUserRepository, IFriendRepository):
-    def try_add_or_update_user(self, user: User) -> bool:
+    def try_add_or_update_user(self, user_id: Union[int, str], username: str, first_name: str, last_name: str) -> bool:
         attributes = {
-            TelegramUserFields.USERNAME: user.username,
-            TelegramUserFields.FIRST_NAME: user.first_name,
-            TelegramUserFields.LAST_NAME: user.last_name,
+            TelegramUserFields.USERNAME: username,
+            TelegramUserFields.FIRST_NAME: first_name,
+            TelegramUserFields.LAST_NAME: last_name,
         }
 
-        obj, was_added = TelegramUser.objects.update_or_create(id=user.id, defaults=attributes)
+        obj, was_added = TelegramUser.objects.update_or_create(id=user_id, defaults=attributes)
 
         return was_added
 
@@ -32,23 +31,20 @@ class TelegramUserRepository(ITelegramUserRepository, IFriendRepository):
     def get_user_by_credentials(self, username: str, password: str) -> Optional[TelegramUser]:
         return TelegramUser.objects.get_by_credentials(username, password).first()
 
-    def is_user_exist(self, user_id: Union[int, str]) -> bool:
-        return bool(self.get_user(user_id))
-
-    def get_friend(self, user: TelegramUser, identifier: Union[int, str]) -> Optional[TelegramUser]:
+    def get_friend(self, user_id: Union[int, str], identifier: Union[int, str]) -> Optional[TelegramUser]:
         param = (
             {TelegramUserFields.ID: int(identifier)}
             if str(identifier).isdigit()
             else {TelegramUserFields.USERNAME: str(identifier)}
         )
 
-        return user.friends.filter(**param).first()
+        return TelegramUser.objects.filter(friends__id=user_id, **param).first()
 
-    def get_friends(self, user: TelegramUser) -> QuerySet[TelegramUser]:
-        return user.friends.all()
+    def get_friends(self, user_id: Union[int, str]) -> QuerySet[TelegramUser]:
+        return TelegramUser.objects.filter(friends__id=user_id).all()
 
-    def is_friend_exists(self, user: TelegramUser, friend: TelegramUser) -> bool:
-        return user.friends.filter(pk=friend.pk).exists()
+    def is_friend_exists(self, user_id: Union[int, str], friend_id: Union[int, str]) -> bool:
+        return TelegramUser.objects.filter(id=user_id, friends__id=friend_id).exists()
 
     def update_phone(self, user_id: Union[int, str], value: str) -> None:
         TelegramUser.objects.filter(id=user_id).update(phone=value)

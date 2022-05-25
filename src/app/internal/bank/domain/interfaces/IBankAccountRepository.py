@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
+from typing import Union
 
 from django.db.models import QuerySet
 
@@ -9,13 +10,17 @@ from app.internal.users.db.models import TelegramUser
 
 class IBankAccountRepository(ABC):
     @abstractmethod
-    def get_bank_accounts(self, user: TelegramUser) -> QuerySet[BankAccount]:
+    def get_bank_account(self, number: int) -> BankAccount:
         pass
 
     @abstractmethod
-    def accrue(self, account: BankAccount, accrual: Decimal) -> None:
+    def get_bank_accounts(self, user_id: Union[int, str]) -> QuerySet[BankAccount]:
         pass
 
     @abstractmethod
-    def subtract(self, account: BankAccount, accrual: Decimal) -> None:
+    def accrue(self, number: int, accrual: Decimal) -> None:
+        pass
+
+    @abstractmethod
+    def subtract(self, number: int, accrual: Decimal) -> None:
         pass

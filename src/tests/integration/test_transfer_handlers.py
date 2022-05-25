@@ -6,7 +6,7 @@ import pytest
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import TransferService
+from app.internal.bank.domain.services import TransferBotService
 from app.internal.bot.modules.transfer.handlers import (
     _ACCRUAL_GREATER_BALANCE_ERROR,
     _ACCRUAL_PARSE_ERROR,
@@ -37,7 +37,7 @@ from app.internal.users.db.models import TelegramUser
 from tests.conftest import BALANCE
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
-transfer_service = TransferService(
+transfer_service = TransferBotService(
     account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
 )
 

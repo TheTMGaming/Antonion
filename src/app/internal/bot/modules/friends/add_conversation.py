@@ -11,8 +11,8 @@ from app.internal.bot.modules.filters import TEXT
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.users.db.models import TelegramUser
-from app.internal.users.db.repositories import FriendRequestRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendService
+from app.internal.users.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
+from app.internal.users.domain.services import FriendBotService, TelegramUserBotService
 
 _WELCOME = "Введите никнейм или идентификатор пользователя"
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль! Повторите попытку, либо /cancel"
@@ -22,8 +22,8 @@ _REQUEST_ALREADY_EXIST_ERROR = "Вы уже отправили заявку да
 _REQUEST_SUCCESS = "Заявка отправлена! Да прибудет денюж... в смысле дружба!"
 _NOTIFICATION_MESSAGE = "С вами хочет познакомиться {username} ({name}). Используйте команду /accept"
 
-_user_repo = TelegramUserRepository()
-_friend_service = FriendService(friend_repo=_user_repo, request_repo=FriendRequestRepository())
+_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
 
 
 @if_update_message_exists
@@ -42,8 +42,8 @@ def handle_add_friend_start(update: Update, context: CallbackContext) -> int:
 def handle_add_friend(update: Update, context: CallbackContext) -> int:
     friend_identifier = "".join(update.message.text)
 
-    user = _user_repo.get_user(update.effective_user.id)
-    friend = _user_repo.get_user(friend_identifier)
+    user = _user_service.get_user(update.effective_user.id)
+    friend = _user_service.get_user(friend_identifier)
 
     if user == friend:
         update.message.reply_text(_STUPID_CHOICE_SELF_ERROR)
@@ -53,7 +53,7 @@ def handle_add_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_USER_NOT_FOUND_ERROR)
         return FriendStates.INPUT
 
-    if _user_repo.is_friend_exists(user, friend):
+    if _friend_service.is_friend_exists(user, friend):
         update.message.reply_text(_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 

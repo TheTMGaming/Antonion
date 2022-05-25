@@ -1,2 +1,3 @@
-from .FriendService import FriendService
-from .TelegramUserService import TelegramUserService
+from .FriendBotService import FriendBotService
+from .FriendRequestBotService import FriendRequestBotService
+from .TelegramUserBotService import TelegramUserBotService

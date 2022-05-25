@@ -1,11 +1,13 @@
 from itertools import chain
 
+from django.db.models import QuerySet
+
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository
 from app.internal.users.db.models import TelegramUser
 
 
-class BankObjectService:
+class BankObjectBotService:
     def __init__(self, account_repo: IBankAccountRepository, card_repo: IBankCardRepository):
         self._account_repo = account_repo
         self._card_repo = card_repo
@@ -23,9 +25,15 @@ class BankObjectService:
         return dict(
             (number, document)
             for number, document in enumerate(
-                chain(self._account_repo.get_bank_accounts(user), self._card_repo.get_cards(user)), start=1
+                chain(self._account_repo.get_bank_accounts(user.id), self._card_repo.get_cards(user.id)), start=1
             )
         )
 
     def is_balance_zero(self, document: BankObject) -> bool:
         return document.get_balance() == 0
+
+    def get_bank_accounts(self, user: TelegramUser) -> QuerySet[BankAccount]:
+        return self._account_repo.get_bank_accounts(user.id)
+
+    def get_cards(self, user: TelegramUser) -> QuerySet[BankCard]:
+        return self._card_repo.get_cards(user.id)

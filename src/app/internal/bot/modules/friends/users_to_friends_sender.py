@@ -4,16 +4,17 @@ from telegram.ext import CallbackContext
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.general import mark_conversation_end
 from app.internal.users.db.repositories import FriendRequestRepository
+from app.internal.users.domain.services import FriendRequestBotService
 
 _USERNAME_VARIANT = "{num}) {username}"
 
-_request_repo = FriendRequestRepository()
+_request_service = FriendRequestBotService(request_repo=FriendRequestRepository())
 
 
 def send_username_list(
     update: Update, context: CallbackContext, list_empty_message: str, usernames_session: str, welcome: str
 ) -> int:
-    usernames = _request_repo.get_usernames_to_friends(update.effective_user.id)
+    usernames = _request_service.get_usernames_to_friends(update.effective_user)
 
     if not usernames:
         update.message.reply_text(list_empty_message)

@@ -4,18 +4,17 @@ import pytest
 
 from app.internal.users.db.models import FriendRequest, TelegramUser
 from app.internal.users.db.repositories import FriendRequestRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendService
+from app.internal.users.domain.services import FriendBotService, FriendRequestBotService
 
-user_repo = TelegramUserRepository()
-request_repo = FriendRequestRepository()
-friend_service = FriendService(friend_repo=user_repo, request_repo=request_repo)
+friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+request_service = FriendRequestBotService(request_repo=FriendRequestRepository())
 
 
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_friend(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
-    actual_by_id = [user_repo.get_friend(telegram_user, friend.id) for friend in friends]
-    actual_by_username = [user_repo.get_friend(telegram_user, friend.username) for friend in friends]
+    actual_by_id = [friend_service.get_friend(telegram_user, friend.id) for friend in friends]
+    actual_by_username = [friend_service.get_friend(telegram_user, friend.username) for friend in friends]
 
     assert friends == actual_by_id == actual_by_username
 
@@ -23,7 +22,7 @@ def test_getting_friend(telegram_user: TelegramUser, friends: List[TelegramUser]
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_checking_friend_exist(telegram_user: TelegramUser, friends: List[TelegramUser]) -> None:
-    assert all(user_repo.is_friend_exists(telegram_user, friend) for friend in friends)
+    assert all(friend_service.is_friend_exists(telegram_user, friend) for friend in friends)
 
 
 @pytest.mark.django_db
@@ -53,7 +52,7 @@ def test_creating_friend_request__already_exist(
 def test_getting_friendship_username_list(
     telegram_user: TelegramUser, another_telegram_users: List[TelegramUser], friend_requests: List[FriendRequest]
 ) -> None:
-    actual = list(request_repo.get_usernames_to_friends(telegram_user.id))
+    actual = list(request_service.get_usernames_to_friends(telegram_user))
     expected = [user.username for user in another_telegram_users]
 
     assert actual == expected

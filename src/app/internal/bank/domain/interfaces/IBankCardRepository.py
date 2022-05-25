@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional, Union
 
 from django.db.models import QuerySet
 
@@ -8,5 +9,9 @@ from app.internal.users.db.models import TelegramUser
 
 class IBankCardRepository(ABC):
     @abstractmethod
-    def get_cards(self, user: TelegramUser) -> QuerySet[BankCard]:
+    def get_card(self, number: str) -> Optional[BankCard]:
+        pass
+
+    @abstractmethod
+    def get_cards(self, user_id: Union[int, str]) -> QuerySet[BankCard]:
         pass

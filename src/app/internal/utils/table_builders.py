@@ -3,8 +3,8 @@ from typing import Iterable
 from django.conf import settings
 
 from app.internal.bank.db.models import BankAccount, Transaction
-from app.internal.utils.Table import Table
 from app.internal.utils.OperationNames import OperationNames
+from app.internal.utils.Table import Table
 
 
 def build_transfer_history(account: BankAccount, transactions: Iterable[Transaction]) -> str:

@@ -9,11 +9,11 @@ from app.internal.bot.decorators import (
 )
 from app.internal.bot.modules.filters import INT
 from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.friends.username_list_sender import send_username_list
+from app.internal.bot.modules.friends.users_to_friends_sender import send_username_list
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.users.db.models import TelegramUser
-from app.internal.users.db.repositories import FriendRequestRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendService
+from app.internal.users.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
+from app.internal.users.domain.services import FriendBotService, TelegramUserBotService
 
 _WELCOME = "Выберите из списка того, с кем хотите иметь дело:\n\n"
 _USERNAME_VARIANT = "{num}) {username}"
@@ -24,8 +24,8 @@ _ACCEPT_SUCCESS = "Ураа. Теперь вы друзья с {username}"
 
 _USERNAMES_SESSION = "username_list"
 
-_user_repo = TelegramUserRepository()
-_friend_service = FriendService(friend_repo=_user_repo, request_repo=FriendRequestRepository())
+_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
 
 
 @if_update_message_exists
@@ -46,8 +46,8 @@ def handle_accept(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_STUPID_CHOICE)
         return FriendStates.INPUT
 
-    user = _user_repo.get_user(update.effective_user.id)
-    friend = _user_repo.get_user(username)
+    user = _user_service.get_user(update.effective_user.id)
+    friend = _user_service.get_user(username)
 
     if not _friend_service.try_accept_friend(friend, user):
         update.message.reply_text(_FRIEND_CANCEL)

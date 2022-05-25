@@ -1,14 +1,12 @@
 from decimal import Decimal
-from itertools import chain
 
 from django.db import IntegrityError, transaction
 
 from app.internal.bank.db.models import BankAccount, BankObject, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
-from app.internal.users.db.models import TelegramUser
 
 
-class TransferService:
+class TransferBotService:
     def __init__(
         self,
         account_repo: IBankAccountRepository,
@@ -50,10 +48,10 @@ class TransferService:
 
         try:
             with transaction.atomic():
-                self._account_repo.subtract(source, accrual)
-                self._account_repo.accrue(destination, accrual)
+                self._account_repo.subtract(source.number, accrual)
+                self._account_repo.accrue(destination.number, accrual)
 
-            self._transaction_repo.declare(source, destination, TransactionTypes.TRANSFER, accrual)
+            self._transaction_repo.declare(source.number, destination.number, TransactionTypes.TRANSFER, accrual)
 
             return True
 

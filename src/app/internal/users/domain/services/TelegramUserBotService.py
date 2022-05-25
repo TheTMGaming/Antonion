@@ -1,17 +1,27 @@
-from typing import Union
+from typing import Optional, Union
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, is_valid_number_for_region, parse
 from telegram import User
 
+from app.internal.users.db.models import TelegramUser
 from app.internal.users.domain.interfaces import ISecretKeyRepository, ITelegramUserRepository
 
 
-class TelegramUserService:
+class TelegramUserBotService:
     def __init__(self, user_repo: ITelegramUserRepository, secret_key_repo: ISecretKeyRepository):
         self._user_repo = user_repo
         self._secret_key_repo = secret_key_repo
+
+    def try_add_or_update_user(self, user: User) -> bool:
+        return self._user_repo.try_add_or_update_user(user.id, user.username, user.first_name, user.last_name)
+
+    def get_user(self, identifier: Union[int, str]) -> Optional[TelegramUser]:
+        return self._user_repo.get_user(identifier)
+
+    def is_secret_key_correct(self, user: User, actual: str) -> bool:
+        return self._secret_key_repo.is_secret_key_correct(user.id, actual)
 
     def try_set_phone(self, user_id: Union[int, str], value: str) -> bool:
         try:

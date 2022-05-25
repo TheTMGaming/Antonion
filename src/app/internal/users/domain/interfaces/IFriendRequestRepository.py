@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Union
+
+from django.db.models import QuerySet
 
 from app.internal.users.db.models import FriendRequest, TelegramUser
 
@@ -19,4 +21,8 @@ class IFriendRequestRepository(ABC):
 
     @abstractmethod
     def remove(self, source: TelegramUser, destination: TelegramUser) -> bool:
+        pass
+
+    @abstractmethod
+    def get_usernames_to_friends(self, user_id: Union[int, str]) -> QuerySet[str]:
         pass

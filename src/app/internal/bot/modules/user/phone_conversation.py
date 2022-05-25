@@ -6,13 +6,13 @@ from app.internal.bot.modules.filters import TEXT
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.bot.modules.user.FriendStates import FriendStates
 from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import TelegramUserService
+from app.internal.users.domain.services import TelegramUserBotService
 
 _WELCOME = "Введите, пожалуйста, номер телефона"
 _UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
 _INVALID_PHONE = "Я не могу сохранить эти кракозябры. Повторите попытку, либо /cancel"
 
-_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 
 
 @if_update_message_exists

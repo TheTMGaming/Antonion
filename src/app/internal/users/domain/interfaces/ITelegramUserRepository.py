@@ -6,7 +6,11 @@ from app.internal.users.db.models import TelegramUser
 
 class ITelegramUserRepository(ABC):
     @abstractmethod
-    def get_user(self, user_id: Union[int, str]) -> Optional[TelegramUser]:
+    def try_add_or_update_user(self, user_id: Union[int, str], username: str, first_name: str, last_name: str) -> bool:
+        pass
+
+    @abstractmethod
+    def get_user(self, identifier: Union[int, str]) -> Optional[TelegramUser]:
         pass
 
     @abstractmethod

@@ -9,13 +9,11 @@ from telegram import User
 
 from app.internal.users.db.models import SecretKey, TelegramUser
 from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import TelegramUserService
+from app.internal.users.domain.services import TelegramUserBotService
 from tests.conftest import KEY, TIP, WRONG_KEY
 
 chars = string.printable
-secret_key_repo = SecretKeyRepository()
-user_repo = TelegramUserRepository()
-user_service = TelegramUserService(user_repo=user_repo, secret_key_repo=secret_key_repo)
+user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 
 _CORRECTED_PHONE_NUMBERS = list(
     chain(
@@ -50,7 +48,7 @@ _WRONG_PHONE_NUMBERS = [
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_adding_user_to_db(user: User) -> None:
-    was_added = user_repo.try_add_or_update_user(user)
+    was_added = user_service.try_add_or_update_user(user)
     assert was_added
 
     _assert_telegram_user(user)
@@ -67,7 +65,7 @@ def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
         is_bot=False,
     )
 
-    was_added = user_repo.try_add_or_update_user(user)
+    was_added = user_service.try_add_or_update_user(user)
     assert not was_added
 
     _assert_telegram_user(user)
@@ -77,15 +75,9 @@ def test_updating_user_in_db(telegram_user: TelegramUser) -> None:
 @pytest.mark.unit
 def test_getting_user_by_identifier(users: List[User], telegram_users: List[TelegramUser]) -> None:
     assert all(
-        telegram_users[i] == user_repo.get_user(users[i].id) == user_repo.get_user(users[i].username)
+        telegram_users[i] == user_service.get_user(users[i].id) == user_service.get_user(users[i].username)
         for i in range(len(users))
     )
-
-
-@pytest.mark.django_db
-@pytest.mark.unit
-def test_check_existing_of_user_by_id(users: List[User], telegram_users: List[TelegramUser]) -> None:
-    assert all(user_repo.is_user_exist(user.id) for user in users)
 
 
 @pytest.mark.django_db
@@ -138,5 +130,5 @@ def test_creating_password(user: User, telegram_user: TelegramUser) -> None:
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_confirmation_secret_key(user: User, telegram_user_with_password: TelegramUser) -> None:
-    assert secret_key_repo.is_secret_key_correct(KEY, user) is True
-    assert secret_key_repo.is_secret_key_correct(WRONG_KEY, user) is False
+    assert user_service.is_secret_key_correct(user, KEY) is True
+    assert user_service.is_secret_key_correct(user, WRONG_KEY) is False

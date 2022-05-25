@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectService, TransferService
+from app.internal.bank.domain.services import BankObjectBotService, TransferBotService
 from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
@@ -19,7 +19,7 @@ from app.internal.bot.modules.general import cancel, mark_conversation_end, mark
 from app.internal.bot.modules.transfer.TransferStates import TransferStates
 from app.internal.users.db.models import TelegramUser
 from app.internal.users.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendService, TelegramUserService
+from app.internal.users.domain.services import FriendBotService, TelegramUserBotService
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
@@ -64,14 +64,11 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
-_user_repo = TelegramUserRepository()
-_account_repo = BankAccountRepository()
-_card_repo = BankCardRepository()
-_friend_service = FriendService(friend_repo=_user_repo, request_repo=FriendRequestRepository())
-_user_service = TelegramUserService(user_repo=_user_repo, secret_key_repo=SecretKeyRepository())
-_bank_object_service = BankObjectService(account_repo=_account_repo, card_repo=_card_repo)
-_transfer_service = TransferService(
-    account_repo=_account_repo, card_repo=_card_repo, transaction_repo=TransactionRepository()
+_friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+_transfer_service = TransferBotService(
+    account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
 )
 
 
@@ -82,7 +79,7 @@ _transfer_service = TransferService(
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = _user_repo.get_user(update.effective_user.id)
+    user = _user_service.get_user(update.effective_user.id)
 
     friends = _friend_service.get_friends_as_dict(user)
     if len(friends) == 0:
