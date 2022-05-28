@@ -2,12 +2,12 @@ from typing import List
 
 import pytest
 
-from app.internal.users.db.models import FriendRequest, TelegramUser
-from app.internal.users.db.repositories import FriendRequestRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendBotService, FriendRequestBotService
+from app.internal.user.db.models import FriendRequest, TelegramUser
+from app.internal.user.db.repositories import FriendRequestRepository, TelegramUserRepository
+from app.internal.user.domain.services import FriendRequestService, FriendService
 
-friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
-request_service = FriendRequestBotService(request_repo=FriendRequestRepository())
+friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+request_service = FriendRequestService(request_repo=FriendRequestRepository())
 
 
 @pytest.mark.django_db

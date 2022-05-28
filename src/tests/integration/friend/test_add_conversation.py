@@ -14,7 +14,7 @@ from app.internal.bot.modules.friends.add_conversation import (
     handle_add_friend_start,
 )
 from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.users.db.models import FriendRequest, TelegramUser
+from app.internal.user.db.models import FriendRequest, TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

@@ -13,7 +13,7 @@ from app.internal.bot.modules.friends.rm_conversation import (
     handle_rm_friend,
     handle_rm_friend_start,
 )
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

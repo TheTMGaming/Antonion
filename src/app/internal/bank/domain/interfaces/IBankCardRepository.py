@@ -4,7 +4,7 @@ from typing import Optional, Union
 from django.db.models import QuerySet
 
 from app.internal.bank.db.models import BankCard
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 class IBankCardRepository(ABC):

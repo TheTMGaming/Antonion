@@ -11,7 +11,7 @@ from app.internal.authentication.db.repositories import AuthRepository
 from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.authentication.presentation import JWTAuthentication
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 service = JWTService(auth_repo=AuthRepository())
 

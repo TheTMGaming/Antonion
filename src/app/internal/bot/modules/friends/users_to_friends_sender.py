@@ -3,12 +3,12 @@ from telegram.ext import CallbackContext
 
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.general import mark_conversation_end
-from app.internal.users.db.repositories import FriendRequestRepository
-from app.internal.users.domain.services import FriendRequestBotService
+from app.internal.user.db.repositories import FriendRequestRepository
+from app.internal.user.domain.services import FriendRequestService
 
 _USERNAME_VARIANT = "{num}) {username}"
 
-_request_service = FriendRequestBotService(request_repo=FriendRequestRepository())
+_request_service = FriendRequestService(request_repo=FriendRequestRepository())
 
 
 def send_username_list(

@@ -1,6 +1,6 @@
 from django.db import models
 
-from app.internal.users.db.models.TelegramUser import TelegramUser
+from app.internal.user.db.models.TelegramUser import TelegramUser
 
 
 class RefreshToken(models.Model):

@@ -14,8 +14,8 @@ from app.internal.bot.modules.balance.BalanceStates import BalanceStates
 from app.internal.bot.modules.document import send_document_list
 from app.internal.bot.modules.filters import INT
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import TelegramUserBotService
+from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
+from app.internal.user.domain.services import TelegramUserService
 
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 _WELCOME = "Выберите банковский счёт или карту, либо /cancel\n"
@@ -26,7 +26,7 @@ _BALANCE_BY_CARD = "На карточке {number} лежит {balance}"
 
 _DOCUMENTS_SESSION = "documents"
 
-_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 _bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 
 

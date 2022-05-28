@@ -4,7 +4,7 @@ import pytest
 from django.db.models import QuerySet
 
 from app.internal.authentication.db.models import RefreshToken
-from app.internal.users.db.models import FriendRequest, TelegramUser
+from app.internal.user.db.models import FriendRequest, TelegramUser
 
 
 @pytest.fixture(scope="function")

@@ -9,9 +9,9 @@ from app.internal.bot.decorators import (
     if_user_exist,
     if_user_is_not_in_conversation,
 )
-from app.internal.users.db.models import TelegramUser
-from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import TelegramUserBotService
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
+from app.internal.user.domain.services import TelegramUserService
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
 _UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"
@@ -30,7 +30,7 @@ _RELATION_POINT = "{number}) {username}"
 _RELATION_LIST_EMPTY = "Похоже, что вы в танке... и ни с кеми не взаимодействовали"
 
 
-_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 _transaction_service = TransactionBotService(transaction_repo=TransactionRepository())
 _bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 

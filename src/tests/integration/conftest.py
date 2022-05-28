@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from telegram import User
 
 from app.internal.bank.db.models import BankAccount
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 @pytest.fixture(scope="function")

@@ -20,7 +20,7 @@ from app.internal.bot.modules.user.phone_conversation import (
     handle_phone,
     handle_phone_start,
 )
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 
 

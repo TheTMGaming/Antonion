@@ -7,10 +7,11 @@ from ninja.security import HttpBearer
 from app.internal.authentication.db.repositories import AuthRepository
 from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
+from app.internal.user.db.repositories import TelegramUserRepository
 
 
 class JWTAuthentication(HttpBearer):
-    _service = JWTService(auth_repo=AuthRepository())
+    _service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepository())
 
     def authenticate(self, request: HttpRequest, token: str) -> Optional[str]:
         request.telegram_user = None

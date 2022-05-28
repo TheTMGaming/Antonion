@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 
 from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import ITransactionRepository
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 class TransactionBotService:

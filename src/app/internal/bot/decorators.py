@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.bot.modules.general import COMMAND, IN_CONVERSATION
-from app.internal.users.db.repositories import TelegramUserRepository
+from app.internal.user.db.repositories import TelegramUserRepository
 
 _USER_DOESNT_EXIST = "Моя вас не знать. Моя предложить знакомиться с вами! (команда /start)"
 _UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей мобилке. Пожалуйста, продиктуйте! (команда /phone)"

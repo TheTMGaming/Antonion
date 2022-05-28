@@ -11,9 +11,9 @@ from app.internal.bot.modules.filters import INT
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.friends.users_to_friends_sender import send_username_list
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.users.db.models import TelegramUser
-from app.internal.users.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendBotService, TelegramUserBotService
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
+from app.internal.user.domain.services import FriendService, TelegramUserService
 
 _WELCOME = "Выберите из списка того, с кем хотите иметь дело:\n\n"
 _USERNAME_VARIANT = "{num}) {username}"
@@ -24,8 +24,8 @@ _ACCEPT_SUCCESS = "Ураа. Теперь вы друзья с {username}"
 
 _USERNAMES_SESSION = "username_list"
 
-_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
 
 
 @if_update_message_exists

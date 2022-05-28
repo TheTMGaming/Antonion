@@ -17,9 +17,9 @@ from app.internal.bot.modules.document import send_document_list
 from app.internal.bot.modules.filters import FLOATING, INT
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.bot.modules.transfer.TransferStates import TransferStates
-from app.internal.users.db.models import TelegramUser
-from app.internal.users.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import FriendBotService, TelegramUserBotService
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
+from app.internal.user.domain.services import FriendService, TelegramUserService
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
@@ -64,8 +64,8 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
-_friend_service = FriendBotService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
-_user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 _bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 _transfer_service = TransferBotService(
     account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()

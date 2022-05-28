@@ -28,7 +28,7 @@ from app.internal.bot.modules.user.password_conversation import (
     handle_start,
 )
 from app.internal.bot.modules.user.PasswordStates import PasswordStates
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 from tests.conftest import KEY, PASSWORD, TIP, WRONG_KEY, WRONG_PASSWORD
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 

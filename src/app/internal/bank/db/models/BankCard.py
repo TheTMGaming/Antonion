@@ -4,7 +4,7 @@ from django.db import models
 
 from app.internal.bank.db.models.BankAccount import BankAccount
 from app.internal.bank.db.models.BankObject import BankObject
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 class BankCard(models.Model, BankObject):

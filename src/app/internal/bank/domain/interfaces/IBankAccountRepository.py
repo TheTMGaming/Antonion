@@ -5,7 +5,7 @@ from typing import Union
 from django.db.models import QuerySet
 
 from app.internal.bank.db.models import BankAccount
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 class IBankAccountRepository(ABC):

@@ -33,7 +33,7 @@ from app.internal.bot.modules.transfer.handlers import (
     handle_transfer,
 )
 from app.internal.bot.modules.transfer.TransferStates import TransferStates
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 from tests.conftest import BALANCE
 from tests.integration.general import assert_conversation_end, assert_conversation_start
 

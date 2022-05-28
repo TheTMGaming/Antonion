@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from app.internal.bank.db.models.BankObject import BankObject
-from app.internal.users.db.models.TelegramUser import TelegramUser
+from app.internal.user.db.models.TelegramUser import TelegramUser
 
 
 class BankAccount(models.Model, BankObject):

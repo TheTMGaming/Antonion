@@ -2,7 +2,7 @@ from typing import Optional
 
 from app.internal.authentication.db.models import RefreshToken
 from app.internal.authentication.domain.interfaces import IAuthRepository
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 class AuthRepository(IAuthRepository):

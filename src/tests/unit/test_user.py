@@ -7,13 +7,13 @@ from typing import List
 import pytest
 from telegram import User
 
-from app.internal.users.db.models import SecretKey, TelegramUser
-from app.internal.users.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.users.domain.services import TelegramUserBotService
+from app.internal.user.db.models import SecretKey, TelegramUser
+from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
+from app.internal.user.domain.services import TelegramUserService
 from tests.conftest import KEY, TIP, WRONG_KEY
 
 chars = string.printable
-user_service = TelegramUserBotService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 
 _CORRECTED_PHONE_NUMBERS = list(
     chain(

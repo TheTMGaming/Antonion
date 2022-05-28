@@ -5,8 +5,8 @@ import pytest
 from telegram import User
 
 from app.internal.bank.db.models import BankAccount, BankCard
-from app.internal.users.db.models import SecretKey, TelegramUser
-from app.internal.users.db.models.TelegramUserManager import TelegramUserManager
+from app.internal.user.db.models import SecretKey, TelegramUser
+from app.internal.user.db.models.TelegramUserManager import TelegramUserManager
 
 BALANCE = Decimal(10**4)
 PASSWORD = "1337<PrO>228"

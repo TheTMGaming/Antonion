@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 
 class BankObjectBotService:

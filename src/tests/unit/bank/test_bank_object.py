@@ -5,7 +5,7 @@ import pytest
 from app.internal.bank.db.models import BankAccount, BankCard
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository
 from app.internal.bank.domain.services import BankObjectBotService
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
 
 bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 

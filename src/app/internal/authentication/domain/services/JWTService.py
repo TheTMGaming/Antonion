@@ -9,7 +9,8 @@ from jwt import PyJWTError, decode, encode
 from app.internal.authentication.db.models import RefreshToken
 from app.internal.authentication.domain.interfaces import IAuthRepository
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
-from app.internal.users.db.models import TelegramUser
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.db.repositories import TelegramUserRepository
 
 
 class JWTService:
@@ -20,8 +21,12 @@ class JWTService:
 
     ALGORITHM = "HS256"
 
-    def __init__(self, auth_repo: IAuthRepository):
+    def __init__(self, auth_repo: IAuthRepository, user_repo: TelegramUserRepository):
         self._auth_repo = auth_repo
+        self._user_repo = user_repo
+
+    def get_user_by_credentials(self, username: str, password: str) -> Optional[TelegramUser]:
+        return self._user_repo.get_user_by_credentials(username, password)
 
     def get_authenticated_telegram_user(self, payload: Dict[str, Any]) -> Optional[TelegramUser]:
         return self._auth_repo.get_authenticated_telegram_user(payload[self.TELEGRAM_ID])
