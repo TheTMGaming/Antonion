@@ -20,7 +20,7 @@ class TelegramUserService:
     def get_user(self, identifier: Union[int, str]) -> Optional[TelegramUser]:
         return self._user_repo.get_user(identifier)
 
-    def is_secret_key_correct(self, user: User, actual: str) -> bool:
+    def is_secret_key_correct(self, user: Union[User, TelegramUser], actual: str) -> bool:
         return self._secret_key_repo.is_secret_key_correct(user.id, actual)
 
     def try_set_phone(self, user_id: Union[int, str], value: str) -> bool:
@@ -37,7 +37,7 @@ class TelegramUserService:
 
         return True
 
-    def try_update_password(self, user: User, password: str) -> bool:
+    def try_update_password(self, user: Union[User, TelegramUser], password: str) -> bool:
         try:
             self._user_repo.update_password(user.id, password)
 

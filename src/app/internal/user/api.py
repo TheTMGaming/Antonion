@@ -10,4 +10,4 @@ def add_user_api(api: NinjaAPI) -> None:
     user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
     user_handlers = TelegramUserHandlers(user_service=user_service)
 
-    api.add_router(prefix="/user", router=get_user_router(user_handlers))
+    api.add_router(prefix="", router=get_user_router(user_handlers))
