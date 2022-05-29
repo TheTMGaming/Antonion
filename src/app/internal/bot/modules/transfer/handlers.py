@@ -64,7 +64,7 @@ _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
 
 
-_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository())
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
 _bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 _transfer_service = TransferBotService(

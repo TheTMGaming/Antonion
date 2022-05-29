@@ -12,7 +12,7 @@ from app.internal.bot.modules.history.handlers import (
     handle_start,
 )
 from app.internal.bot.modules.history.HistoryStates import HistoryStates
-from tests.integration.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

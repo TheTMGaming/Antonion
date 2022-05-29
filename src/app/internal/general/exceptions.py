@@ -12,8 +12,11 @@ class APIException(Exception):
 
 
 class BadRequestException(APIException):
+    def __init__(self, message: str = "Check entered values or headers"):
+        self.message = message
+
     def handle(self, request: HttpRequest, exc, api: NinjaAPI) -> HttpResponse:
-        return api.create_response(request, data={"error": "Check entered values or headers"}, status=400)
+        return api.create_response(request, data={"error": exc.message}, status=400)
 
 
 class IntegrityException(APIException):
@@ -51,6 +54,14 @@ class RevokedRefreshTokenException(APIException):
         return api.create_response(request, data={"error": "Refresh token was be revoked"}, status=400)
 
 
+class NotFoundException(APIException):
+    def __init__(self, what: str = "resource"):
+        self.what = what
+
+    def handle(self, request: HttpRequest, exc, api: NinjaAPI) -> HttpResponse:
+        return api.create_response(request, data={"error": f"Not found: {exc.what}"}, status=404)
+
+
 def add_exceptions(api: NinjaAPI) -> None:
     exceptions = {
         UnauthorizedException,
@@ -59,6 +70,7 @@ def add_exceptions(api: NinjaAPI) -> None:
         AccessTokenTTLZeroException,
         UnknownRefreshTokenException,
         BadRequestException,
+        NotFoundException,
     }
 
     for exception in exceptions:

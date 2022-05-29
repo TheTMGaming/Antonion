@@ -13,7 +13,7 @@ from app.internal.bot.modules.friends.users_to_friends_sender import send_userna
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService
+from app.internal.user.domain.services import FriendService, TelegramUserService, FriendRequestService
 
 _WELCOME = "Выберите из списка того, с кем хотите иметь дело:\n\n"
 _USERNAME_VARIANT = "{num}) {username}"
@@ -25,7 +25,8 @@ _ACCEPT_SUCCESS = "Ураа. Теперь вы друзья с {username}"
 _USERNAMES_SESSION = "username_list"
 
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository())
+_request_service = FriendRequestService(request_repo=FriendRequestRepository())
 
 
 @if_update_message_exists
@@ -49,7 +50,7 @@ def handle_accept(update: Update, context: CallbackContext) -> int:
     user = _user_service.get_user(update.effective_user.id)
     friend = _user_service.get_user(username)
 
-    if not _friend_service.try_accept_friend(friend, user):
+    if not _request_service.try_accept(friend, user):
         update.message.reply_text(_FRIEND_CANCEL)
         return mark_conversation_end(context)
 

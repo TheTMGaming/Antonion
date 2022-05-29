@@ -12,7 +12,7 @@ from app.internal.bot.modules.friends.reject_conversation import (
     handle_reject_start,
 )
 from app.internal.user.db.models import FriendRequest, TelegramUser
-from tests.integration.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

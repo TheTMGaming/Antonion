@@ -35,7 +35,7 @@ from app.internal.bot.modules.transfer.handlers import (
 from app.internal.bot.modules.transfer.TransferStates import TransferStates
 from app.internal.user.db.models import TelegramUser
 from tests.conftest import BALANCE
-from tests.integration.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
 transfer_service = TransferBotService(
     account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()

@@ -12,7 +12,7 @@ from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService
+from app.internal.user.domain.services import FriendService, TelegramUserService, FriendRequestService
 
 _WELCOME = "Введите никнейм или идентификатор пользователя"
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль! Повторите попытку, либо /cancel"
@@ -23,7 +23,8 @@ _REQUEST_SUCCESS = "Заявка отправлена! Да прибудет д�
 _NOTIFICATION_MESSAGE = "С вами хочет познакомиться {username} ({name}). Используйте команду /accept"
 
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository())
+_request_service = FriendRequestService(request_repo=FriendRequestRepository())
 
 
 @if_update_message_exists
@@ -57,7 +58,7 @@ def handle_add_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 
-    if not _friend_service.try_create_friend_request(user, friend):
+    if not _request_service.create(user, friend):
         update.message.reply_text(_REQUEST_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 

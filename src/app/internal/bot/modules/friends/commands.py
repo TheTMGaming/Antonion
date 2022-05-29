@@ -20,7 +20,7 @@ _FRIENDSHIPS_EMPTY = "На данный момент нет заявок в др
 
 
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository())
 _request_service = FriendRequestService(request_repo=FriendRequestRepository())
 
 

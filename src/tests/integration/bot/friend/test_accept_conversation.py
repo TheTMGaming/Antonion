@@ -12,7 +12,7 @@ from app.internal.bot.modules.friends.accept_conversation import (
 )
 from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.user.db.models import FriendRequest, TelegramUser
-from tests.integration.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

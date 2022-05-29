@@ -6,7 +6,7 @@ from telegram import User
 
 from app.internal.bank.db.models import BankAccount, BankCard
 from app.internal.user.db.models import SecretKey, TelegramUser
-from app.internal.user.db.models.TelegramUserManager import TelegramUserManager
+from app.internal.user.db.repositories import TelegramUserRepository
 
 BALANCE = Decimal(10**4)
 PASSWORD = "1337<PrO>228"
@@ -15,6 +15,7 @@ KEY = "noob"
 WRONG_KEY = "pro"
 TIP = "Who am i?"
 
+user_repo = TelegramUserRepository()
 
 @pytest.fixture(scope="function")
 def user(user_id=1337, first_name="Вася", last_name="Пупкин", username="geroj") -> User:
@@ -74,7 +75,7 @@ def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+780055
 @pytest.fixture(scope="function")
 def telegram_users_with_password(telegram_users_with_phone: List[TelegramUser]) -> List[TelegramUser]:
     for user in telegram_users_with_phone:
-        user.password = TelegramUserManager.hash(PASSWORD)
+        user.password = user_repo._hash(PASSWORD)
         SecretKey.objects.create(telegram_user=user, value=KEY, tip=TIP)
 
     TelegramUser.objects.bulk_update(telegram_users_with_phone, fields=["password"])

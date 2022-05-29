@@ -30,7 +30,7 @@ from app.internal.bot.modules.user.password_conversation import (
 from app.internal.bot.modules.user.PasswordStates import PasswordStates
 from app.internal.user.db.models import TelegramUser
 from tests.conftest import KEY, PASSWORD, TIP, WRONG_KEY, WRONG_PASSWORD
-from tests.integration.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

@@ -10,8 +10,9 @@ from app.internal.authentication.db.repositories import AuthRepository
 from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.user.db.models import TelegramUser
+from app.internal.user.db.repositories import TelegramUserRepository
 
-service = JWTService(auth_repo=AuthRepository())
+service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepository())
 CREATED_AT, TELEGRAM_ID, TOKEN_TYPE = service.CREATED_AT, service.TELEGRAM_ID, service.TOKEN_TYPE
 
 

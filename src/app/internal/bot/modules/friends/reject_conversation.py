@@ -13,7 +13,7 @@ from app.internal.bot.modules.friends.users_to_friends_sender import send_userna
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService
+from app.internal.user.domain.services import FriendService, TelegramUserService, FriendRequestService
 
 _WELCOME = "Выберите из списка того, с кем не хотите иметь дело:\n\n"
 _LIST_EMPTY = "На данный момент нет заявок в друзья :("
@@ -25,8 +25,9 @@ _REJECT_MESSAGE = "Пользователь {username} отменил вашу �
 _USERNAMES_SESSION = "username_list"
 
 
-_friend_service = FriendService(friend_repo=TelegramUserRepository(), request_repo=FriendRequestRepository())
+_friend_service = FriendService(friend_repo=TelegramUserRepository())
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
+_request_service = FriendRequestService(request_repo=FriendRequestRepository())
 
 
 @if_update_message_exists
@@ -50,7 +51,7 @@ def handle_reject(update: Update, context: CallbackContext) -> int:
     user = _user_service.get_user(update.effective_user.id)
     friend = _user_service.get_user(username)
 
-    _friend_service.reject_friend_request(friend, user)
+    _request_service.try_reject(friend, user)
 
     update.message.reply_text(_REJECT_SUCCESS)
     context.bot.send_message(chat_id=friend.id, text=get_notification(user))
