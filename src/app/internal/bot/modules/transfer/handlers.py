@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectBotService, TransferBotService
+from app.internal.bank.domain.services import BankObjectService, TransferService
 from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
@@ -66,8 +66,8 @@ _ACCRUAL_SESSION = "accrual"
 
 _friend_service = FriendService(friend_repo=TelegramUserRepository())
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
-_transfer_service = TransferBotService(
+_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+_transfer_service = TransferService(
     account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
 )
 

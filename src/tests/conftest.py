@@ -17,6 +17,7 @@ TIP = "Who am i?"
 
 user_repo = TelegramUserRepository()
 
+
 @pytest.fixture(scope="function")
 def user(user_id=1337, first_name="Вася", last_name="Пупкин", username="geroj") -> User:
     return User(id=user_id, first_name=first_name, last_name=last_name, username=username, is_bot=False)

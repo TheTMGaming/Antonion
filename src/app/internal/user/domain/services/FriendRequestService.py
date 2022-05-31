@@ -1,6 +1,6 @@
 from typing import Union
 
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import QuerySet
 from telegram import User
 

@@ -4,10 +4,10 @@ import pytest
 
 from app.internal.bank.db.models import BankAccount, BankCard
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository
-from app.internal.bank.domain.services import BankObjectBotService
+from app.internal.bank.domain.services import BankObjectService
 from app.internal.user.db.models import TelegramUser
 
-bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 
 
 @pytest.mark.django_db

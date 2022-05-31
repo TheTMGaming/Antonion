@@ -2,16 +2,18 @@ from typing import List
 
 from django.http import HttpRequest
 
-from app.internal.general.exceptions import NotFoundException, BadRequestException
+from app.internal.general.exceptions import BadRequestException, NotFoundException
 from app.internal.general.responses import SuccessResponse
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.domain.entities.friends import FriendRequestOut
 from app.internal.user.domain.entities.user import TelegramUserOut
-from app.internal.user.domain.services import FriendService, TelegramUserService, FriendRequestService
+from app.internal.user.domain.services import FriendRequestService, FriendService, TelegramUserService
 
 
 class FriendHandlers:
-    def __init__(self, user_service: TelegramUserService, friend_service: FriendService, request_service: FriendRequestService):
+    def __init__(
+        self, user_service: TelegramUserService, friend_service: FriendService, request_service: FriendRequestService
+    ):
         self._user_service = user_service
         self._friend_service = friend_service
         self._request_service = request_service

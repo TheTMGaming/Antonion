@@ -3,7 +3,7 @@ from ninja import Body
 
 from app.internal.general.exceptions import BadRequestException, IntegrityException
 from app.internal.general.responses import SuccessResponse
-from app.internal.user.domain.entities.user import TelegramUserOut, PhoneSchema, PasswordSchema
+from app.internal.user.domain.entities.user import PasswordSchema, PhoneSchema, TelegramUserOut
 from app.internal.user.domain.services import TelegramUserService
 
 

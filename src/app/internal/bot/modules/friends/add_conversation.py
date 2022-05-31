@@ -12,7 +12,7 @@ from app.internal.bot.modules.friends.FriendStates import FriendStates
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService, FriendRequestService
+from app.internal.user.domain.services import FriendRequestService, FriendService, TelegramUserService
 
 _WELCOME = "Введите никнейм или идентификатор пользователя"
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль! Повторите попытку, либо /cancel"

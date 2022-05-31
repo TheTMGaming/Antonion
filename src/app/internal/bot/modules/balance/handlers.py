@@ -3,7 +3,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 
 from app.internal.bank.db.models import BankAccount, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository
-from app.internal.bank.domain.services import BankObjectBotService
+from app.internal.bank.domain.services import BankObjectService
 from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
@@ -27,7 +27,7 @@ _BALANCE_BY_CARD = "На карточке {number} лежит {balance}"
 _DOCUMENTS_SESSION = "documents"
 
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 
 
 @if_update_message_exists

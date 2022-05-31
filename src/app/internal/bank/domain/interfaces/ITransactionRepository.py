@@ -4,7 +4,7 @@ from typing import Union
 
 from django.db.models import QuerySet
 
-from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
+from app.internal.bank.db.models import Transaction, TransactionTypes
 
 
 class ITransactionRepository(ABC):

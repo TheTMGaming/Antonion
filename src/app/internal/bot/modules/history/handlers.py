@@ -3,7 +3,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 
 from app.internal.bank.db.models import BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectBotService, TransactionBotService
+from app.internal.bank.domain.services import BankObjectService, TransactionService
 from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
@@ -26,8 +26,8 @@ _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни сч
 _DOCUMENTS_SESSION = "documents"
 
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
-_transaction_service = TransactionBotService(transaction_repo=TransactionRepository())
+_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+_transaction_service = TransactionService(transaction_repo=TransactionRepository())
 
 
 @if_update_message_exists

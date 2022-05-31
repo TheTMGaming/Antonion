@@ -1,12 +1,13 @@
 from decimal import Decimal
+from typing import Optional
 
 from django.db import IntegrityError, transaction
 
-from app.internal.bank.db.models import BankAccount, BankObject, TransactionTypes
+from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
 
 
-class TransferBotService:
+class TransferService:
     def __init__(
         self,
         account_repo: IBankAccountRepository,
@@ -42,7 +43,7 @@ class TransferBotService:
 
         return accrual <= document.get_balance()
 
-    def try_transfer(self, source: BankAccount, destination: BankAccount, accrual: Decimal) -> bool:
+    def try_transfer(self, source: BankAccount, destination: BankAccount, accrual: Decimal) -> Optional[Transaction]:
         if not self.validate_accrual(accrual):
             raise ValueError()
 
@@ -51,9 +52,7 @@ class TransferBotService:
                 self._account_repo.subtract(source.number, accrual)
                 self._account_repo.accrue(destination.number, accrual)
 
-            self._transaction_repo.declare(source.number, destination.number, TransactionTypes.TRANSFER, accrual)
-
-            return True
+            return self._transaction_repo.declare(source.number, destination.number, TransactionTypes.TRANSFER, accrual)
 
         except IntegrityError:
-            return False
+            return None

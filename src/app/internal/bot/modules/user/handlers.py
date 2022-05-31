@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectBotService, TransactionBotService
+from app.internal.bank.domain.services import BankObjectService, TransactionService
 from app.internal.bot.decorators import (
     if_phone_is_set,
     if_update_message_exists,
@@ -31,8 +31,8 @@ _RELATION_LIST_EMPTY = "Похоже, что вы в танке... и ни с к
 
 
 _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_transaction_service = TransactionBotService(transaction_repo=TransactionRepository())
-_bank_object_service = BankObjectBotService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
+_transaction_service = TransactionService(transaction_repo=TransactionRepository())
+_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
 
 
 @if_update_message_exists

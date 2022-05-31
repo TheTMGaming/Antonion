@@ -6,9 +6,9 @@ from django.core.exceptions import ValidationError
 
 from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
 from app.internal.bank.db.repositories import TransactionRepository
-from app.internal.bank.domain.services import TransactionBotService
+from app.internal.bank.domain.services import TransactionService
 
-transaction_service = TransactionBotService(transaction_repo=TransactionRepository())
+transaction_service = TransactionService(transaction_repo=TransactionRepository())
 
 
 @pytest.mark.django_db

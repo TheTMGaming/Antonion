@@ -1,4 +1,5 @@
 from itertools import chain
+from typing import Optional
 
 from django.db.models import QuerySet
 
@@ -7,7 +8,7 @@ from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCar
 from app.internal.user.db.models import TelegramUser
 
 
-class BankObjectBotService:
+class BankObjectService:
     def __init__(self, account_repo: IBankAccountRepository, card_repo: IBankCardRepository):
         self._account_repo = account_repo
         self._card_repo = card_repo
@@ -35,5 +36,17 @@ class BankObjectBotService:
     def get_bank_accounts(self, user: TelegramUser) -> QuerySet[BankAccount]:
         return self._account_repo.get_bank_accounts(user.id)
 
+    def get_bank_account(self, user: TelegramUser, number: int) -> Optional[BankAccount]:
+        return self._account_repo.get_bank_account(user.id, number)
+
     def get_cards(self, user: TelegramUser) -> QuerySet[BankCard]:
         return self._card_repo.get_cards(user.id)
+
+    def get_card(self, user: TelegramUser, number: int) -> Optional[BankCard]:
+        return self._card_repo.get_card(user.id, number)
+
+    def get_user_bank_account_by_document_number(self, user: TelegramUser, number: int) -> Optional[BankAccount]:
+        return self._account_repo.get_user_bank_account_by_document_number(user.id, number)
+
+    def get_bank_account_by_document_number(self, number) -> Optional[BankAccount]:
+        return self._account_repo.get_bank_account_by_document_number(number)

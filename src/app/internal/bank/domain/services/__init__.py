@@ -1,3 +1,3 @@
-from .BankObjectBotService import BankObjectBotService
-from .TransactionBotService import TransactionBotService
-from .TransferBotService import TransferBotService
+from .BankObjectService import BankObjectService
+from .TransactionService import TransactionService
+from .TransferService import TransferService

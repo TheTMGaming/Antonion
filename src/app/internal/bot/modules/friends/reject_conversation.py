@@ -13,7 +13,7 @@ from app.internal.bot.modules.friends.users_to_friends_sender import send_userna
 from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService, FriendRequestService
+from app.internal.user.domain.services import FriendRequestService, FriendService, TelegramUserService
 
 _WELCOME = "Выберите из списка того, с кем не хотите иметь дело:\n\n"
 _LIST_EMPTY = "На данный момент нет заявок в друзья :("

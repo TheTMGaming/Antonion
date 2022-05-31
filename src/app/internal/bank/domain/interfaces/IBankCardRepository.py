@@ -9,7 +9,7 @@ from app.internal.user.db.models import TelegramUser
 
 class IBankCardRepository(ABC):
     @abstractmethod
-    def get_card(self, number: str) -> Optional[BankCard]:
+    def get_card(self, user_id: Union[int, str], number: int) -> Optional[BankCard]:
         pass
 
     @abstractmethod
