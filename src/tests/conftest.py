@@ -2,10 +2,11 @@ from decimal import Decimal
 from typing import List
 
 import pytest
+from django.db.models import QuerySet
 from telegram import User
 
 from app.internal.bank.db.models import BankAccount, BankCard
-from app.internal.user.db.models import SecretKey, TelegramUser
+from app.internal.user.db.models import FriendRequest, SecretKey, TelegramUser
 from app.internal.user.db.repositories import TelegramUserRepository
 
 BALANCE = Decimal(10**4)
@@ -105,8 +106,17 @@ def bank_account(bank_accounts: List[BankAccount]) -> BankAccount:
 
 
 @pytest.fixture(scope="function")
-def another_account(bank_accounts: List[BankAccount]) -> BankAccount:
-    return bank_accounts[1]
+def another_account(another_accounts: List[BankAccount]) -> BankAccount:
+    return another_accounts[0]
+
+
+@pytest.fixture(scope="function")
+def another_accounts(another_telegram_users: List[TelegramUser], bank_accounts: List[BankAccount]) -> List[BankAccount]:
+    accounts = []
+    for user in another_telegram_users:
+        accounts.append(BankAccount.objects.create(balance=BALANCE, owner=user))
+
+    return accounts
 
 
 @pytest.fixture(scope="function")
@@ -120,8 +130,17 @@ def card(cards: List[BankCard]) -> BankCard:
 
 
 @pytest.fixture(scope="function")
-def another_card(cards: List[BankCard]) -> BankCard:
-    return cards[1]
+def another_card(another_cards: List[BankCard]) -> BankCard:
+    return another_cards[0]
+
+
+@pytest.fixture(scope="function")
+def another_cards(another_accounts: List[BankAccount]) -> List[BankCard]:
+    cards = []
+    for account in another_accounts:
+        cards.append(BankCard.objects.create(bank_account=account))
+
+    return cards
 
 
 @pytest.fixture(scope="function")
@@ -133,6 +152,16 @@ def friends(telegram_user: TelegramUser, telegram_users: List[TelegramUser]) -> 
         friend.friends.add(telegram_user)
 
     return friends
+
+
+@pytest.fixture(scope="function")
+def friend(friends: List[TelegramUser]) -> TelegramUser:
+    return friends[0]
+
+
+@pytest.fixture(scope="function")
+def friend_with_account(friend: TelegramUser, friend_account: BankAccount) -> TelegramUser:
+    return friend
 
 
 @pytest.fixture(scope="function")
@@ -153,3 +182,17 @@ def friend_cards(friend_accounts: List[BankAccount]) -> List[BankCard]:
 @pytest.fixture(scope="function")
 def friend_card(friend_cards: List[BankCard]) -> BankCard:
     return friend_cards[0]
+
+
+@pytest.fixture(scope="function")
+def friend_request(telegram_user: TelegramUser, another_telegram_user: TelegramUser) -> FriendRequest:
+    return FriendRequest.objects.create(source=another_telegram_user, destination=telegram_user)
+
+
+@pytest.fixture(scope="function")
+def friend_requests(telegram_user: TelegramUser, telegram_users: List[TelegramUser]) -> QuerySet[FriendRequest]:
+    return FriendRequest.objects.bulk_create(
+        FriendRequest(source=another, destination=telegram_user)
+        for another in telegram_users
+        if another != telegram_user
+    )

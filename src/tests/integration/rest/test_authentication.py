@@ -5,6 +5,7 @@ import freezegun
 import jwt
 import pytest
 from django.conf import settings
+from django.http import HttpRequest
 from ninja.security import HttpBearer
 
 from app.internal.authentication.db.repositories import AuthRepository
@@ -20,7 +21,7 @@ service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepositor
 @freezegun.freeze_time("2022-05-21")
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_ok(http_request: MagicMock, telegram_user: TelegramUser) -> None:
+def test_ok(http_request: HttpRequest, telegram_user: TelegramUser) -> None:
     token = service.generate_token(telegram_user.id, TokenTypes.ACCESS)
     http_request.headers[HttpBearer.header] = f"Bearer {token}"
 
@@ -31,17 +32,19 @@ def test_ok(http_request: MagicMock, telegram_user: TelegramUser) -> None:
 
 
 @freezegun.freeze_time("2022-05-21")
+@pytest.mark.django_db
 @pytest.mark.integration
-def test_wrong_payload(http_request: MagicMock) -> None:
+def test_wrong_payload(http_request: HttpRequest) -> None:
     token = jwt.encode({"stupid": 1337}, settings.SECRET_KEY)
     http_request.headers[HttpBearer.header] = f"Bearer {token}"
 
-    _assert_error(http_request)
+    assert_error(http_request)
 
 
 @freezegun.freeze_time("2022-05-21")
+@pytest.mark.django_db
 @pytest.mark.integration
-def test_dead_token(http_request: MagicMock) -> None:
+def test_dead_token(http_request: HttpRequest) -> None:
     now = datetime.now()
 
     token = jwt.encode(
@@ -50,11 +53,10 @@ def test_dead_token(http_request: MagicMock) -> None:
     http_request.headers[HttpBearer.header] = f"Bearer {token}"
 
     freezegun.api.freeze_time(now - 2 * settings.ACCESS_TOKEN_TTL)
-    _assert_error(http_request)
+    assert_error(http_request)
 
 
-def _assert_error(http_request: MagicMock) -> None:
+def assert_error(http_request: HttpRequest) -> None:
     JWTAuthentication()(http_request)
 
-    assert hasattr(http_request, "telegram_user")
-    assert http_request.telegram_user is None
+    assert hasattr(http_request, "telegram_user") and http_request.telegram_user is None

@@ -24,18 +24,12 @@ class FriendHandlers:
         return [TelegramUserOut.from_orm(friend) for friend in friends]
 
     def get_friend(self, request: HttpRequest, identifier: str) -> TelegramUserOut:
-        friend = self._friend_service.get_friend(request.telegram_user, identifier)
-
-        if not friend:
-            raise NotFoundException("friend")
+        friend = self._try_get_friend(request, identifier)
 
         return TelegramUserOut.from_orm(friend)
 
     def remove_friend(self, request: HttpRequest, identifier: str) -> SuccessResponse:
-        friend = self._friend_service.get_friend(request.telegram_user, identifier)
-
-        if not friend:
-            raise NotFoundException("friend")
+        friend = self._try_get_friend(request, identifier)
 
         self._friend_service.try_remove_from_friends(request.telegram_user, friend)
 
@@ -80,3 +74,11 @@ class FriendHandlers:
             raise NotFoundException("user")
 
         return user
+
+    def _try_get_friend(self, request: HttpRequest, identifier: str) -> TelegramUser:
+        friend = self._friend_service.get_friend(request.telegram_user, identifier)
+
+        if not friend:
+            raise NotFoundException("friend")
+
+        return friend

@@ -28,14 +28,6 @@ def update(user: User) -> MagicMock:
 
 
 @pytest.fixture(scope="function")
-def http_request() -> HttpRequest:
-    request = MagicMock()
-    request.headers = {}
-
-    return request
-
-
-@pytest.fixture(scope="function")
 def context() -> MagicMock:
     context = MagicMock()
     context.args = []
@@ -46,13 +38,3 @@ def context() -> MagicMock:
     context.bot = bot
 
     return context
-
-
-@pytest.fixture(scope="function")
-def friend(friends: List[TelegramUser]) -> TelegramUser:
-    return friends[0]
-
-
-@pytest.fixture(scope="function")
-def friend_with_account(friend: TelegramUser, friend_account: BankAccount) -> TelegramUser:
-    return friend

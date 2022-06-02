@@ -2,11 +2,11 @@ from ninja import Schema
 from pydantic import Field
 
 
-class PhoneSchema(Schema):
+class PhoneIn(Schema):
     phone: str = Field(max_length=63)
 
 
-class PasswordSchema(Schema):
+class PasswordIn(Schema):
     key: str = Field(max_length=255)
     password: str = Field(max_length=255)
 

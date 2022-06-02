@@ -17,7 +17,7 @@ class FriendRequestRepository(IFriendRequestRepository):
         return self._get(source, destination).exists()
 
     def remove(self, source: TelegramUser, destination: TelegramUser) -> bool:
-        return bool(self._get(source, destination).delete())
+        return self._get(source, destination).delete()[0] > 0
 
     def get_usernames_to_friends(self, user_id: Union[int, str]) -> QuerySet[str]:
         return FriendRequest.objects.filter(destination__id=user_id).values_list("source__username", flat=True)

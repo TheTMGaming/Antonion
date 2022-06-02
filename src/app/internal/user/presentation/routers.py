@@ -5,7 +5,7 @@ from ninja import Router
 from app.internal.authentication.presentation import JWTAuthentication
 from app.internal.general.responses import ErrorResponse, SuccessResponse
 from app.internal.user.domain.entities.friends import FriendRequestOut
-from app.internal.user.domain.entities.user import PhoneSchema, TelegramUserOut
+from app.internal.user.domain.entities.user import PhoneIn, TelegramUserOut
 from app.internal.user.presentation.handlers import FriendHandlers, TelegramUserHandlers
 
 
@@ -13,14 +13,18 @@ def get_user_router(user_handlers: TelegramUserHandlers) -> Router:
     router = Router(tags=["user"], auth=[JWTAuthentication()])
 
     router.add_api_operation(
-        path="/me", methods=["GET"], view_func=user_handlers.get_about_me, response={200: TelegramUserOut}
+        path="/me",
+        methods=["GET"],
+        view_func=user_handlers.get_about_me,
+        response={200: TelegramUserOut},
+        url_name="me",
     )
 
     router.add_api_operation(
         path="/phone",
         methods=["PATCH"],
         view_func=user_handlers.update_phone,
-        response={200: PhoneSchema, 400: ErrorResponse},
+        response={200: PhoneIn, 400: ErrorResponse},
     )
 
     router.add_api_operation(
