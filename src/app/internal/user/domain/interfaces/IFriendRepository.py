@@ -18,3 +18,7 @@ class IFriendRepository(ABC):
     @abstractmethod
     def is_friend_exists(self, user_id: Union[int, str], friend_id: Union[int, str]) -> bool:
         pass
+
+    @abstractmethod
+    def remove(self, source: TelegramUser, friend: TelegramUser) -> None:
+        pass

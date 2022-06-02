@@ -1,8 +1,8 @@
 from typing import List
-from unittest.mock import MagicMock
 
 import pytest
-from telegram.ext import ConversationHandler
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bot.modules.balance.BalanceStates import BalanceStates
@@ -15,14 +15,15 @@ from app.internal.bot.modules.balance.handlers import (
     handle_choice,
     handle_start,
 )
+from app.internal.user.db.models import TelegramUser
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_start(
-    update: MagicMock,
-    context: MagicMock,
-    telegram_user_with_phone,
+    update: Update,
+    context: CallbackContext,
+    telegram_user_with_phone: TelegramUser,
     bank_accounts: List[BankAccount],
     cards: List[BankCard],
 ) -> None:
@@ -36,7 +37,9 @@ def test_start(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_start__documents_len_is_zero(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+def test_start__documents_len_is_zero(
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
+) -> None:
     next_state = handle_start(update, context)
 
     assert next_state == ConversationHandler.END
@@ -47,17 +50,17 @@ def test_start__documents_len_is_zero(update: MagicMock, context: MagicMock, tel
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_choice__bank_account(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_choice__bank_account(update: Update, context: CallbackContext, bank_account: BankAccount) -> None:
     _test_balance__bank_object(update, context, bank_account, _BALANCE_BY_BANK_ACCOUNT)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_choice__card(update: MagicMock, context: MagicMock, card: BankCard) -> None:
+def test_choice__card(update: Update, context: CallbackContext, card: BankCard) -> None:
     _test_balance__bank_object(update, context, card, _BALANCE_BY_CARD)
 
 
-def _test_balance__bank_object(update: MagicMock, context: MagicMock, obj: BankObject, details: str) -> None:
+def _test_balance__bank_object(update: Update, context: CallbackContext, obj: BankObject, details: str) -> None:
     update.message.text = "1"
     context.user_data[_DOCUMENTS_SESSION] = {1: obj}
 
@@ -72,7 +75,7 @@ def _test_balance__bank_object(update: MagicMock, context: MagicMock, obj: BankO
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_choice__stupid(update: MagicMock, context: MagicMock, bank_account: BankAccount) -> None:
+def test_choice__stupid(update: Update, context: CallbackContext, bank_account: BankAccount) -> None:
     update.message.text = "-1"
     context.user_data[_DOCUMENTS_SESSION] = {1: bank_account}
 

@@ -11,9 +11,38 @@ from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import TelegramUserRepository
+from tests.conftest import PASSWORD, WRONG_PASSWORD
 
 service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepository())
 CREATED_AT, TELEGRAM_ID, TOKEN_TYPE = service.CREATED_AT, service.TELEGRAM_ID, service.TOKEN_TYPE
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_getting_authenticated_user(telegram_user: TelegramUser) -> None:
+    payload = {TELEGRAM_ID: telegram_user.id}
+    actual = service.get_authenticated_telegram_user(payload)
+
+    assert actual == telegram_user
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_getting_authenticated_user__not_exists() -> None:
+    payload = {TELEGRAM_ID: 1337}
+    actual = service.get_authenticated_telegram_user(payload)
+
+    assert actual is None
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_getting_user_by_credentials(telegram_user_with_password: TelegramUser) -> None:
+    correct = service.get_user_by_credentials(telegram_user_with_password.username, PASSWORD)
+    wrong = service.get_user_by_credentials(telegram_user_with_password.username, WRONG_PASSWORD)
+
+    assert correct == telegram_user_with_password
+    assert wrong is None
 
 
 @freeze_time("2022-05-21")
@@ -61,6 +90,7 @@ def _assert_tokens(access: str, refresh: str, telegram_user: TelegramUser) -> No
     assert refresh_payload == payload | {TOKEN_TYPE: TokenTypes.REFRESH.value}
 
 
+@freeze_time("2022-06-02")
 @pytest.mark.unit
 def test_getting_payload(token_type=TokenTypes.ACCESS) -> None:
     expected = {TELEGRAM_ID: 123, CREATED_AT: service._now().timestamp(), TOKEN_TYPE: token_type.value}
@@ -78,24 +108,6 @@ def test_getting_bad_payload() -> None:
     payload = service.try_get_payload(token)
 
     assert payload == {}
-
-
-@pytest.mark.django_db
-@pytest.mark.unit
-def test_getting_authenticated_user(telegram_user: TelegramUser) -> None:
-    payload = {TELEGRAM_ID: telegram_user.id}
-    actual = service.get_authenticated_telegram_user(payload)
-
-    assert actual == telegram_user
-
-
-@pytest.mark.django_db
-@pytest.mark.unit
-def test_getting_authenticated_user__not_exists() -> None:
-    payload = {TELEGRAM_ID: 1337}
-    actual = service.get_authenticated_telegram_user(payload)
-
-    assert actual is None
 
 
 @pytest.mark.unit

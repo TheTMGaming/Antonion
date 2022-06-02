@@ -49,7 +49,6 @@ class TelegramUserService:
         try:
             with transaction.atomic():
                 self._secret_key_repo.create(user.id, key, tip)
-
                 self._user_repo.update_password(user.id, password)
 
             return True

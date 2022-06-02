@@ -1,6 +1,6 @@
-from unittest.mock import MagicMock
-
 import pytest
+from telegram import Update
+from telegram.ext import CallbackContext
 
 from app.internal.bot.modules.friends.add_conversation import (
     _ALREADY_EXIST_ERROR,
@@ -20,7 +20,7 @@ from tests.integration.bot.general import assert_conversation_end, assert_conver
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_add_friend_start(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+def test_add_friend_start(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     next_state = handle_add_friend_start(update, context)
 
     assert next_state == FriendStates.INPUT
@@ -31,7 +31,10 @@ def test_add_friend_start(update: MagicMock, context: MagicMock, telegram_user_w
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_add_friend(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, another_telegram_user: TelegramUser
+    update: Update,
+    context: CallbackContext,
+    telegram_user_with_phone: TelegramUser,
+    another_telegram_user: TelegramUser,
 ) -> None:
     update.message.text = str(another_telegram_user.id)
     next_state = handle_add_friend(update, context)
@@ -45,14 +48,16 @@ def test_add_friend(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_add_friend__self(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+def test_add_friend__self(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     update.message.text = str(telegram_user_with_phone.id)
     _test_add_friend__error(update, context, _STUPID_CHOICE_SELF_ERROR)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_add_friend__not_exist(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+def test_add_friend__not_exist(
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
+) -> None:
     update.message.text = "-1"
     _test_add_friend__error(update, context, _USER_NOT_FOUND_ERROR)
 
@@ -60,7 +65,7 @@ def test_add_friend__not_exist(update: MagicMock, context: MagicMock, telegram_u
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_add_friend__already_exist_friend(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, friend: TelegramUser
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser, friend: TelegramUser
 ) -> None:
     update.message.text = str(friend.id)
     _test_add_friend__error(update, context, _ALREADY_EXIST_ERROR)
@@ -69,7 +74,7 @@ def test_add_friend__already_exist_friend(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_add_friend__already_exist_request(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, another_telegram_user: TelegramUser
+    update: Update, context: CallbackContext, telegram_user_with_phone, another_telegram_user: TelegramUser
 ) -> None:
     update.message.text = str(another_telegram_user.id)
     FriendRequest.objects.create(source=telegram_user_with_phone, destination=another_telegram_user)
@@ -77,7 +82,7 @@ def test_add_friend__already_exist_request(
     _test_add_friend__error(update, context, _REQUEST_ALREADY_EXIST_ERROR)
 
 
-def _test_add_friend__error(update: MagicMock, context: MagicMock, text: str) -> None:
+def _test_add_friend__error(update: Update, context: CallbackContext, text: str) -> None:
     next_state = handle_add_friend(update, context)
 
     assert next_state == FriendStates.INPUT

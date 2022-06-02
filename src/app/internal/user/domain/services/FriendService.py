@@ -1,6 +1,5 @@
 from typing import Dict, Union
 
-from django.db import IntegrityError, transaction
 from django.db.models import QuerySet
 
 from app.internal.user.db.models import TelegramUser
@@ -20,13 +19,8 @@ class FriendService:
     def get_friends_as_dict(self, user: TelegramUser) -> Dict[int, TelegramUser]:
         return dict((num, friend) for num, friend in enumerate(self._friend_repo.get_friends(user.id), 1))
 
-    def try_remove_from_friends(self, first: TelegramUser, second: TelegramUser) -> bool:
-        try:
-            with transaction.atomic():
-                first.friends.remove(second)
-            return True
-        except IntegrityError:
-            return False
+    def remove_from_friends(self, source: TelegramUser, friend: TelegramUser) -> None:
+        self._friend_repo.remove(source, friend)
 
     def is_friend_exists(self, user: TelegramUser, friend: TelegramUser) -> bool:
         return self._friend_repo.is_friend_exists(user.id, friend.id)

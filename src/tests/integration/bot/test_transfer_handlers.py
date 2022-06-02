@@ -1,8 +1,9 @@
 from decimal import Decimal
 from typing import List
-from unittest.mock import MagicMock
 
 import pytest
+from telegram import Update
+from telegram.ext import CallbackContext
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
@@ -37,7 +38,7 @@ from app.internal.user.db.models import TelegramUser
 from tests.conftest import BALANCE
 from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
-transfer_service = TransferService(
+service = TransferService(
     account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
 )
 
@@ -45,9 +46,9 @@ transfer_service = TransferService(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_start(
-    update: MagicMock,
-    context: MagicMock,
-    telegram_user_with_phone,
+    update: Update,
+    context: CallbackContext,
+    telegram_user_with_phone: TelegramUser,
     friends: List[TelegramUser],
     bank_accounts: List[BankAccount],
 ) -> None:
@@ -67,9 +68,9 @@ def test_start(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_start__friends_list_is_empty(
-    update: MagicMock,
-    context: MagicMock,
-    telegram_user_with_phone,
+    update: Update,
+    context: CallbackContext,
+    telegram_user_with_phone: TelegramUser,
     bank_accounts: List[BankAccount],
 ) -> None:
     next_state = handle_start(update, context)
@@ -81,7 +82,7 @@ def test_start__friends_list_is_empty(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_start__source_documents_list_is_empty(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, friend: TelegramUser
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser, friend: TelegramUser
 ) -> None:
     next_state = handle_start(update, context)
 
@@ -92,8 +93,8 @@ def test_start__source_documents_list_is_empty(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_destination(
-    update: MagicMock,
-    context: MagicMock,
+    update: Update,
+    context: CallbackContext,
     telegram_user: TelegramUser,
     friend_with_account: TelegramUser,
     friend_account: BankAccount,
@@ -114,7 +115,9 @@ def test_getting_destination(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_getting_destination__stupid_choice(update: MagicMock, context: MagicMock, telegram_user: TelegramUser) -> None:
+def test_getting_destination__stupid_choice(
+    update: Update, context: CallbackContext, telegram_user: TelegramUser
+) -> None:
     context.user_data[_FRIEND_VARIANTS_SESSION] = {}
     update.message.text = "1"
     next_state = handle_getting_destination(update, context)
@@ -128,7 +131,7 @@ def test_getting_destination__stupid_choice(update: MagicMock, context: MagicMoc
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_destination__friend_documents_list_is_empty(
-    update: MagicMock, context: MagicMock, telegram_user: TelegramUser, friend: TelegramUser
+    update: Update, context: CallbackContext, telegram_user: TelegramUser, friend: TelegramUser
 ) -> None:
     context.user_data[_FRIEND_VARIANTS_SESSION] = {1: friend}
     update.message.text = "1"
@@ -145,7 +148,7 @@ def test_getting_destination__friend_documents_list_is_empty(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_destination_document__bank_account(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     _test_getting_destination_document__bank_object(update, context, bank_account, friend_account)
 
@@ -153,13 +156,13 @@ def test_getting_destination_document__bank_account(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_destination_document__card(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_card: BankCard
+    update: Update, context: CallbackContext, bank_account: BankAccount, friend_card: BankCard
 ) -> None:
     _test_getting_destination_document__bank_object(update, context, bank_account, friend_card)
 
 
 def _test_getting_destination_document__bank_object(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, obj: BankObject
+    update: Update, context: CallbackContext, bank_account: BankAccount, obj: BankObject
 ) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
@@ -177,7 +180,7 @@ def _test_getting_destination_document__bank_object(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_destination_document__stupid_choice(
-    update: MagicMock, context: MagicMock, friend_account: BankAccount
+    update: Update, context: CallbackContext, friend_account: BankAccount
 ) -> None:
     update.message.text = "-1"
     context.user_data[_DESTINATION_DOCUMENTS_SESSION] = {1: friend_account}
@@ -192,18 +195,18 @@ def test_getting_destination_document__stupid_choice(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_source_document__bank_account(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount
 ) -> None:
     _test_getting_source_document__bank_object(update, context, bank_account)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_getting_source_document__card(update: MagicMock, context: MagicMock, card: BankCard) -> None:
+def test_getting_source_document__card(update: Update, context: CallbackContext, card: BankCard) -> None:
     _test_getting_source_document__bank_object(update, context, card)
 
 
-def _test_getting_source_document__bank_object(update: MagicMock, context: MagicMock, obj: BankObject) -> None:
+def _test_getting_source_document__bank_object(update: Update, context: CallbackContext, obj: BankObject) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: obj}
 
@@ -218,7 +221,7 @@ def _test_getting_source_document__bank_object(update: MagicMock, context: Magic
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_source_document__stupid_choice(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount
 ) -> None:
     update.message.text = "-1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
@@ -233,7 +236,7 @@ def test_getting_source_document__stupid_choice(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_source_document__balance_is_zero(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount
 ) -> None:
     update.message.text = "1"
     context.user_data[_SOURCE_DOCUMENTS_SESSION] = {1: bank_account}
@@ -250,10 +253,10 @@ def test_getting_source_document__balance_is_zero(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_accrual(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = str(bank_account.balance)
-    accrual = transfer_service.parse_accrual(update.message.text)
+    accrual = service.parse_accrual(update.message.text)
     context.user_data[_SOURCE_SESSION] = bank_account
     context.user_data[_DESTINATION_SESSION] = friend_account
 
@@ -268,7 +271,7 @@ def test_getting_accrual(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_accrual__parse_error(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = "0"
 
@@ -282,7 +285,7 @@ def test_getting_accrual__parse_error(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_accrual__extracting_error(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, friend_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount, friend_account: BankAccount
 ) -> None:
     update.message.text = str(bank_account.balance * 2)
     context.user_data[_SOURCE_SESSION] = bank_account
@@ -297,7 +300,7 @@ def test_getting_accrual__extracting_error(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_transfer(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, another_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount, another_account: BankAccount
 ) -> None:
     _assert_transfer(update, context, bank_account, another_account, BALANCE, True)
 
@@ -305,14 +308,14 @@ def test_transfer(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_transfer_fail(
-    update: MagicMock, context: MagicMock, bank_account: BankAccount, another_account: BankAccount
+    update: Update, context: CallbackContext, bank_account: BankAccount, another_account: BankAccount
 ) -> None:
     _assert_transfer(update, context, bank_account, another_account, BALANCE * 2, False)
 
 
 def _assert_transfer(
-    update: MagicMock,
-    context: MagicMock,
+    update: Update,
+    context: CallbackContext,
     source: BankAccount,
     destination: BankAccount,
     accrual: Decimal,

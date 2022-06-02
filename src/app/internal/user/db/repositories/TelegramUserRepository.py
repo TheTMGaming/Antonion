@@ -47,6 +47,9 @@ class TelegramUserRepository(ITelegramUserRepository, IFriendRepository):
     def is_friend_exists(self, user_id: Union[int, str], friend_id: Union[int, str]) -> bool:
         return TelegramUser.objects.filter(id=user_id, friends__id=friend_id).exists()
 
+    def remove(self, source: TelegramUser, friend: TelegramUser) -> None:
+        source.friends.remove(friend)
+
     def update_phone(self, user_id: Union[int, str], value: str) -> None:
         TelegramUser.objects.filter(id=user_id).update(phone=value)
 

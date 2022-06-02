@@ -1,7 +1,8 @@
 from typing import List
-from unittest.mock import MagicMock
 
 import pytest
+from telegram import Update
+from telegram.ext import CallbackContext
 
 from app.internal.bank.db.models import BankAccount
 from app.internal.bot.modules.history.handlers import (
@@ -12,13 +13,14 @@ from app.internal.bot.modules.history.handlers import (
     handle_start,
 )
 from app.internal.bot.modules.history.HistoryStates import HistoryStates
+from app.internal.user.db.models import TelegramUser
 from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_start(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, bank_accounts: List[BankAccount]
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser, bank_accounts: List[BankAccount]
 ) -> None:
     next_state = handle_start(update, context)
 
@@ -31,7 +33,9 @@ def test_start(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_start__documents_is_empty(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+def test_start__documents_is_empty(
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
+) -> None:
     next_state = handle_start(update, context)
 
     assert_conversation_end(next_state, context)
@@ -42,7 +46,7 @@ def test_start__documents_is_empty(update: MagicMock, context: MagicMock, telegr
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_document(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, bank_account: BankAccount
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser, bank_account: BankAccount
 ) -> None:
     update.message.text = "1"
     context.user_data[_DOCUMENTS_SESSION] = {int(update.message.text): bank_account}
@@ -56,7 +60,7 @@ def test_getting_document(
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_getting_document__stupid_choice(
-    update: MagicMock, context: MagicMock, telegram_user_with_phone, bank_account: BankAccount
+    update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser, bank_account: BankAccount
 ) -> None:
     update.message.text = "-1"
     context.user_data[_DOCUMENTS_SESSION] = {1: bank_account}

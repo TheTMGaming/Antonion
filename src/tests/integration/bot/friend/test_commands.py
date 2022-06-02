@@ -1,7 +1,8 @@
 from typing import List
-from unittest.mock import MagicMock
 
 import pytest
+from telegram import Update
+from telegram.ext import CallbackContext
 
 from app.internal.bot.modules.friends.commands import (
     _FRIENDSHIPS_EMPTY,
@@ -14,15 +15,17 @@ from app.internal.user.db.models import TelegramUser
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_friends(update: MagicMock, context: MagicMock, telegram_users_with_phone, friends: List[TelegramUser]) -> None:
+def test_friends(
+    update: Update, context: CallbackContext, friends: List[TelegramUser], telegram_user_with_phone: TelegramUser
+) -> None:
     handle_friends(update, context)
 
-    assert update.message.reply_text.call_count == len(telegram_users_with_phone) - 1
+    assert update.message.reply_text.call_count == len(friends)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_friends__not_exist(update: MagicMock, context: MagicMock, telegram_users_with_phone) -> None:
+def test_friends__not_exist(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     handle_friends(update, context)
 
     update.message.reply_text.assert_called_once_with(_LIST_EMPTY_ERROR)
@@ -30,7 +33,7 @@ def test_friends__not_exist(update: MagicMock, context: MagicMock, telegram_user
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_friendships__empty(update: MagicMock, context: MagicMock, telegram_user_with_phone) -> None:
+def test_friendships__empty(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     handle_friendships(update, context)
 
     update.message.reply_text.assert_called_once_with(_FRIENDSHIPS_EMPTY)

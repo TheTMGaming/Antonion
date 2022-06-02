@@ -31,7 +31,7 @@ class FriendHandlers:
     def remove_friend(self, request: HttpRequest, identifier: str) -> SuccessResponse:
         friend = self._try_get_friend(request, identifier)
 
-        self._friend_service.try_remove_from_friends(request.telegram_user, friend)
+        self._friend_service.remove_from_friends(request.telegram_user, friend)
 
         return SuccessResponse()
 
@@ -41,7 +41,7 @@ class FriendHandlers:
         if self._friend_service.is_friend_exists(request.telegram_user, user):
             raise BadRequestException("User is already friend")
 
-        if not self._request_service.create(request.telegram_user, user):
+        if not self._request_service.try_create(request.telegram_user, user):
             raise BadRequestException("Friend request already exists")
 
         return SuccessResponse()

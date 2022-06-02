@@ -60,10 +60,7 @@ def handle_rm_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_STUPID_CHOICE)
         return FriendStates.INPUT
 
-    if not _friend_service.try_remove_from_friends(user, friend):
-        update.message.reply_text(_REMOVE_ERROR)
-        return mark_conversation_end(context)
-
+    _friend_service.remove_from_friends(user, friend)
     update.message.reply_text(_REMOVE_SUCCESS)
 
     context.bot.send_message(chat_id=friend.id, text=get_notification(user))

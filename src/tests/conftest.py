@@ -7,16 +7,18 @@ from telegram import User
 
 from app.internal.bank.db.models import BankAccount, BankCard
 from app.internal.user.db.models import FriendRequest, SecretKey, TelegramUser
-from app.internal.user.db.repositories import TelegramUserRepository
+from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 
 BALANCE = Decimal(10**4)
 PASSWORD = "1337<PrO>228"
 WRONG_PASSWORD = "0>Spyric<0"
+PHONE = "+78005553535"
 KEY = "noob"
 WRONG_KEY = "pro"
 TIP = "Who am i?"
 
 user_repo = TelegramUserRepository()
+secret_repo = SecretKeyRepository()
 
 
 @pytest.fixture(scope="function")
@@ -64,35 +66,43 @@ def another_telegram_users(telegram_users: List[TelegramUser]) -> List[TelegramU
     return telegram_users[1:]
 
 
-@pytest.fixture(scope="function")
-def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+78005553535") -> List[TelegramUser]:
-    for user in telegram_users:
-        user.phone = phone
-
-    TelegramUser.objects.bulk_update(telegram_users, fields=["phone"])
-
-    return telegram_users
-
-
-@pytest.fixture(scope="function")
-def telegram_users_with_password(telegram_users_with_phone: List[TelegramUser]) -> List[TelegramUser]:
-    for user in telegram_users_with_phone:
-        user.password = user_repo._hash(PASSWORD)
-        SecretKey.objects.create(telegram_user=user, value=KEY, tip=TIP)
-
-    TelegramUser.objects.bulk_update(telegram_users_with_phone, fields=["password"])
-
-    return telegram_users_with_phone
+# @pytest.fixture(scope="function")
+# def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+78005553535") -> List[TelegramUser]:
+#     for user in telegram_users:
+#         user.phone = phone
+#
+#     TelegramUser.objects.bulk_update(telegram_users, fields=["phone"])
+#
+#     return telegram_users
 
 
-@pytest.fixture(scope="function")
-def telegram_user_with_password(telegram_users_with_password: List[TelegramUser]) -> TelegramUser:
-    return telegram_users_with_password[0]
+# @pytest.fixture(scope="function")
+# def telegram_users_with_password(telegram_users_with_phone: List[TelegramUser]) -> List[TelegramUser]:
+#     for user in telegram_users_with_phone:
+#         user.password = user_repo._hash(PASSWORD)
+#         SecretKey.objects.try_create(telegram_user=user, value=KEY, tip=TIP)
+#
+#     TelegramUser.objects.bulk_update(telegram_users_with_phone, fields=["password"])
+#
+#     return telegram_users_with_phone
 
 
 @pytest.fixture(scope="function")
-def telegram_user_with_phone(telegram_users_with_phone: List[TelegramUser]) -> TelegramUser:
-    return telegram_users_with_phone[0]
+def telegram_user_with_password(telegram_user_with_phone: TelegramUser) -> TelegramUser:
+    telegram_user_with_phone.password = user_repo._hash(PASSWORD)
+    telegram_user_with_phone.save(update_fields=["password"])
+
+    secret_repo.create(telegram_user_with_phone.id, KEY, TIP)
+
+    return telegram_user_with_phone
+
+
+@pytest.fixture(scope="function")
+def telegram_user_with_phone(telegram_user: TelegramUser) -> TelegramUser:
+    telegram_user.phone = PHONE
+    telegram_user.save(update_fields=["phone"])
+
+    return telegram_user
 
 
 @pytest.fixture(scope="function")
@@ -148,8 +158,11 @@ def friends(telegram_user: TelegramUser, telegram_users: List[TelegramUser]) -> 
     friends = [friend for friend in telegram_users if friend != telegram_user]
 
     telegram_user.friends.add(*friends)
+
     for friend in friends:
-        friend.friends.add(telegram_user)
+        friend.phone = PHONE
+
+    TelegramUser.objects.bulk_update(friends, fields=["phone"])
 
     return friends
 

@@ -58,7 +58,7 @@ def handle_add_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 
-    if not _request_service.create(user, friend):
+    if not _request_service.try_create(user, friend):
         update.message.reply_text(_REQUEST_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 

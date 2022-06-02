@@ -15,7 +15,7 @@ class FriendRequestService:
     def get_usernames_to_friends(self, user: Union[User, TelegramUser]) -> QuerySet[str]:
         return self._request_repo.get_usernames_to_friends(user.id)
 
-    def create(self, source: TelegramUser, destination: TelegramUser) -> bool:
+    def try_create(self, source: TelegramUser, destination: TelegramUser) -> bool:
         if self._request_repo.exists(source, destination):
             return False
 
