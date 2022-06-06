@@ -142,7 +142,7 @@ DATETIME_FORMAT = DATETIME_INPUT_FORMATS = "Y-m-d H:m:s"
 
 # JWT Authentication
 
-ACCESS_TOKEN_TTL = timedelta(days=3)
+ACCESS_TOKEN_TTL = timedelta(minutes=30)
 REFRESH_TOKEN_TTL = timedelta(days=10)
 
 HASHER = BCryptSHA256PasswordHasher()

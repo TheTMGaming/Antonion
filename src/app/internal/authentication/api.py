@@ -7,9 +7,12 @@ from app.internal.authentication.presentation.routers import get_auth_router
 from app.internal.user.db.repositories import TelegramUserRepository
 
 
-def add_auth_api(api: NinjaAPI) -> None:
-    service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepository())
-    auth_handlers = AuthHandlers(auth_service=service)
+def register_auth_api(api: NinjaAPI) -> None:
+    auth_repo = AuthRepository()
+    user_repo = TelegramUserRepository()
 
-    router = get_auth_router(auth_handlers)
-    api.add_router("/auth", router)
+    auth_service = JWTService(auth_repo, user_repo)
+
+    auth_handlers = AuthHandlers(auth_service)
+
+    api.add_router("/auth", get_auth_router(auth_handlers))

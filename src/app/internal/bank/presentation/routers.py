@@ -5,7 +5,7 @@ from ninja import Router
 from app.internal.authentication.presentation import JWTAuthentication
 from app.internal.bank.domain.entities import BankAccountOut, BankCardOut, TransactionOut
 from app.internal.bank.presentation.handlers import BankHandlers
-from app.internal.general.responses import ErrorResponse
+from app.internal.responses import ErrorResponse
 
 
 def get_bank_router(bank_handlers: BankHandlers) -> Router:

@@ -6,7 +6,7 @@ from ninja.responses import Response
 from app.internal.authentication.domain.entities import AccessTokenOut, CredentialsSchema
 from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
-from app.internal.general.exceptions import (
+from app.internal.exceptions import (
     AccessTokenTTLZeroException,
     InvalidPayloadException,
     RevokedRefreshTokenException,

@@ -3,7 +3,7 @@ from typing import List
 from ninja import Router
 
 from app.internal.authentication.presentation import JWTAuthentication
-from app.internal.general.responses import ErrorResponse, SuccessResponse
+from app.internal.responses import ErrorResponse, SuccessResponse
 from app.internal.user.domain.entities.friends import FriendRequestOut
 from app.internal.user.domain.entities.user import PhoneIn, TelegramUserOut
 from app.internal.user.presentation.handlers import FriendHandlers, TelegramUserHandlers

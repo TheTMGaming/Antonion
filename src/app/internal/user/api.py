@@ -6,20 +6,26 @@ from app.internal.user.presentation.handlers import FriendHandlers, TelegramUser
 from app.internal.user.presentation.routers import get_friends_router, get_user_router
 
 
-def add_user_api(api: NinjaAPI) -> None:
-    user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-    user_handlers = TelegramUserHandlers(user_service=user_service)
+def register_user_api(api: NinjaAPI) -> None:
+    user_repo = TelegramUserRepository()
+    secret_repo = SecretKeyRepository()
 
-    api.add_router(prefix="", router=get_user_router(user_handlers))
+    user_service = TelegramUserService(user_repo, secret_repo)
+
+    user_handlers = TelegramUserHandlers(user_service)
+
+    api.add_router(prefix="/user", router=get_user_router(user_handlers))
 
 
-def add_friend_api(api: NinjaAPI) -> None:
-    user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-    friend_service = FriendService(friend_repo=TelegramUserRepository())
-    request_service = FriendRequestService(request_repo=FriendRequestRepository())
+def register_friends_api(api: NinjaAPI) -> None:
+    user_repo = TelegramUserRepository()
+    secret_repo = SecretKeyRepository()
+    request_repo = FriendRequestRepository()
 
-    friend_handlers = FriendHandlers(
-        user_service=user_service, friend_service=friend_service, request_service=request_service
-    )
+    user_service = TelegramUserService(user_repo, secret_repo)
+    friend_service = FriendService(friend_repo=user_repo)
+    request_service = FriendRequestService(request_repo)
+
+    friend_handlers = FriendHandlers(user_service, friend_service, request_service)
 
     api.add_router(prefix="/friends", router=get_friends_router(friend_handlers))
