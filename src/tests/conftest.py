@@ -66,27 +66,6 @@ def another_telegram_users(telegram_users: List[TelegramUser]) -> List[TelegramU
     return telegram_users[1:]
 
 
-# @pytest.fixture(scope="function")
-# def telegram_users_with_phone(telegram_users: List[TelegramUser], phone="+78005553535") -> List[TelegramUser]:
-#     for user in telegram_users:
-#         user.phone = phone
-#
-#     TelegramUser.objects.bulk_update(telegram_users, fields=["phone"])
-#
-#     return telegram_users
-
-
-# @pytest.fixture(scope="function")
-# def telegram_users_with_password(telegram_users_with_phone: List[TelegramUser]) -> List[TelegramUser]:
-#     for user in telegram_users_with_phone:
-#         user.password = user_repo._hash(PASSWORD)
-#         SecretKey.objects.try_create(telegram_user=user, value=KEY, tip=TIP)
-#
-#     TelegramUser.objects.bulk_update(telegram_users_with_phone, fields=["password"])
-#
-#     return telegram_users_with_phone
-
-
 @pytest.fixture(scope="function")
 def telegram_user_with_password(telegram_user_with_phone: TelegramUser) -> TelegramUser:
     telegram_user_with_phone.password = user_repo._hash(PASSWORD)

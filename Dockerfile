@@ -1,14 +1,16 @@
 FROM python:3.10-slim-buster
-ENV PYTHONUNBUFFERED=1
+
+ENV PYTHONBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
-COPY Pipfile.lock .
+EXPOSE 8000
+
+COPY Pipfile .
 RUN apt-get update && \
     apt-get install make && \
     pip install pipenv && \
-    pipenv sync --clear
-
-EXPOSE 8000
+    pipenv install --clear
 
 COPY . .

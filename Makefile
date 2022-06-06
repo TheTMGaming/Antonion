@@ -1,8 +1,11 @@
 command:
 	pipenv run python src/manage.py ${c}
 
+dev:
+	make command c="runserver 127.0.0.1:8000"
+
 run:
-	make command c="runserver 0.0.0.0:8000"
+	pipenv run gunicorn -c config/gunicorn.conf.py config.wsgi:application
 
 bot:
 	make command c="runbot"
@@ -40,9 +43,6 @@ check_lint:
 
 lint_build:
 	docker run --rm "${IMAGE_NAME}" make check_lint
-
-dev:
-	docker-compose -f docker-compose.local.yml up -d --build
 
 up:
 	docker-compose up -d --build
