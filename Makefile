@@ -5,7 +5,7 @@ dev:
 	make command c="runserver 127.0.0.1:8000"
 
 run:
-	pipenv run gunicorn -c config/gunicorn.conf.py config.wsgi:application
+	cd src && pipenv run gunicorn -c config/gunicorn.conf.py config.wsgi:application
 
 bot:
 	make command c="runbot"
