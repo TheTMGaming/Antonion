@@ -22,10 +22,10 @@ pyjwt = "~=2.4.0"
 freezegun = "~=1.2.1"
 django-ninja = "~=0.18.0"
 gunicorn = "~=20.1.0"
+django-debug-toolbar = "*"
 
 [dev-packages]
 psycopg2 = "*"
-django-debug-toolbar = "*"
 
 [requires]
 python_version = "3.10"
