@@ -16,7 +16,7 @@ services:
     build: .
     image: "${IMAGE_NAME}"
     container_name: app
-    command: make static migrate run
+    command: make collectstatic migrate run
     restart: always
     env_file:
       - src/config/.env

@@ -19,7 +19,7 @@ migration:
 superuser:
 	make command c="createsuperuser"
 
-static:
+collectstatic:
 	make command c="collectstatic --no-input --clear"
 
 shell:
