@@ -11,7 +11,7 @@ from app.internal.bank.db.repositories import BankAccountRepository, BankCardRep
 from app.internal.bank.domain.entities import BankAccountOut, BankCardOut, TransactionOut, TransferIn
 from app.internal.bank.domain.services import BankObjectService, TransactionService, TransferService
 from app.internal.bank.presentation.handlers import BankHandlers
-from app.internal.exceptions import BadRequestException, NotFoundException
+from app.internal.general.rest.exceptions import BadRequestException, NotFoundException
 from tests.conftest import BALANCE
 
 bank_obj_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())

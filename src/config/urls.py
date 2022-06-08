@@ -6,7 +6,7 @@ from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 
 from app.internal.api import get_api
-from app.internal.bot.webhook import BotWebhook
+from app.internal.webhook import BotWebhook
 
 api = get_api()
 

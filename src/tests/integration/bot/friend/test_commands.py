@@ -4,13 +4,13 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.bot.modules.friends.commands import (
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.presentation.handlers.bot.friends.commands import (
     _FRIENDSHIPS_EMPTY,
     _LIST_EMPTY_ERROR,
     handle_friends,
     handle_friendships,
 )
-from app.internal.user.db.models import TelegramUser
 
 
 @pytest.mark.django_db

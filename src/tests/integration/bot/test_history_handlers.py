@@ -5,16 +5,16 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from app.internal.bank.db.models import BankAccount
-from app.internal.bot.modules.history.handlers import (
+from app.internal.bank.presentation.handlers.bot.history.handlers import (
     _DOCUMENTS_SESSION,
     _LIST_EMPTY_MESSAGE,
     _STUPID_CHOICE,
     handle_getting_document,
     handle_start,
 )
-from app.internal.bot.modules.history.HistoryStates import HistoryStates
+from app.internal.bank.presentation.handlers.bot.history.HistoryStates import HistoryStates
 from app.internal.user.db.models import TelegramUser
-from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

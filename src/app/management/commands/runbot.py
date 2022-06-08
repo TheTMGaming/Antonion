@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from app.internal.bot.polling import start_polling
+from app.internal.polling import start_polling
 
 
 class Command(BaseCommand):

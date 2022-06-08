@@ -3,7 +3,7 @@ from typing import Callable, Optional
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-from app.internal.bot.modules.general import COMMAND, IN_CONVERSATION
+from app.internal.general.bot.handlers import COMMAND, IN_CONVERSATION
 from app.internal.user.db.repositories import TelegramUserRepository
 
 _USER_DOESNT_EXIST = "Моя вас не знать. Моя предложить знакомиться с вами! (команда /start)"
@@ -24,7 +24,7 @@ def if_update_message_exists(handler: Callable) -> Callable:
     return wrapper
 
 
-def if_user_exist(handler: Callable) -> Callable:
+def if_user_exists(handler: Callable) -> Callable:
     def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
         user = user_repo.get_user(update.effective_user.id)
 
@@ -38,7 +38,7 @@ def if_user_exist(handler: Callable) -> Callable:
     return wrapper
 
 
-def if_phone_is_set(handler: Callable) -> Callable:
+def if_phone_was_set(handler: Callable) -> Callable:
     def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
         user = user_repo.get_user(update.effective_user.id)
 

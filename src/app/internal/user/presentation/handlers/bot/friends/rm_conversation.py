@@ -1,18 +1,18 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.bot.decorators import (
-    if_phone_is_set,
+from app.internal.general.bot.decorators import (
+    if_phone_was_set,
     if_update_message_exists,
-    if_user_exist,
+    if_user_exists,
     if_user_is_not_in_conversation,
 )
-from app.internal.bot.modules.filters import INT
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.general.bot.filters import INT
+from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.services import FriendService, TelegramUserService
+from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 
 _WELCOME = "Выберите пользователя, который плохо себя ведёт:\n\n"
 _LIST_EMPTY = "К сожалению, у вас нет друзей :("
@@ -31,8 +31,8 @@ _friend_service = FriendService(friend_repo=TelegramUserRepository())
 
 
 @if_update_message_exists
-@if_user_exist
-@if_phone_is_set
+@if_user_exists
+@if_phone_was_set
 @if_user_is_not_in_conversation
 def handle_rm_friend_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)

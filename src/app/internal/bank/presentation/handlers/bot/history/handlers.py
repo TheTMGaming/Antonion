@@ -4,16 +4,16 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.bank.db.models import BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
 from app.internal.bank.domain.services import BankObjectService, TransactionService
-from app.internal.bot.decorators import (
-    if_phone_is_set,
+from app.internal.bank.presentation.handlers.bot.document import send_document_list
+from app.internal.bank.presentation.handlers.bot.history.HistoryStates import HistoryStates
+from app.internal.general.bot.decorators import (
+    if_phone_was_set,
     if_update_message_exists,
-    if_user_exist,
+    if_user_exists,
     if_user_is_not_in_conversation,
 )
-from app.internal.bot.modules.document import send_document_list
-from app.internal.bot.modules.filters import INT
-from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.bot.modules.history.HistoryStates import HistoryStates
+from app.internal.general.bot.filters import INT
+from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.services import TelegramUserService
 from app.internal.utils.file_managers import create_temp_file, get_transfer_history_filename, remove_temp_file
@@ -31,8 +31,8 @@ _transaction_service = TransactionService(transaction_repo=TransactionRepository
 
 
 @if_update_message_exists
-@if_user_exist
-@if_phone_is_set
+@if_user_exists
+@if_phone_was_set
 @if_user_is_not_in_conversation
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)

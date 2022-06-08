@@ -5,13 +5,13 @@ from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
-from app.internal.bot.modules.balance.BalanceStates import BalanceStates
-from app.internal.bot.modules.balance.handlers import (
+from app.internal.bank.presentation.handlers.bot.balance.handlers import (
     _BALANCE_BY_BANK_ACCOUNT,
     _BALANCE_BY_CARD,
     _DOCUMENTS_SESSION,
     _LIST_EMPTY_MESSAGE,
     _STUPID_CHOICE,
+    BalanceStates,
     handle_choice,
     handle_start,
 )

@@ -7,7 +7,7 @@ from ninja import Body
 from app.internal.bank.db.models import BankAccount, BankCard, Transaction
 from app.internal.bank.domain.entities import BankAccountOut, BankCardOut, TransactionOut, TransferIn
 from app.internal.bank.domain.services import BankObjectService, TransactionService, TransferService
-from app.internal.exceptions import BadRequestException, IntegrityException, NotFoundException
+from app.internal.general.rest.exceptions import BadRequestException, IntegrityException, NotFoundException
 from app.internal.user.db.models import TelegramUser
 
 

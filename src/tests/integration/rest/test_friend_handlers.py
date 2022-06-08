@@ -3,8 +3,8 @@ from typing import Callable, List, Union
 import pytest
 from django.http import HttpRequest
 
-from app.internal.exceptions import BadRequestException, NotFoundException
-from app.internal.responses import SuccessResponse
+from app.internal.general.rest.exceptions import BadRequestException, NotFoundException
+from app.internal.general.rest.responses import SuccessResponse
 from app.internal.user.db.models import FriendRequest, TelegramUser
 from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.entities.user import TelegramUserOut

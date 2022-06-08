@@ -1,12 +1,12 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.bot.decorators import if_update_message_exists, if_user_exist, if_user_is_not_in_conversation
-from app.internal.bot.modules.filters import TEXT
-from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.bot.modules.user.PasswordStates import PasswordStates
+from app.internal.general.bot.decorators import if_update_message_exists, if_user_exists, if_user_is_not_in_conversation
+from app.internal.general.bot.filters import TEXT
+from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.services import TelegramUserService
+from app.internal.user.presentation.handlers.bot.password.PasswordStates import PasswordStates
 
 _INPUT_SECRET_IF_EXISTS = "Введите секретное слово, либо /cancel\n\nПодсказка: {tip}"
 _SECRET_KEY_ERROR = "Неправильное секретной слово. Поки"
@@ -27,7 +27,7 @@ _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_k
 
 
 @if_update_message_exists
-@if_user_exist
+@if_user_exists
 @if_user_is_not_in_conversation
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)

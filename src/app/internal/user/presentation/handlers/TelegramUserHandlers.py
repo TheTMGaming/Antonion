@@ -1,8 +1,8 @@
 from django.http import HttpRequest
 from ninja import Body
 
-from app.internal.exceptions import BadRequestException, IntegrityException
-from app.internal.responses import SuccessResponse
+from app.internal.general.rest.exceptions import BadRequestException, IntegrityException
+from app.internal.general.rest.responses import SuccessResponse
 from app.internal.user.domain.entities.user import PasswordIn, PhoneIn, TelegramUserOut
 from app.internal.user.domain.services import TelegramUserService
 

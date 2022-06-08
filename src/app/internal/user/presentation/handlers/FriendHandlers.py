@@ -2,8 +2,8 @@ from typing import List
 
 from django.http import HttpRequest
 
-from app.internal.exceptions import BadRequestException, NotFoundException
-from app.internal.responses import SuccessResponse
+from app.internal.general.rest.exceptions import BadRequestException, NotFoundException
+from app.internal.general.rest.responses import SuccessResponse
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.domain.entities.friends import FriendRequestOut
 from app.internal.user.domain.entities.user import TelegramUserOut

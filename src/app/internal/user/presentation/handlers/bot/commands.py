@@ -3,10 +3,10 @@ from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
 from app.internal.bank.domain.services import BankObjectService, TransactionService
-from app.internal.bot.decorators import (
-    if_phone_is_set,
+from app.internal.general.bot.decorators import (
+    if_phone_was_set,
     if_update_message_exists,
-    if_user_exist,
+    if_user_exists,
     if_user_is_not_in_conversation,
 )
 from app.internal.user.db.models import TelegramUser
@@ -47,8 +47,8 @@ def handle_start(update: Update, context: CallbackContext) -> None:
 
 
 @if_update_message_exists
-@if_user_exist
-@if_phone_is_set
+@if_user_exists
+@if_phone_was_set
 @if_user_is_not_in_conversation
 def handle_me(update: Update, context: CallbackContext) -> None:
     user = _user_service.get_user(update.effective_user.id)
@@ -59,8 +59,8 @@ def handle_me(update: Update, context: CallbackContext) -> None:
 
 
 @if_update_message_exists
-@if_user_exist
-@if_phone_is_set
+@if_user_exists
+@if_phone_was_set
 @if_user_is_not_in_conversation
 def handle_relations(update: Update, context: CallbackContext) -> None:
     usernames = list(enumerate(_transaction_service.get_related_usernames(update.effective_user.id), start=1))

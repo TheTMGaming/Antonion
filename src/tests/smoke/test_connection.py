@@ -4,15 +4,14 @@ import freezegun
 import pytest
 from django.conf import settings
 from django.urls import reverse
-from ninja.security import HttpBearer
 from telegram import TelegramError
 
 from app.internal.authentication.db.repositories import AuthRepository
 from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
-from app.internal.bot.webhook.BotWebhookService import BotWebhookService
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import TelegramUserRepository
+from app.internal.webhook.BotWebhookService import BotWebhookService
 
 
 @pytest.mark.django_db

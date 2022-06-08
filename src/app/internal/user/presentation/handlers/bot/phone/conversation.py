@@ -1,12 +1,12 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.bot.decorators import if_update_message_exists, if_user_exist, if_user_is_not_in_conversation
-from app.internal.bot.modules.filters import TEXT
-from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.bot.modules.user.FriendStates import FriendStates
+from app.internal.general.bot.decorators import if_update_message_exists, if_user_exists, if_user_is_not_in_conversation
+from app.internal.general.bot.filters import TEXT
+from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.services import TelegramUserService
+from app.internal.user.presentation.handlers.bot.phone.PhoneStates import PhoneStates
 
 _WELCOME = "Введите, пожалуйста, номер телефона"
 _UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
@@ -16,14 +16,14 @@ _user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_k
 
 
 @if_update_message_exists
-@if_user_exist
+@if_user_exists
 @if_user_is_not_in_conversation
 def handle_phone_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
     update.message.reply_text(_WELCOME)
 
-    return FriendStates.INPUT
+    return PhoneStates.INPUT
 
 
 @if_update_message_exists
@@ -33,7 +33,7 @@ def handle_phone(update: Update, context: CallbackContext) -> int:
     was_set = _user_service.try_set_phone(update.effective_user.id, phone)
     if not was_set:
         update.message.reply_text(_INVALID_PHONE)
-        return FriendStates.INPUT
+        return PhoneStates.INPUT
 
     update.message.reply_text(_UPDATING_PHONE)
 
@@ -45,6 +45,6 @@ entry_point = CommandHandler("phone", handle_phone_start)
 
 phone_conversation = ConversationHandler(
     entry_points=[entry_point],
-    states={FriendStates.INPUT: [MessageHandler(TEXT, handle_phone)]},
+    states={PhoneStates.INPUT: [MessageHandler(TEXT, handle_phone)]},
     fallbacks=[cancel],
 )

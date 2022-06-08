@@ -3,8 +3,8 @@ from telegram import Update, User
 from telegram.ext import CallbackContext
 
 from app.internal.bank.db.models import BankAccount, Transaction
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.user.handlers import (
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.presentation.handlers.bot.commands import (
     _RELATION_LIST_EMPTY,
     _UPDATING_DETAILS,
     _WELCOME as welcome_user,
@@ -12,15 +12,15 @@ from app.internal.bot.modules.user.handlers import (
     handle_relations,
     handle_start,
 )
-from app.internal.bot.modules.user.phone_conversation import (
+from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
+from app.internal.user.presentation.handlers.bot.phone.conversation import (
     _INVALID_PHONE,
     _UPDATING_PHONE,
     _WELCOME,
     handle_phone,
     handle_phone_start,
 )
-from app.internal.user.db.models import TelegramUser
-from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

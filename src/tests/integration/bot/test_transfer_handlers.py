@@ -8,7 +8,7 @@ from telegram.ext import CallbackContext
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
 from app.internal.bank.domain.services import TransferService
-from app.internal.bot.modules.transfer.handlers import (
+from app.internal.bank.presentation.handlers.bot.transfer.handlers import (
     _ACCRUAL_GREATER_BALANCE_ERROR,
     _ACCRUAL_PARSE_ERROR,
     _ACCRUAL_SESSION,
@@ -33,10 +33,10 @@ from app.internal.bot.modules.transfer.handlers import (
     handle_start,
     handle_transfer,
 )
-from app.internal.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.bank.presentation.handlers.bot.transfer.TransferStates import TransferStates
 from app.internal.user.db.models import TelegramUser
 from tests.conftest import BALANCE
-from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 service = TransferService(
     account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()

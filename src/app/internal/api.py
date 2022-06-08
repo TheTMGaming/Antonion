@@ -5,7 +5,7 @@ from ninja import NinjaAPI
 
 from app.internal.authentication.api import register_auth_api
 from app.internal.bank.api import register_bank_api
-from app.internal.exceptions import (
+from app.internal.general.rest.exceptions import (
     AccessTokenTTLZeroException,
     APIException,
     BadRequestException,

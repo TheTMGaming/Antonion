@@ -2,7 +2,8 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.bot.modules.user.password_conversation import (
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.presentation.handlers.bot.password.conversation import (
     _CONFIRM_PASSWORD,
     _CREATE_TIP,
     _CREATING_SUCCESS,
@@ -27,10 +28,9 @@ from app.internal.bot.modules.user.password_conversation import (
     handle_entering_in_updating,
     handle_start,
 )
-from app.internal.bot.modules.user.PasswordStates import PasswordStates
-from app.internal.user.db.models import TelegramUser
+from app.internal.user.presentation.handlers.bot.password.PasswordStates import PasswordStates
 from tests.conftest import KEY, PASSWORD, TIP, WRONG_KEY, WRONG_PASSWORD
-from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

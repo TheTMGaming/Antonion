@@ -7,18 +7,18 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
 from app.internal.bank.domain.services import BankObjectService, TransferService
-from app.internal.bot.decorators import (
-    if_phone_is_set,
+from app.internal.bank.presentation.handlers.bot.document import send_document_list
+from app.internal.bank.presentation.handlers.bot.transfer.TransferStates import TransferStates
+from app.internal.general.bot.decorators import (
+    if_phone_was_set,
     if_update_message_exists,
-    if_user_exist,
+    if_user_exists,
     if_user_is_not_in_conversation,
 )
-from app.internal.bot.modules.document import send_document_list
-from app.internal.bot.modules.filters import FLOATING, INT
-from app.internal.bot.modules.general import cancel, mark_conversation_end, mark_conversation_start
-from app.internal.bot.modules.transfer.TransferStates import TransferStates
+from app.internal.general.bot.filters import FLOATING, INT
+from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
+from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.services import FriendService, TelegramUserService
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
@@ -73,8 +73,8 @@ _transfer_service = TransferService(
 
 
 @if_update_message_exists
-@if_user_exist
-@if_phone_is_set
+@if_user_exists
+@if_phone_was_set
 @if_user_is_not_in_conversation
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)

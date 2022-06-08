@@ -2,15 +2,15 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-from app.internal.bot.decorators import (
+from app.internal.general.bot.decorators import (
     _UNDEFINED_PHONE,
     _USER_DOESNT_EXIST,
-    if_phone_is_set,
+    if_phone_was_set,
     if_update_message_exists,
-    if_user_exist,
+    if_user_exists,
     if_user_is_not_in_conversation,
 )
-from app.internal.bot.modules.general import mark_conversation_start
+from app.internal.general.bot.handlers import mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 
 
@@ -29,26 +29,26 @@ def test_if_update_message_exist_error(update: Update, context: CallbackContext)
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_if_user_exist(update: Update, context: CallbackContext, telegram_user: TelegramUser) -> None:
-    assert if_user_exist(_handler)(update, context) == _handler(update, context)
+    assert if_user_exists(_handler)(update, context) == _handler(update, context)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_if_user_exist_error(update: Update, context: CallbackContext) -> None:
-    assert if_user_exist(_handler)(update, context) == ConversationHandler.END
+    assert if_user_exists(_handler)(update, context) == ConversationHandler.END
     update.message.reply_text.assert_called_once_with(_USER_DOESNT_EXIST)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_if_phone_is_set(update: Update, context: CallbackContext, telegram_user_with_phone) -> None:
-    assert if_phone_is_set(_handler)(update, context) == _handler(update, context)
+    assert if_phone_was_set(_handler)(update, context) == _handler(update, context)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_if_phone_is_not_set(update: Update, context: CallbackContext, telegram_user: TelegramUser) -> None:
-    assert if_phone_is_set(_handler)(update, context) == ConversationHandler.END
+    assert if_phone_was_set(_handler)(update, context) == ConversationHandler.END
     update.message.reply_text.assert_called_once_with(_UNDEFINED_PHONE)
 
 

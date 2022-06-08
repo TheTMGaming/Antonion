@@ -20,17 +20,7 @@ from environ import Env
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = Env(
-    ALLOWED_HOSTS=(str, ""),
-    POSTGRES_DB=(str, ""),
-    POSTGRES_USER=(str, ""),
-    POSTGRES_PASSWORD=(str, ""),
-    POSTGRES_HOST=(str, ""),
-    POSTGRES_PORT=(str, ""),
-    SECRET_KEY=(str, ""),
-    TELEGRAM_BOT_TOKEN=(str, ""),
-    DEBUG=(bool, False),
-)
+env = Env()
 Env.read_env()
 
 # Quick-start development settings - unsuitable for production
@@ -155,6 +145,11 @@ REFRESH_TOKEN_COOKIE = "refresh_token"
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "static/"
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

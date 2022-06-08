@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
 
 
-class FriendStates(IntEnum):
+class PhoneStates(IntEnum):
     INPUT = auto()

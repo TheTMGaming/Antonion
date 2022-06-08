@@ -5,10 +5,11 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.friends.users_to_friends_sender import send_username_list
 from app.internal.user.db.models import FriendRequest, TelegramUser
-from tests.integration.bot.general import assert_conversation_end
+from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
+from app.internal.user.presentation.handlers.bot.friends.users_to_friends_sender import send_username_list
+
+from tests.integration.bot.conftest import assert_conversation_end
 
 _WELCOME = "abc"
 _LIST_EMPTY = "ops"

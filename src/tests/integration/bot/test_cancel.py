@@ -2,7 +2,7 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-from app.internal.bot.modules.general import _CANCEL_OPERATION, handle_cancel
+from app.internal.general.bot.handlers import _CANCEL_OPERATION, handle_cancel
 
 
 @pytest.mark.integration

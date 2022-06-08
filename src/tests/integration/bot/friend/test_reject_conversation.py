@@ -2,8 +2,9 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.friends.reject_conversation import (
+from app.internal.user.db.models import FriendRequest, TelegramUser
+from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
+from app.internal.user.presentation.handlers.bot.friends.reject_conversation import (
     _REJECT_SUCCESS,
     _STUPID_CHOICE,
     _USERNAMES_SESSION,
@@ -11,8 +12,7 @@ from app.internal.bot.modules.friends.reject_conversation import (
     handle_reject,
     handle_reject_start,
 )
-from app.internal.user.db.models import FriendRequest, TelegramUser
-from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

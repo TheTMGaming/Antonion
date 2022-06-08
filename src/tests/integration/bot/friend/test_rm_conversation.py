@@ -4,18 +4,18 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.friends.rm_conversation import (
+from app.internal.user.db.models import TelegramUser
+from app.internal.user.presentation.handlers.bot.friends.rm_conversation import (
     _REMOVE_SUCCESS,
     _STUPID_CHOICE,
     _USER_SESSION,
     _USERNAMES_SESSION,
+    FriendStates,
     get_notification,
     handle_rm_friend,
     handle_rm_friend_start,
 )
-from app.internal.user.db.models import TelegramUser
-from tests.integration.bot.general import assert_conversation_end, assert_conversation_start
+from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db

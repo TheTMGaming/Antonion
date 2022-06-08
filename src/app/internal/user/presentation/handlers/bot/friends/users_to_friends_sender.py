@@ -1,10 +1,10 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.bot.modules.friends.FriendStates import FriendStates
-from app.internal.bot.modules.general import mark_conversation_end
+from app.internal.general.bot.handlers import mark_conversation_end
 from app.internal.user.db.repositories import FriendRequestRepository
 from app.internal.user.domain.services import FriendRequestService
+from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 
 _USERNAME_VARIANT = "{num}) {username}"
 

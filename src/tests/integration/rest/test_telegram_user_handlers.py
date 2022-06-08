@@ -3,8 +3,8 @@ import re
 import pytest
 from django.http import HttpRequest
 
-from app.internal.exceptions import BadRequestException
-from app.internal.responses import SuccessResponse
+from app.internal.general.rest.exceptions import BadRequestException
+from app.internal.general.rest.responses import SuccessResponse
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.entities.user import PasswordIn, PhoneIn
