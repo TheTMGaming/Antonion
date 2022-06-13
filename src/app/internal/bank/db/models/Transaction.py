@@ -11,7 +11,8 @@ class Transaction(models.Model):
     destination = models.ForeignKey(BankAccount, on_delete=models.CASCADE, related_name="transactions_to_me")
     accrual = models.DecimalField(decimal_places=2, max_digits=20, default=0, validators=[MinValueValidator(0)])
     photo = models.ImageField(upload_to="transactions/%Y/%m/%d/", null=True, default=None)
-    was_viewed = models.BooleanField(default=False)
+    was_source_viewed = models.BooleanField(default=False)
+    was_destination_viewed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

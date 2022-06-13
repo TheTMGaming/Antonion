@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import Optional, Union
 
@@ -42,3 +41,13 @@ class TransactionRepository(ITransactionRepository):
         to = Transaction.objects.filter(destination__owner_id=user_id).values_list("source__owner__username", flat=True)
 
         return from_.union(to)
+
+    def get_new_transactions(self, user_id: Union[int, str]) -> QuerySet[Transaction]:
+        return Transaction.objects.filter(
+            Q(source__owner_id=user_id) & Q(was_source_viewed=False)
+            | Q(destination__owner__id=user_id) & Q(was_destination_viewed=False)
+        )
+
+    def mark_transactions_as_viewed(self, user_id: Union[int, str]) -> None:
+        Transaction.objects.filter(source__owner_id=user_id).update(was_source_viewed=True)
+        Transaction.objects.filter(destination__owner_id=user_id).update(was_destination_viewed=True)

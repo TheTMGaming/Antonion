@@ -188,7 +188,7 @@ def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
 
 @if_update_message_exists
 def handle_getting_photo(update: Update, context: CallbackContext) -> int:
-    photo = update.message.document or update.message.photo[-1]
+    photo = update.message.photo[-1]
 
     if photo.file_size > settings.MAX_SIZE_PHOTO_BYTES:
         update.message.reply_text(_PHOTO_SIZE_ERROR)
@@ -213,7 +213,7 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     source: BankAccount = context.user_data[_SOURCE_SESSION]
     destination: BankAccount = context.user_data[_DESTINATION_SESSION]
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
-    photo: Optional[Union[PhotoSize, Document]] = context.user_data.get(_PHOTO_SESSION)
+    photo: Optional[PhotoSize] = context.user_data.get(_PHOTO_SESSION)
 
     is_success = _transfer_service.try_transfer(source, destination, accrual, photo)
     message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
@@ -221,9 +221,13 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(message)
 
     if is_success:
-        context.bot.send_message(
-            chat_id=destination.get_owner().id, text=_get_accrual_detail(source, destination, accrual)
-        )
+        details = _get_accrual_detail(source, destination, accrual)
+        destination_id = destination.get_owner().id
+
+        if photo:
+            context.bot.send_photo(chat_id=destination_id, photo=photo, caption=details)
+        else:
+            context.bot.send_message(chat_id=destination_id, text=details)
 
     return mark_conversation_end(context)
 
@@ -294,7 +298,7 @@ transfer_conversation = ConversationHandler(
         TransferStates.ACCRUAL: [MessageHandler(FLOATING, handle_getting_accrual)],
         TransferStates.PHOTO: [
             MessageHandler(IMAGE, handle_getting_photo),
-            CommandHandler("skip", handle_skip_getting_photo)
+            CommandHandler("skip", handle_skip_getting_photo),
         ],
         TransferStates.CONFIRM: [CommandHandler("confirm", handle_transfer)],
     },

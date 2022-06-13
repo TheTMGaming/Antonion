@@ -50,7 +50,7 @@ class TransferService:
         source: BankAccount,
         destination: BankAccount,
         accrual: Decimal,
-        photo: Optional[Union[PhotoSize, Document]],
+        photo: Optional[PhotoSize],
     ) -> Optional[Transaction]:
         if not self.validate_accrual(accrual):
             raise ValueError()

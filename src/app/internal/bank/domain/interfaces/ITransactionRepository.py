@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
@@ -26,4 +26,12 @@ class ITransactionRepository(ABC):
 
     @abstractmethod
     def get_related_usernames(self, user_id: Union[int, str]) -> QuerySet[str]:
+        pass
+
+    @abstractmethod
+    def get_new_transactions(self, user_id: Union[int, str]) -> QuerySet[Transaction]:
+        pass
+
+    @abstractmethod
+    def mark_transactions_as_viewed(self, user_id: Union[int, str]) -> None:
         pass

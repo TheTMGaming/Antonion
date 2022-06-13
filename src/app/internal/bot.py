@@ -1,4 +1,5 @@
 from app.internal.bank.presentation.handlers.bot.balance import balance_conversation
+from app.internal.bank.presentation.handlers.bot.commands import bank_commands
 from app.internal.bank.presentation.handlers.bot.history import history_conversation
 from app.internal.bank.presentation.handlers.bot.transfer import transfer_conversation
 from app.internal.user.presentation.handlers.bot.commands import user_commands
@@ -12,10 +13,7 @@ from app.internal.user.presentation.handlers.bot.friends import (
 from app.internal.user.presentation.handlers.bot.password import password_conversation
 from app.internal.user.presentation.handlers.bot.phone import phone_conversation
 
-commands = [
-    *user_commands,
-    *friends_commands,
-]
+commands = [*user_commands, *friends_commands, *bank_commands]
 
 conversations = [
     password_conversation,
