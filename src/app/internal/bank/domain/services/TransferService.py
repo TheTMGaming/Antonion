@@ -1,7 +1,9 @@
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Union
 
+from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
+from telegram import Document, PhotoSize, TelegramError
 
 from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
@@ -43,16 +45,30 @@ class TransferService:
 
         return accrual <= document.get_balance()
 
-    def try_transfer(self, source: BankAccount, destination: BankAccount, accrual: Decimal) -> Optional[Transaction]:
+    def try_transfer(
+        self,
+        source: BankAccount,
+        destination: BankAccount,
+        accrual: Decimal,
+        photo: Optional[Union[PhotoSize, Document]],
+    ) -> Optional[Transaction]:
         if not self.validate_accrual(accrual):
             raise ValueError()
+
+        try:
+            if photo:
+                photo = ContentFile(content=photo.get_file().download_as_bytearray(), name=photo.file_unique_id)
+        except TelegramError:
+            return None
 
         try:
             with transaction.atomic():
                 self._account_repo.subtract(source.number, accrual)
                 self._account_repo.accrue(destination.number, accrual)
 
-            return self._transaction_repo.declare(source.number, destination.number, TransactionTypes.TRANSFER, accrual)
+            return self._transaction_repo.declare(
+                source.number, destination.number, TransactionTypes.TRANSFER, accrual, photo
+            )
 
         except IntegrityError:
             return None

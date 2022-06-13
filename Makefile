@@ -28,6 +28,9 @@ shell:
 debug:
 	make command c="debug"
 
+sql:
+	make command c="debugsqlshell"
+
 piplock:
 	pipenv install
 

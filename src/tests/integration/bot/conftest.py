@@ -7,7 +7,7 @@ from telegram import User
 from telegram.ext import CallbackContext, ConversationHandler
 
 from app.internal.bank.db.models import BankAccount
-from app.internal.general.bot.handlers import IN_CONVERSATION, COMMAND
+from app.internal.general.bot.handlers import COMMAND, IN_CONVERSATION
 from app.internal.user.db.models import TelegramUser
 
 

@@ -3,7 +3,6 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from app.internal.user.db.models import FriendRequest, TelegramUser
-from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 from app.internal.user.presentation.handlers.bot.friends.accept_conversation import (
     _FRIEND_CANCEL,
     _STUPID_CHOICE,
@@ -12,6 +11,7 @@ from app.internal.user.presentation.handlers.bot.friends.accept_conversation imp
     handle_accept,
     handle_accept_start,
 )
+from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 

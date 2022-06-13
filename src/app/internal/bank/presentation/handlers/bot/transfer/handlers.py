@@ -1,7 +1,9 @@
+from collections import namedtuple
 from decimal import Decimal
-from typing import Dict
+from typing import Dict, Optional, Union
 
-from telegram import Update
+from django.conf import settings
+from telegram import Document, File, PhotoSize, Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
@@ -15,7 +17,7 @@ from app.internal.general.bot.decorators import (
     if_user_exists,
     if_user_is_not_in_conversation,
 )
-from app.internal.general.bot.filters import FLOATING, INT
+from app.internal.general.bot.filters import FLOATING, IMAGE, INT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
@@ -29,6 +31,10 @@ _FRIEND_VARIANT = "{number}) {username} ({first_name})"
 _TRANSFER_DESTINATION_WELCOME = "Выберите банковский счёт или карту получателя:\n"
 _TRANSFER_SOURCE_WELCOME = "Откуда списать:\n"
 _ACCRUAL_WELCOME = "Введите размер перевода:\n"
+_PHOTO_WELCOME = (
+    f"Сделайте приятное другу, прикрепив картинку, либо /cancel или /skip."
+    f" Только помни, максимальный размер картинки - {settings.MAX_SIZE_PHOTO_KB} KB"
+)
 
 _SOURCE_DOCUMENT_LIST_EMPTY_ERROR = "У вас нет счёта или карты! Как вы собрались переводить?"
 _FRIEND_DOCUMENT_LIST_EMPTY_ERROR = "К сожалению, у друга нет счетов и карт. Выберите другого, либо /cancel"
@@ -38,6 +44,9 @@ _ACCRUAL_GREATER_BALANCE_ERROR = (
     "Размер перевода не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
 )
 _FRIEND_LIST_EMPTY_ERROR = "Заведите сначала друзей! Команда /add_friend"
+_PHOTO_SIZE_ERROR = (
+    f"Превышен максимальный размер - {settings.MAX_SIZE_PHOTO_KB} KB. Повторите попытку, либо /cancel или /skip"
+)
 
 _TRANSFER_DETAILS = (
     "Проверьте корректность данных перевода. Если согласны, введите /confirm, иначе - /cancel\n\n"
@@ -62,6 +71,10 @@ _SOURCE_SESSION = "source_document"
 _CHOSEN_FRIEND_SESSION = "chosen_friend"
 _FRIEND_VARIANTS_SESSION = "friend_variants"
 _ACCRUAL_SESSION = "accrual"
+_CAPTION_SESSION = "photo_caption"
+_PHOTO_SESSION = "transfer_photo"
+
+Photo = namedtuple("Photo", ["id", "size"])
 
 
 _friend_service = FriendService(friend_repo=TelegramUserRepository())
@@ -168,6 +181,28 @@ def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
 
     context.user_data[_ACCRUAL_SESSION] = accrual
 
+    update.message.reply_text(_PHOTO_WELCOME)
+
+    return TransferStates.PHOTO
+
+
+@if_update_message_exists
+def handle_getting_photo(update: Update, context: CallbackContext) -> int:
+    photo = update.message.document or update.message.photo[-1]
+
+    if photo.file_size > settings.MAX_SIZE_PHOTO_BYTES:
+        update.message.reply_text(_PHOTO_SIZE_ERROR)
+        return TransferStates.PHOTO
+
+    context.user_data[_PHOTO_SESSION] = photo
+
+    _send_transfer_details(update, context)
+
+    return TransferStates.CONFIRM
+
+
+@if_update_message_exists
+def handle_skip_getting_photo(update: Update, context: CallbackContext) -> int:
     _send_transfer_details(update, context)
 
     return TransferStates.CONFIRM
@@ -178,8 +213,9 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     source: BankAccount = context.user_data[_SOURCE_SESSION]
     destination: BankAccount = context.user_data[_DESTINATION_SESSION]
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
+    photo: Optional[Union[PhotoSize, Document]] = context.user_data.get(_PHOTO_SESSION)
 
-    is_success = _transfer_service.try_transfer(source, destination, accrual)
+    is_success = _transfer_service.try_transfer(source, destination, accrual, photo)
     message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
 
     update.message.reply_text(message)
@@ -256,6 +292,10 @@ transfer_conversation = ConversationHandler(
         TransferStates.DESTINATION_DOCUMENT: [MessageHandler(INT, handle_getting_destination_document)],
         TransferStates.SOURCE_DOCUMENT: [MessageHandler(INT, handle_getting_source_document)],
         TransferStates.ACCRUAL: [MessageHandler(FLOATING, handle_getting_accrual)],
+        TransferStates.PHOTO: [
+            MessageHandler(IMAGE, handle_getting_photo),
+            CommandHandler("skip", handle_skip_getting_photo)
+        ],
         TransferStates.CONFIRM: [CommandHandler("confirm", handle_transfer)],
     },
     fallbacks=[cancel],
