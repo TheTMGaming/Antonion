@@ -2,16 +2,14 @@ from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.general.bot.decorators import (
-    if_phone_was_set,
     if_update_message_exists,
-    if_user_exists,
+    if_user_is_created,
     if_user_is_not_in_conversation,
 )
 from app.internal.general.bot.filters import INT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.general.services import friend_service, user_service
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService
 from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 
 _WELCOME = "Выберите пользователя, который плохо себя ведёт:\n\n"
@@ -26,19 +24,14 @@ _USERNAMES_SESSION = "usernames"
 _USER_SESSION = "user"
 
 
-_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_friend_service = FriendService(friend_repo=TelegramUserRepository())
-
-
 @if_update_message_exists
-@if_user_exists
-@if_phone_was_set
+@if_user_is_created
 @if_user_is_not_in_conversation
 def handle_rm_friend_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = _user_service.get_user(update.effective_user.id)
-    friends = _friend_service.get_friends_as_dict(user)
+    user = user_service.get_user(update.effective_user.id)
+    friends = friend_service.get_friends_as_dict(user)
 
     context.user_data[_USERNAMES_SESSION] = friends
     context.user_data[_USER_SESSION] = user
@@ -60,7 +53,7 @@ def handle_rm_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_STUPID_CHOICE)
         return FriendStates.INPUT
 
-    _friend_service.remove_from_friends(user, friend)
+    friend_service.remove_from_friends(user, friend)
     update.message.reply_text(_REMOVE_SUCCESS)
 
     context.bot.send_message(chat_id=friend.id, text=get_notification(user))

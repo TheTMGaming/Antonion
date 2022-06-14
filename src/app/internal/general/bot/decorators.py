@@ -8,6 +8,8 @@ from app.internal.user.db.repositories import TelegramUserRepository
 
 _USER_DOESNT_EXIST = "Моя вас не знать. Моя предложить знакомиться с вами! (команда /start)"
 _UNDEFINED_PHONE = "Вы забыли уведомить нас о вашей мобилке. Пожалуйста, продиктуйте! (команда /phone)"
+_UNDEFINED_USERNAME = "Пожалуйста, установите никнейм в телеграме, а то банк вам не доверяет"
+
 _MUST_CONVERSATION_END = "Вы не завершили команду /{command}. Это можно сделать с помощью /cancel"
 
 
@@ -24,32 +26,28 @@ def if_update_message_exists(handler: Callable) -> Callable:
     return wrapper
 
 
-def if_user_exists(handler: Callable) -> Callable:
-    def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
-        user = user_repo.get_user(update.effective_user.id)
+def if_user_is_created(phone=True) -> Callable:
+    def handler_wrapper(handler: Callable) -> Callable:
+        def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
+            user = user_repo.get_user(update.effective_user.id)
 
-        if user:
+            if not user:
+                update.message.reply_text(_USER_DOESNT_EXIST)
+                return ConversationHandler.END
+
+            if not user.username:
+                update.message.reply_text(_UNDEFINED_USERNAME)
+                return ConversationHandler.END
+
+            if phone and not user.phone:
+                update.message.reply_text(_UNDEFINED_PHONE)
+                return ConversationHandler.END
+
             return handler(update, context)
 
-        update.message.reply_text(_USER_DOESNT_EXIST)
+        return wrapper
 
-        return ConversationHandler.END
-
-    return wrapper
-
-
-def if_phone_was_set(handler: Callable) -> Callable:
-    def wrapper(update: Update, context: CallbackContext) -> Optional[int]:
-        user = user_repo.get_user(update.effective_user.id)
-
-        if user.phone:
-            return handler(update, context)
-
-        update.message.reply_text(_UNDEFINED_PHONE)
-
-        return ConversationHandler.END
-
-    return wrapper
+    return handler_wrapper
 
 
 def if_user_is_not_in_conversation(handler: Callable) -> Callable:

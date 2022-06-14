@@ -2,11 +2,8 @@ from typing import List
 
 import pytest
 
+from app.internal.general.services import request_service
 from app.internal.user.db.models import FriendRequest, TelegramUser
-from app.internal.user.db.repositories import FriendRequestRepository
-from app.internal.user.domain.services import FriendRequestService
-
-service = FriendRequestService(request_repo=FriendRequestRepository())
 
 
 @pytest.mark.django_db
@@ -14,7 +11,7 @@ service = FriendRequestService(request_repo=FriendRequestRepository())
 def test_getting_friendship_username_list(
     telegram_user: TelegramUser, another_telegram_users: List[TelegramUser], friend_requests: List[FriendRequest]
 ) -> None:
-    actual = list(service.get_usernames_to_friends(telegram_user))
+    actual = list(request_service.get_usernames_to_friends(telegram_user))
     expected = [user.username for user in another_telegram_users]
 
     assert actual == expected
@@ -23,7 +20,7 @@ def test_getting_friendship_username_list(
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_creating_friend_request(telegram_user: TelegramUser, another_telegram_user: TelegramUser) -> None:
-    is_created = service.try_create(another_telegram_user, telegram_user)
+    is_created = request_service.try_create(another_telegram_user, telegram_user)
     requests = FriendRequest.objects.filter(source=another_telegram_user, destination=telegram_user).all()
 
     assert is_created
@@ -37,7 +34,7 @@ def test_creating_friend_request(telegram_user: TelegramUser, another_telegram_u
 def test_creating_friend_request__already_exist(
     telegram_user: TelegramUser, another_telegram_user: TelegramUser, friend_request: FriendRequest
 ) -> None:
-    is_created = service.try_create(another_telegram_user, telegram_user)
+    is_created = request_service.try_create(another_telegram_user, telegram_user)
 
     assert not is_created
 
@@ -47,7 +44,7 @@ def test_creating_friend_request__already_exist(
 def test_accepting_friend(
     telegram_user: TelegramUser, another_telegram_user: TelegramUser, friend_request: FriendRequest
 ) -> None:
-    is_accepted = service.try_accept(another_telegram_user, telegram_user)
+    is_accepted = request_service.try_accept(another_telegram_user, telegram_user)
 
     assert is_accepted
     assert telegram_user.friends.filter(id=another_telegram_user.id).exists()
@@ -60,7 +57,7 @@ def test_accepting_friend(
 def test_accepting_friend__request_is_not_exist(
     telegram_user: TelegramUser, another_telegram_user: TelegramUser
 ) -> None:
-    is_accepted = service.try_accept(another_telegram_user, telegram_user)
+    is_accepted = request_service.try_accept(another_telegram_user, telegram_user)
 
     assert not is_accepted
     assert not telegram_user.friends.filter(id=another_telegram_user.id).exists()
@@ -73,7 +70,7 @@ def test_accepting_friend__request_is_not_exist(
 def test_rejecting_friend_request(telegram_user: TelegramUser, another_telegram_user: TelegramUser) -> None:
     request = FriendRequest.objects.create(source=another_telegram_user, destination=telegram_user)
 
-    service.try_reject(another_telegram_user, telegram_user)
+    request_service.try_reject(another_telegram_user, telegram_user)
 
     assert not FriendRequest.objects.filter(pk=request.pk).exists()
 
@@ -81,6 +78,6 @@ def test_rejecting_friend_request(telegram_user: TelegramUser, another_telegram_
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_rejecting_friend_request__not_exist(telegram_user: TelegramUser, another_telegram_user: TelegramUser) -> None:
-    service.try_reject(another_telegram_user, telegram_user)
+    request_service.try_reject(another_telegram_user, telegram_user)
 
     assert not FriendRequest.objects.filter(source=another_telegram_user, destination=telegram_user).exists()

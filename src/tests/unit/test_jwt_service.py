@@ -6,22 +6,19 @@ from django.conf import settings
 from freezegun import freeze_time
 
 from app.internal.authentication.db.models import RefreshToken
-from app.internal.authentication.db.repositories import AuthRepository
-from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
+from app.internal.general.services import auth_service
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import TelegramUserRepository
 from tests.conftest import PASSWORD, WRONG_PASSWORD
 
-service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepository())
-CREATED_AT, TELEGRAM_ID, TOKEN_TYPE = service.CREATED_AT, service.TELEGRAM_ID, service.TOKEN_TYPE
+CREATED_AT, TELEGRAM_ID, TOKEN_TYPE = auth_service.CREATED_AT, auth_service.TELEGRAM_ID, auth_service.TOKEN_TYPE
 
 
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_authenticated_user(telegram_user: TelegramUser) -> None:
     payload = {TELEGRAM_ID: telegram_user.id}
-    actual = service.get_authenticated_telegram_user(payload)
+    actual = auth_service.get_authenticated_telegram_user(payload)
 
     assert actual == telegram_user
 
@@ -30,7 +27,7 @@ def test_getting_authenticated_user(telegram_user: TelegramUser) -> None:
 @pytest.mark.unit
 def test_getting_authenticated_user__not_exists() -> None:
     payload = {TELEGRAM_ID: 1337}
-    actual = service.get_authenticated_telegram_user(payload)
+    actual = auth_service.get_authenticated_telegram_user(payload)
 
     assert actual is None
 
@@ -38,8 +35,8 @@ def test_getting_authenticated_user__not_exists() -> None:
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_getting_user_by_credentials(telegram_user_with_password: TelegramUser) -> None:
-    correct = service.get_user_by_credentials(telegram_user_with_password.username, PASSWORD)
-    wrong = service.get_user_by_credentials(telegram_user_with_password.username, WRONG_PASSWORD)
+    correct = auth_service.get_user_by_credentials(telegram_user_with_password.username, PASSWORD)
+    wrong = auth_service.get_user_by_credentials(telegram_user_with_password.username, WRONG_PASSWORD)
 
     assert correct == telegram_user_with_password
     assert wrong is None
@@ -49,7 +46,7 @@ def test_getting_user_by_credentials(telegram_user_with_password: TelegramUser) 
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_creating_tokens(telegram_user: TelegramUser) -> None:
-    access, refresh = service.create_access_and_refresh_tokens(telegram_user)
+    access, refresh = auth_service.create_access_and_refresh_tokens(telegram_user)
     actual_refresh_tokens = RefreshToken.objects.filter(telegram_user=telegram_user).all()
 
     _assert_tokens(access, refresh, telegram_user)
@@ -61,7 +58,7 @@ def test_creating_tokens(telegram_user: TelegramUser) -> None:
 @pytest.mark.django_db
 @pytest.mark.unit
 def test_updating_tokens(telegram_user: TelegramUser, refresh_token: RefreshToken) -> None:
-    tokens = service.update_access_and_refresh_tokens(refresh_token)
+    tokens = auth_service.update_access_and_refresh_tokens(refresh_token)
 
     assert tokens is not None
     _assert_tokens(tokens[0], tokens[1], telegram_user)
@@ -76,14 +73,14 @@ def test_updating_tokens__revoking_all(telegram_user: TelegramUser, refresh_toke
     refresh_token.revoked = True
     refresh_token.save(update_fields=["revoked"])
 
-    tokens = service.update_access_and_refresh_tokens(refresh_token)
+    tokens = auth_service.update_access_and_refresh_tokens(refresh_token)
 
     assert tokens is None
     assert RefreshToken.objects.filter(telegram_user=telegram_user, revoked=False).count() == 0
 
 
 def _assert_tokens(access: str, refresh: str, telegram_user: TelegramUser) -> None:
-    access_payload, refresh_payload = service.try_get_payload(access), service.try_get_payload(refresh)
+    access_payload, refresh_payload = auth_service.try_get_payload(access), auth_service.try_get_payload(refresh)
 
     payload = {TELEGRAM_ID: telegram_user.id, CREATED_AT: datetime.now().timestamp()}
     assert access_payload == payload | {TOKEN_TYPE: TokenTypes.ACCESS.value}
@@ -93,11 +90,11 @@ def _assert_tokens(access: str, refresh: str, telegram_user: TelegramUser) -> No
 @freeze_time("2022-06-02")
 @pytest.mark.unit
 def test_getting_payload(token_type=TokenTypes.ACCESS) -> None:
-    expected = {TELEGRAM_ID: 123, CREATED_AT: service._now().timestamp(), TOKEN_TYPE: token_type.value}
+    expected = {TELEGRAM_ID: 123, CREATED_AT: auth_service._now().timestamp(), TOKEN_TYPE: token_type.value}
 
-    token = service.generate_token(expected[TELEGRAM_ID], token_type)
+    token = auth_service.generate_token(expected[TELEGRAM_ID], token_type)
 
-    actual = service.try_get_payload(token)
+    actual = auth_service.try_get_payload(token)
 
     assert actual == expected
 
@@ -105,7 +102,7 @@ def test_getting_payload(token_type=TokenTypes.ACCESS) -> None:
 @pytest.mark.unit
 def test_getting_bad_payload() -> None:
     token = "imstupidtoken"
-    payload = service.try_get_payload(token)
+    payload = auth_service.try_get_payload(token)
 
     assert payload == {}
 
@@ -124,10 +121,10 @@ def test_getting_bad_payload() -> None:
     ],
 )
 def test_validation_payload(payload: Dict[str, Any], is_valid: bool) -> None:
-    assert service.is_payload_valid(payload) == is_valid
+    assert auth_service.is_payload_valid(payload) == is_valid
 
 
-@freeze_time(service._now())
+@freeze_time(auth_service._now())
 @pytest.mark.parametrize(
     ["delta", "is_alive"],
     [
@@ -143,6 +140,10 @@ def test_validation_payload(payload: Dict[str, Any], is_valid: bool) -> None:
     ],
 )
 def test_is_token_alive(delta: timedelta, is_alive: bool) -> None:
-    payload = {TELEGRAM_ID: 123, TOKEN_TYPE: TokenTypes.ACCESS.value, CREATED_AT: (service._now() + delta).timestamp()}
+    payload = {
+        TELEGRAM_ID: 123,
+        TOKEN_TYPE: TokenTypes.ACCESS.value,
+        CREATED_AT: (auth_service._now() + delta).timestamp(),
+    }
 
-    assert service.is_token_alive(payload, TokenTypes.ACCESS, settings.ACCESS_TOKEN_TTL) == is_alive
+    assert auth_service.is_token_alive(payload, TokenTypes.ACCESS, settings.ACCESS_TOKEN_TTL) == is_alive

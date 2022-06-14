@@ -7,7 +7,7 @@ from app.internal.general.bot.decorators import (
     _USER_DOESNT_EXIST,
     if_phone_was_set,
     if_update_message_exists,
-    if_user_exists,
+    if_user_is_created,
     if_user_is_not_in_conversation,
 )
 from app.internal.general.bot.handlers import mark_conversation_start
@@ -29,13 +29,13 @@ def test_if_update_message_exist_error(update: Update, context: CallbackContext)
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_if_user_exist(update: Update, context: CallbackContext, telegram_user: TelegramUser) -> None:
-    assert if_user_exists(_handler)(update, context) == _handler(update, context)
+    assert if_user_is_created(_handler)(update, context) == _handler(update, context)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_if_user_exist_error(update: Update, context: CallbackContext) -> None:
-    assert if_user_exists(_handler)(update, context) == ConversationHandler.END
+    assert if_user_is_created(_handler)(update, context) == ConversationHandler.END
     update.message.reply_text.assert_called_once_with(_USER_DOESNT_EXIST)
 
 

@@ -7,7 +7,7 @@ from telegram.ext import CallbackContext
 
 from app.internal.user.db.models import FriendRequest, TelegramUser
 from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
-from app.internal.user.presentation.handlers.bot.friends.users_to_friends_sender import send_username_list
+from app.internal.user.presentation.handlers.bot.friends.general import send_username_list
 from tests.integration.bot.conftest import assert_conversation_end
 
 _WELCOME = "abc"

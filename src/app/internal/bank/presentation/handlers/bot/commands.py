@@ -1,12 +1,12 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
-from app.internal.bank.db.repositories import TransactionRepository
-from app.internal.bank.domain.services import TransactionService
-from app.internal.general.bot.decorators import if_update_message_exists, if_user_exists, if_phone_was_set, \
-    if_user_is_not_in_conversation
-from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import TelegramUserService
+from app.internal.general.bot.decorators import (
+    if_update_message_exists,
+    if_user_is_created,
+    if_user_is_not_in_conversation,
+)
+from app.internal.general.services import transaction_service, user_service
 
 _TRANSACTION_DETAILS = (
     "Откуда: {source_number} ({source})\n"
@@ -17,17 +17,13 @@ _TRANSACTION_DETAILS = (
 _NEW_TRANSACTIONS_EMPTY_MESSAGE = "Как жаль, новых платежей не было совершено. Банк желает, чтобы вы исправили ситуацию"
 _LAST_END_MESSAGE = "Это был последний платёж..."
 
-_transaction_service = TransactionService(TransactionRepository())
-_user_service = TelegramUserService(TelegramUserRepository(), SecretKeyRepository())
-
 
 @if_update_message_exists
-@if_user_exists
-@if_phone_was_set
+@if_user_is_created
 @if_user_is_not_in_conversation
 def handle_last(update: Update, context: CallbackContext) -> None:
-    user = _user_service.get_user(update.effective_user.id)
-    transactions = _transaction_service.get_and_mark_new_transactions(update.effective_user)
+    user = user_service.get_user(update.effective_user.id)
+    transactions = transaction_service.get_and_mark_new_transactions(update.effective_user)
 
     if len(transactions) == 0:
         update.message.reply_text(_NEW_TRANSACTIONS_EMPTY_MESSAGE)

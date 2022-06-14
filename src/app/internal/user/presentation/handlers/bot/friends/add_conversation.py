@@ -2,16 +2,14 @@ from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.general.bot.decorators import (
-    if_phone_was_set,
     if_update_message_exists,
-    if_user_exists,
+    if_user_is_created,
     if_user_is_not_in_conversation,
 )
 from app.internal.general.bot.filters import TEXT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.general.services import friend_service, request_service, user_service
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendRequestService, FriendService, TelegramUserService
 from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 
 _WELCOME = "Введите никнейм или идентификатор пользователя"
@@ -22,14 +20,9 @@ _REQUEST_ALREADY_EXIST_ERROR = "Вы уже отправили заявку да
 _REQUEST_SUCCESS = "Заявка отправлена! Да прибудет денюж... в смысле дружба!"
 _NOTIFICATION_MESSAGE = "С вами хочет познакомиться {username} ({name}). Используйте команду /accept"
 
-_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_friend_service = FriendService(friend_repo=TelegramUserRepository())
-_request_service = FriendRequestService(request_repo=FriendRequestRepository())
-
 
 @if_update_message_exists
-@if_user_exists
-@if_phone_was_set
+@if_user_is_created
 @if_user_is_not_in_conversation
 def handle_add_friend_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
@@ -43,8 +36,8 @@ def handle_add_friend_start(update: Update, context: CallbackContext) -> int:
 def handle_add_friend(update: Update, context: CallbackContext) -> int:
     friend_identifier = "".join(update.message.text)
 
-    user = _user_service.get_user(update.effective_user.id)
-    friend = _user_service.get_user(friend_identifier)
+    user = user_service.get_user(update.effective_user.id)
+    friend = user_service.get_user(friend_identifier)
 
     if user == friend:
         update.message.reply_text(_STUPID_CHOICE_SELF_ERROR)
@@ -54,11 +47,11 @@ def handle_add_friend(update: Update, context: CallbackContext) -> int:
         update.message.reply_text(_USER_NOT_FOUND_ERROR)
         return FriendStates.INPUT
 
-    if _friend_service.is_friend_exists(user, friend):
+    if friend_service.is_friend_exists(user, friend):
         update.message.reply_text(_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 
-    if not _request_service.try_create(user, friend):
+    if not request_service.try_create(user, friend):
         update.message.reply_text(_REQUEST_ALREADY_EXIST_ERROR)
         return FriendStates.INPUT
 

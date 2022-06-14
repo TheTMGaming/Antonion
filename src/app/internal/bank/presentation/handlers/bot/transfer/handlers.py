@@ -1,27 +1,22 @@
-from collections import namedtuple
 from decimal import Decimal
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from django.conf import settings
-from telegram import Document, File, PhotoSize, Update
+from telegram import PhotoSize, Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
-from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectService, TransferService
 from app.internal.bank.presentation.handlers.bot.document import send_document_list
 from app.internal.bank.presentation.handlers.bot.transfer.TransferStates import TransferStates
 from app.internal.general.bot.decorators import (
-    if_phone_was_set,
     if_update_message_exists,
-    if_user_exists,
+    if_user_is_created,
     if_user_is_not_in_conversation,
 )
 from app.internal.general.bot.filters import FLOATING, IMAGE, INT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.general.services import bank_object_service, friend_service, transfer_service, user_service
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
-from app.internal.user.domain.services import FriendService, TelegramUserService
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
@@ -74,32 +69,21 @@ _ACCRUAL_SESSION = "accrual"
 _CAPTION_SESSION = "photo_caption"
 _PHOTO_SESSION = "transfer_photo"
 
-Photo = namedtuple("Photo", ["id", "size"])
-
-
-_friend_service = FriendService(friend_repo=TelegramUserRepository())
-_user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-_bank_object_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
-_transfer_service = TransferService(
-    account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
-)
-
 
 @if_update_message_exists
-@if_user_exists
-@if_phone_was_set
+@if_user_is_created
 @if_user_is_not_in_conversation
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
-    user = _user_service.get_user(update.effective_user.id)
+    user = user_service.get_user(update.effective_user.id)
 
-    friends = _friend_service.get_friends_as_dict(user)
+    friends = friend_service.get_friends_as_dict(user)
     if len(friends) == 0:
         update.message.reply_text(_FRIEND_LIST_EMPTY_ERROR)
         return mark_conversation_end(context)
 
-    documents = _bank_object_service.get_documents_order(user)
+    documents = bank_object_service.get_documents_order(user)
     if len(documents) == 0:
         update.message.reply_text(_SOURCE_DOCUMENT_LIST_EMPTY_ERROR)
         return mark_conversation_end(context)
@@ -122,7 +106,7 @@ def handle_getting_destination(update: Update, context: CallbackContext) -> int:
 
     context.user_data[_CHOSEN_FRIEND_SESSION] = friend
 
-    documents = _bank_object_service.get_documents_order(friend)
+    documents = bank_object_service.get_documents_order(friend)
 
     return _save_and_send_friend_document_list(update, context, documents)
 
@@ -136,7 +120,7 @@ def handle_getting_destination_document(update: Update, context: CallbackContext
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.DESTINATION_DOCUMENT
 
-    context.user_data[_DESTINATION_SESSION] = _bank_object_service.get_bank_account_from_document(destination)
+    context.user_data[_DESTINATION_SESSION] = bank_object_service.get_bank_account_from_document(destination)
 
     source_documents: Dict[int, BankObject] = context.user_data[_SOURCE_DOCUMENTS_SESSION]
     send_document_list(update, source_documents, _TRANSFER_SOURCE_WELCOME, show_balance=True)
@@ -153,9 +137,9 @@ def handle_getting_source_document(update: Update, context: CallbackContext) -> 
         update.message.reply_text(_STUPID_CHOICE_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
-    source: BankAccount = _bank_object_service.get_bank_account_from_document(source)
+    source: BankAccount = bank_object_service.get_bank_account_from_document(source)
 
-    if _bank_object_service.is_balance_zero(source):
+    if bank_object_service.is_balance_zero(source):
         update.message.reply_text(_BALANCE_ZERO_ERROR)
         return TransferStates.SOURCE_DOCUMENT
 
@@ -169,13 +153,13 @@ def handle_getting_source_document(update: Update, context: CallbackContext) -> 
 @if_update_message_exists
 def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
     try:
-        accrual = _transfer_service.parse_accrual(update.message.text)
+        accrual = transfer_service.parse_accrual(update.message.text)
     except ValueError:
         update.message.reply_text(_ACCRUAL_PARSE_ERROR)
         return TransferStates.ACCRUAL
 
     source: BankAccount = context.user_data[_SOURCE_SESSION]
-    if not _transfer_service.can_extract_from(source, accrual):
+    if not transfer_service.can_extract_from(source, accrual):
         update.message.reply_text(_ACCRUAL_GREATER_BALANCE_ERROR)
         return TransferStates.ACCRUAL
 
@@ -215,7 +199,7 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
     photo: Optional[PhotoSize] = context.user_data.get(_PHOTO_SESSION)
 
-    is_success = _transfer_service.try_transfer(source, destination, accrual, photo)
+    is_success = transfer_service.try_transfer(source, destination, accrual, photo)
     message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
 
     update.message.reply_text(message)

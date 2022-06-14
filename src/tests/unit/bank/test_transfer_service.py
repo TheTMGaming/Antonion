@@ -1,20 +1,13 @@
 from decimal import Decimal
 from enum import IntEnum, auto
 from itertools import chain
-from typing import List, Type
+from typing import List
 
 import pytest
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject, Transaction
-from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
-from app.internal.bank.domain.services import BankObjectService, TransferService
+from app.internal.general.services import bank_object_service, transfer_service
 from tests.conftest import BALANCE
-
-account_repo = BankAccountRepository()
-card_repo = BankCardRepository()
-transaction_repo = TransactionRepository()
-bank_object_service = BankObjectService(account_repo=account_repo, card_repo=card_repo)
-transfer_service = TransferService(account_repo=account_repo, card_repo=card_repo, transaction_repo=transaction_repo)
 
 
 class TransferError(IntEnum):
