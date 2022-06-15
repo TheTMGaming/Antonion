@@ -1,8 +1,12 @@
 from decimal import Decimal
+from itertools import chain
 from typing import List
+from unittest.mock import MagicMock
 
 import pytest
+from django.conf import settings
 from django.db.models import QuerySet
+from ninja import UploadedFile
 from telegram import User
 
 from app.internal.bank.db.models import BankAccount, BankCard
@@ -16,6 +20,43 @@ PHONE = "+78005553535"
 KEY = "noob"
 WRONG_KEY = "pro"
 TIP = "Who am i?"
+
+CORRECT_PHONE_NUMBERS = list(
+    chain(
+        *(
+            [
+                f"{start}8005553535",
+                f"{start} (800) 555 35 35",
+                f"{start}-(800)-555-35-35",
+                f"{start}-800-555-35-35",
+                f"{start}800 55 535 35",
+            ]
+            for start in ["7", "8", "+7"]
+        )
+    )
+)
+
+WRONG_PHONE_NUMBERS = [
+    *(f"+{start}8005553535" for start in chain(range(7), [9])),
+    *(f"{start}8005553535" for start in chain(range(7), [9])),
+    *("1" * length for length in chain(range(11), range(12, 30))),
+    *("a" * length for length in chain(range(11), range(12, 30))),
+    *("a1" * (length // 2) + "a" * (length % 2) for length in range(30)),
+    *("8" * 11 + "a" * amount for amount in range(1, 6)),
+    *("8" * 11 + " " + "a" * amount for amount in range(1, 6)),
+    *("8" * 11 + " " * amount for amount in range(1, 6)),
+    *(" " * amount for amount in range(30)),
+    "",
+    *(f"{start}.800.55,535,35" for start in ["7", "8", "+7"]),
+    "    88005553535",
+    "aaa        88005553535",
+    "        88005553535",
+    "a b 88005553535",
+    "88005553535 1 2",
+    "8800",
+    "aaaaaaaaaaa",
+]
+
 
 user_repo = TelegramUserRepository()
 secret_repo = SecretKeyRepository()
@@ -188,3 +229,17 @@ def friend_requests(telegram_user: TelegramUser, telegram_users: List[TelegramUs
         for another in telegram_users
         if another != telegram_user
     )
+
+
+@pytest.fixture(scope="function")
+def uploaded_image() -> UploadedFile:
+    image = MagicMock()
+
+    read = MagicMock()
+    read.return_value = b"228"
+
+    image.read = read
+    image.content_type = "image/jpg"
+    image.size = settings.MAX_SIZE_PHOTO_BYTES - 1
+
+    return image

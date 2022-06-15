@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest.mock import MagicMock
 
 import freezegun
 import jwt
@@ -8,21 +7,17 @@ from django.conf import settings
 from django.http import HttpRequest
 from ninja.security import HttpBearer
 
-from app.internal.authentication.db.repositories import AuthRepository
-from app.internal.authentication.domain.services import JWTService
 from app.internal.authentication.domain.services.TokenTypes import TokenTypes
 from app.internal.authentication.presentation import JWTAuthentication
+from app.internal.general.services import auth_service
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import TelegramUserRepository
-
-service = JWTService(auth_repo=AuthRepository(), user_repo=TelegramUserRepository())
 
 
 @freezegun.freeze_time("2022-05-21")
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_ok(http_request: HttpRequest, telegram_user: TelegramUser) -> None:
-    token = service.generate_token(telegram_user.id, TokenTypes.ACCESS)
+    token = auth_service.generate_token(telegram_user.id, TokenTypes.ACCESS)
     http_request.headers[HttpBearer.header] = f"Bearer {token}"
 
     JWTAuthentication()(http_request)
@@ -48,7 +43,8 @@ def test_dead_token(http_request: HttpRequest) -> None:
     now = datetime.now()
 
     token = jwt.encode(
-        {service.TELEGRAM_ID: 123, service.TOKEN_TYPE: 123, service.CREATED_AT: now.timestamp()}, settings.SECRET_KEY
+        {auth_service.TELEGRAM_ID: 123, auth_service.TOKEN_TYPE: 123, auth_service.CREATED_AT: now.timestamp()},
+        settings.SECRET_KEY,
     )
     http_request.headers[HttpBearer.header] = f"Bearer {token}"
 

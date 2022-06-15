@@ -5,15 +5,13 @@ from django.http import HttpRequest
 
 from app.internal.general.rest.exceptions import BadRequestException
 from app.internal.general.rest.responses import SuccessResponse
+from app.internal.general.services import user_service
 from app.internal.user.db.models import TelegramUser
-from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.entities.user import PasswordIn, PhoneIn
-from app.internal.user.domain.services import TelegramUserService
 from app.internal.user.presentation.handlers import TelegramUserHandlers
 from tests.conftest import KEY, PASSWORD, WRONG_KEY
 
-user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-handlers = TelegramUserHandlers(user_service=user_service)
+handlers = TelegramUserHandlers(user_service)
 
 
 @pytest.mark.django_db

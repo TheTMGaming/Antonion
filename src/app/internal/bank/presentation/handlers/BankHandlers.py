@@ -1,12 +1,14 @@
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from django.http import HttpRequest
-from ninja import Body
+from django.utils.timezone import now
+from ninja import File, Form, UploadedFile
 
 from app.internal.bank.db.models import BankAccount, BankCard, Transaction
 from app.internal.bank.domain.entities import BankAccountOut, BankCardOut, TransactionOut, TransferIn
 from app.internal.bank.domain.services import BankObjectService, TransactionService, TransferService
+from app.internal.bank.domain.services.Photo import Photo
 from app.internal.general.rest.exceptions import BadRequestException, IntegrityException, NotFoundException
 from app.internal.user.db.models import TelegramUser
 
@@ -53,11 +55,16 @@ class BankHandlers:
 
         return self._create_history_response(account)
 
-    def transfer(self, request: HttpRequest, transfer: TransferIn = Body(...)) -> TransactionOut:
+    def transfer(
+        self, request: HttpRequest, transfer: TransferIn = Form(...), photo: Optional[UploadedFile] = File(default=None)
+    ) -> TransactionOut:
         accrual = Decimal(transfer.accrual)
 
         if not self._transfer_service.validate_accrual(accrual):
             raise BadRequestException("Invalid accrual")
+
+        if not self._transfer_service.validate_file(photo):
+            raise BadRequestException("Invalid photo type or size")
 
         source = self._bank_obj_service.get_user_bank_account_by_document_number(request.telegram_user, transfer.source)
         if not source:
@@ -70,7 +77,8 @@ class BankHandlers:
         if source == destination:
             raise BadRequestException("Source account equals destination account")
 
-        transaction = self._transfer_service.try_transfer(source, destination, accrual, None)
+        content = Photo(unique_name=str(now().timestamp()), content=photo.read()) if photo else None
+        transaction = self._transfer_service.try_transfer(source, destination, accrual, content)
         if not transaction:
             raise IntegrityException()
 

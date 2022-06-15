@@ -12,15 +12,6 @@ from app.internal.user.presentation.handlers.bot.commands import (
     handle_relations,
     handle_start,
 )
-from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
-from app.internal.user.presentation.handlers.bot.phone.conversation import (
-    _INVALID_PHONE,
-    _UPDATING_PHONE,
-    _WELCOME,
-    handle_phone,
-    handle_phone_start,
-)
-from tests.integration.bot.conftest import assert_conversation_end, assert_conversation_start
 
 
 @pytest.mark.django_db
@@ -56,55 +47,6 @@ def test_start__updating(update: Update, telegram_user: TelegramUser, user: User
 def test_me(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     handle_me(update, context)
     update.message.reply_text.assert_called_once()
-
-
-@pytest.mark.django_db
-@pytest.mark.integration
-def test_phone_start(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
-    next_state = handle_phone_start(update, context)
-
-    assert next_state == FriendStates.INPUT
-    assert_conversation_start(context)
-    update.message.reply_text.assert_called_once_with(_WELCOME)
-
-
-@pytest.mark.django_db
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    ["text", "is_set"],
-    [
-        ["88005553535", True],
-        ["8-800-555-35-35", True],
-        ["8.800.555.35.35", True],
-        ["8(800)-555-35-35", True],
-        ["8 (800)-555-35-35", True],
-        ["8(800) 555 35 35", True],
-        ["8 (800) 555 35 35", True],
-        ["88005553535         ", True],
-        ["8 800 555 35 35", True],
-        ["88005553535 a b", True],
-        ["                ", False],
-        ["aaaaaaaaaaa", False],
-        ["8800", False],
-        ["88005553535 1 2", False],
-        ["a b 88005553535", False],
-        ["        88005553535", False],
-        ["aaa        88005553535", False],
-        ["    88005553535", False],
-    ],
-)
-def test_phone(update: Update, context: CallbackContext, telegram_user: TelegramUser, text: str, is_set: bool) -> None:
-    update.message.text = text
-
-    next_state = handle_phone(update, context)
-    telegram_user.refresh_from_db()
-
-    assert bool(telegram_user.phone) == is_set
-    update.message.reply_text.assert_called_once_with(_UPDATING_PHONE if is_set else _INVALID_PHONE)
-    if is_set:
-        assert_conversation_end(next_state, context)
-    else:
-        assert next_state == FriendStates.INPUT
 
 
 @pytest.mark.django_db

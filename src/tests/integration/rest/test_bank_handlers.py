@@ -2,26 +2,20 @@ from typing import Callable, List
 
 import freezegun
 import pytest
+from django.conf import settings
 from django.db.models import Q
 from django.http import HttpRequest
 from django.utils import timezone
+from ninja import UploadedFile
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject, Transaction
-from app.internal.bank.db.repositories import BankAccountRepository, BankCardRepository, TransactionRepository
 from app.internal.bank.domain.entities import BankAccountOut, BankCardOut, TransactionOut, TransferIn
-from app.internal.bank.domain.services import BankObjectService, TransactionService, TransferService
 from app.internal.bank.presentation.handlers import BankHandlers
 from app.internal.general.rest.exceptions import BadRequestException, NotFoundException
+from app.internal.general.services import bank_object_service, transaction_service, transfer_service
 from tests.conftest import BALANCE
 
-bank_obj_service = BankObjectService(account_repo=BankAccountRepository(), card_repo=BankCardRepository())
-transaction_service = TransactionService(transaction_repo=TransactionRepository())
-transfer_service = TransferService(
-    account_repo=BankAccountRepository(), card_repo=BankCardRepository(), transaction_repo=TransactionRepository()
-)
-handlers = BankHandlers(
-    bank_obj_service=bank_obj_service, transaction_service=transaction_service, transfer_service=transfer_service
-)
+handlers = BankHandlers(bank_object_service, transaction_service, transfer_service)
 
 NOW = timezone.now()
 
@@ -137,29 +131,41 @@ def test_getting_card_history__invalid_number(
 @pytest.mark.django_db
 @pytest.mark.integration
 @freezegun.freeze_time(NOW)
-def test_transfer_account_to_account(http_request, bank_account: BankAccount, another_account: BankAccount) -> None:
+def test_transfer_account_to_account(
+    http_request, bank_account: BankAccount, another_account: BankAccount, uploaded_image: UploadedFile
+) -> None:
     assert_transfer_bank_objects(http_request, bank_account, another_account)
+    assert_transfer_bank_objects(http_request, bank_account, another_account, uploaded_image)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 @freezegun.freeze_time(NOW)
-def test_transfer_account_to_card(http_request, bank_account: BankAccount, another_card: BankCard) -> None:
+def test_transfer_account_to_card(
+    http_request, bank_account: BankAccount, another_card: BankCard, uploaded_image: UploadedFile
+) -> None:
     assert_transfer_bank_objects(http_request, bank_account, another_card)
+    assert_transfer_bank_objects(http_request, bank_account, another_card, uploaded_image)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 @freezegun.freeze_time(NOW)
-def test_transfer_card_to_account(http_request, card: BankCard, another_account: BankAccount) -> None:
+def test_transfer_card_to_account(
+    http_request, card: BankCard, another_account: BankAccount, uploaded_image: UploadedFile
+) -> None:
     assert_transfer_bank_objects(http_request, card, another_account)
+    assert_transfer_bank_objects(http_request, card, another_account, uploaded_image)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 @freezegun.freeze_time(NOW)
-def test_transfer_card_to_card(http_request, card: BankCard, another_card: BankCard) -> None:
+def test_transfer_card_to_card(
+    http_request, card: BankCard, another_card: BankCard, uploaded_image: UploadedFile
+) -> None:
     assert_transfer_bank_objects(http_request, card, another_card)
+    assert_transfer_bank_objects(http_request, card, another_card, uploaded_image)
 
 
 @pytest.mark.django_db
@@ -176,16 +182,16 @@ def test_transfer__not_found_source(
     http_request: HttpRequest, another_card: BankCard, another_account: BankAccount
 ) -> None:
     with pytest.raises(NotFoundException):
-        handlers.transfer(http_request, TransferIn(source=another_card.number, destination=0, accrual=1))
-        handlers.transfer(http_request, TransferIn(source=another_account.number, destination=0, accrual=1))
+        handlers.transfer(http_request, TransferIn(source=another_card.number, destination=0, accrual=1), None)
+        handlers.transfer(http_request, TransferIn(source=another_account.number, destination=0, accrual=1), None)
 
 
 @pytest.mark.django_db
 @pytest.mark.integration
 def test_transfer__not_found_destination(http_request: HttpRequest, card: BankCard, bank_account: BankAccount) -> None:
     with pytest.raises(NotFoundException):
-        handlers.transfer(http_request, TransferIn(source=card.number, destination=0, accrual=1))
-        handlers.transfer(http_request, TransferIn(source=bank_account.number, destination=0, accrual=1))
+        handlers.transfer(http_request, TransferIn(source=card.number, destination=0, accrual=1), None)
+        handlers.transfer(http_request, TransferIn(source=bank_account.number, destination=0, accrual=1), None)
 
 
 @pytest.mark.django_db
@@ -194,17 +200,47 @@ def test_transfer__source_equals_destination(
     http_request: HttpRequest, card: BankCard, bank_account: BankAccount
 ) -> None:
     with pytest.raises(BadRequestException):
-        handlers.transfer(http_request, TransferIn(source=bank_account.number, destination=card.number, accrual=1))
         handlers.transfer(
-            http_request, TransferIn(source=bank_account.number, destination=bank_account.number, accrual=1)
+            http_request, TransferIn(source=bank_account.number, destination=card.number, accrual=1), None
+        )
+        handlers.transfer(
+            http_request, TransferIn(source=bank_account.number, destination=bank_account.number, accrual=1), None
         )
 
 
-def assert_transfer_bank_objects(http_request: HttpRequest, source: BankObject, destination: BankObject) -> None:
+@pytest.mark.django_db
+@pytest.mark.integration
+def test_transfer__invalid_file(
+    http_request: HttpRequest, bank_account: BankAccount, another_account: BankAccount, uploaded_image: UploadedFile
+) -> None:
+    transfer_in = TransferIn(source=bank_account.number, destination=another_account.number, accrual=1)
+    with pytest.raises(BadRequestException):
+        for size in [
+            settings.MAX_SIZE_PHOTO_BYTES + 1,
+            settings.MAX_SIZE_PHOTO_BYTES + 10**-2,
+            settings.MAX_SIZE_PHOTO_BYTES + 10**-5,
+        ]:
+            uploaded_image.size = size
+            handlers.transfer(http_request, transfer_in, uploaded_image)
+
+        uploaded_image.size = settings.MAX_SIZE_PHOTO_BYTES
+        uploaded_image.content_type = "text/plain"
+        handlers.transfer(http_request, transfer_in, uploaded_image)
+
+
+def assert_transfer_bank_objects(
+    http_request: HttpRequest, source: BankObject, destination: BankObject, photo: UploadedFile = None
+) -> None:
     eps = 10**-12
     accrual = 10
     body = TransferIn(source=source.number_field, destination=destination.number_field, accrual=accrual)
-    transaction = handlers.transfer(http_request, body)
+
+    source.refresh_from_db()
+    destination.refresh_from_db()
+    Transaction.objects.all().delete()
+    prev_source_balance, prev_destination_balance = source.get_balance(), destination.get_balance()
+
+    transaction_out = handlers.transfer(http_request, body, photo)
 
     actual_source = BankAccount.objects.filter(
         Q(number=source.number_field) | Q(bank_cards__number=source.number_field)
@@ -213,12 +249,20 @@ def assert_transfer_bank_objects(http_request: HttpRequest, source: BankObject, 
         Q(number=destination.number_field) | Q(bank_cards__number=destination.number_field)
     ).first()
 
-    assert actual_source.number == transaction.source
-    assert actual_destination.number == transaction.destination
-    assert abs(accrual - transaction.accrual) < eps
-    assert NOW == transaction.created_at
-    assert abs(BALANCE - accrual - actual_source.balance) < eps
-    assert abs(BALANCE + accrual - actual_destination.balance) < eps
+    transaction = Transaction.objects.filter(source=actual_source, destination=actual_destination).first()
+
+    assert actual_source.number == transaction_out.source
+    assert actual_destination.number == transaction_out.destination
+    assert abs(accrual - transaction_out.accrual) < eps
+    assert NOW == transaction_out.created_at
+    assert abs(prev_source_balance - accrual - actual_source.balance) < eps
+    assert abs(prev_destination_balance + accrual - actual_destination.balance) < eps
+    assert transaction is not None
+    if photo is not None:
+        url = transaction.photo.url
+        transaction.photo.delete(save=False)
+
+        assert transaction_out.photo == url
 
 
 def assert_bank_account_with_response(account: BankAccount, response: BankAccountOut) -> None:
@@ -236,6 +280,7 @@ def assert_transaction_with_response(transaction: Transaction, response: Transac
     assert str(transaction.destination.number) == response.destination
     assert abs(transaction.accrual.__float__() - response.accrual) < 10**-9
     assert transaction.created_at == response.created_at
+    assert (transaction.photo.url if transaction.photo else None) == response.photo
 
 
 def assert_getting_bank_object_in_handler(
