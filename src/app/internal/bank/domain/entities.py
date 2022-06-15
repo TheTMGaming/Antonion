@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from ninja import Schema
 
@@ -17,6 +18,7 @@ class TransactionOut(Schema):
     source: str
     destination: str
     accrual: float
+    photo: Optional[str]
     created_at: datetime
 
 

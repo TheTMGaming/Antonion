@@ -102,6 +102,7 @@ class BankHandlers:
             source=transaction.source.number,
             destination=transaction.destination.number,
             accrual=transaction.accrual,
+            photo=transaction.photo.url if transaction.photo else None,
             created_at=transaction.created_at,
         )
 

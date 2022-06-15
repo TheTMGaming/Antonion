@@ -22,10 +22,7 @@ _FRIEND_VARIANT = "{number}) {username} ({first_name})"
 _TRANSFER_DESTINATION_WELCOME = "Выберите банковский счёт или карту получателя:\n"
 _TRANSFER_SOURCE_WELCOME = "Откуда списать:\n"
 _ACCRUAL_WELCOME = "Введите размер перевода:\n"
-_PHOTO_WELCOME = (
-    f"Сделайте приятное другу, прикрепив картинку, либо /cancel или /skip."
-    f" Только помни, максимальный размер картинки - {settings.MAX_SIZE_PHOTO_KB} KB"
-)
+_PHOTO_WELCOME = "Сделайте приятное другу, прикрепив картинку, либо /cancel или /skip."
 
 _SOURCE_DOCUMENT_LIST_EMPTY_ERROR = "У вас нет счёта или карты! Как вы собрались переводить?"
 _FRIEND_DOCUMENT_LIST_EMPTY_ERROR = "К сожалению, у друга нет счетов и карт. Выберите другого, либо /cancel"
@@ -35,9 +32,7 @@ _ACCRUAL_GREATER_BALANCE_ERROR = (
     "Размер перевода не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
 )
 _FRIEND_LIST_EMPTY_ERROR = "Заведите сначала друзей! Команда /add_friend"
-_PHOTO_SIZE_ERROR = (
-    f"Превышен максимальный размер - {settings.MAX_SIZE_PHOTO_KB} KB. Повторите попытку, либо /cancel или /skip"
-)
+_PHOTO_SIZE_ERROR = "Превышен максимальный размер. Загрузите другую картинку, либо /cancel или /skip"
 
 _TRANSFER_DETAILS = (
     "Проверьте корректность данных перевода. Если согласны, введите /confirm, иначе - /cancel\n\n"

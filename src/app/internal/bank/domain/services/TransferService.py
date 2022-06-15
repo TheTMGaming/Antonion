@@ -57,7 +57,7 @@ class TransferService:
 
         try:
             if photo:
-                photo = ContentFile(content=photo.get_file().download_as_bytearray(), name=photo.file_unique_id)
+                photo = ContentFile(content=photo.get_file().download_as_bytearray(), name=f"{photo.file_unique_id}.jpg")
         except TelegramError:
             return None
 
