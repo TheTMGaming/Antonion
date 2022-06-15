@@ -45,6 +45,11 @@ def test_add_friend(
         chat_id=another_telegram_user.id, text=get_notification(telegram_user_with_phone)
     )
 
+    telegram_user_with_phone.refresh_from_db()
+    assert FriendRequest.objects.filter(source=telegram_user_with_phone, destination=another_telegram_user).exists()
+    assert not telegram_user_with_phone.friends.filter(id=another_telegram_user.id).exists()
+    assert not another_telegram_user.friends.filter(id=telegram_user_with_phone.id).exists()
+
 
 @pytest.mark.django_db
 @pytest.mark.integration

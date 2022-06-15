@@ -1,13 +1,10 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.general.bot.decorators import (
-    if_update_message_exists,
-    if_user_is_created,
-    if_user_is_not_in_conversation,
-)
+from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
 from app.internal.general.bot.filters import TEXT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
+from app.internal.general.services import user_service
 from app.internal.user.presentation.handlers.bot.phone.PhoneStates import PhoneStates
 
 _WELCOME = "Введите, пожалуйста, номер телефона"
@@ -15,9 +12,9 @@ _UPDATING_PHONE = "Телефон обновил! Готовьтесь к зах
 _INVALID_PHONE = "Я не могу сохранить эти кракозябры. Повторите попытку, либо /cancel"
 
 
-@if_update_message_exists
-@if_user_is_created(phone=False)
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user(phone=False)
+@is_not_user_in_conversation
 def handle_phone_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
@@ -26,11 +23,11 @@ def handle_phone_start(update: Update, context: CallbackContext) -> int:
     return PhoneStates.INPUT
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_phone(update: Update, context: CallbackContext) -> int:
     phone = update.message.text
 
-    was_set = _user_service.try_set_phone(update.effective_user.id, phone)
+    was_set = user_service.try_set_phone(update.effective_user.id, phone)
     if not was_set:
         update.message.reply_text(_INVALID_PHONE)
         return PhoneStates.INPUT

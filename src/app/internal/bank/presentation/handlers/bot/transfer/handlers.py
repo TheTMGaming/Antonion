@@ -8,11 +8,7 @@ from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, M
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.presentation.handlers.bot.document import send_document_list
 from app.internal.bank.presentation.handlers.bot.transfer.TransferStates import TransferStates
-from app.internal.general.bot.decorators import (
-    if_update_message_exists,
-    if_user_is_created,
-    if_user_is_not_in_conversation,
-)
+from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
 from app.internal.general.bot.filters import FLOATING, IMAGE, INT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.general.services import bank_object_service, friend_service, transfer_service, user_service
@@ -70,9 +66,9 @@ _CAPTION_SESSION = "photo_caption"
 _PHOTO_SESSION = "transfer_photo"
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
@@ -95,7 +91,7 @@ def handle_start(update: Update, context: CallbackContext) -> int:
     return TransferStates.DESTINATION
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_getting_destination(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
 
@@ -111,7 +107,7 @@ def handle_getting_destination(update: Update, context: CallbackContext) -> int:
     return _save_and_send_friend_document_list(update, context, documents)
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_getting_destination_document(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     destination: BankObject = context.user_data[_DESTINATION_DOCUMENTS_SESSION].get(number)
@@ -128,7 +124,7 @@ def handle_getting_destination_document(update: Update, context: CallbackContext
     return TransferStates.SOURCE_DOCUMENT
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_getting_source_document(update: Update, context: CallbackContext) -> int:
     number = int(update.message.text)
     source: BankObject = context.user_data[_SOURCE_DOCUMENTS_SESSION].get(number)
@@ -150,7 +146,7 @@ def handle_getting_source_document(update: Update, context: CallbackContext) -> 
     return TransferStates.ACCRUAL
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
     try:
         accrual = transfer_service.parse_accrual(update.message.text)
@@ -170,7 +166,7 @@ def handle_getting_accrual(update: Update, context: CallbackContext) -> int:
     return TransferStates.PHOTO
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_getting_photo(update: Update, context: CallbackContext) -> int:
     photo = update.message.photo[-1]
 
@@ -185,26 +181,26 @@ def handle_getting_photo(update: Update, context: CallbackContext) -> int:
     return TransferStates.CONFIRM
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_skip_getting_photo(update: Update, context: CallbackContext) -> int:
     _send_transfer_details(update, context)
 
     return TransferStates.CONFIRM
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_transfer(update: Update, context: CallbackContext) -> int:
     source: BankAccount = context.user_data[_SOURCE_SESSION]
     destination: BankAccount = context.user_data[_DESTINATION_SESSION]
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
     photo: Optional[PhotoSize] = context.user_data.get(_PHOTO_SESSION)
 
-    is_success = transfer_service.try_transfer(source, destination, accrual, photo)
-    message = _TRANSFER_SUCCESS if is_success else _TRANSFER_FAIL
+    transaction = transfer_service.try_transfer(source, destination, accrual, photo)
+    message = _TRANSFER_SUCCESS if transaction else _TRANSFER_FAIL
 
     update.message.reply_text(message)
 
-    if is_success:
+    if transaction:
         details = _get_accrual_detail(source, destination, accrual)
         destination_id = destination.get_owner().id
 

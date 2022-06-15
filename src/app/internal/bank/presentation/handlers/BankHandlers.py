@@ -70,7 +70,7 @@ class BankHandlers:
         if source == destination:
             raise BadRequestException("Source account equals destination account")
 
-        transaction = self._transfer_service.try_transfer(source, destination, accrual)
+        transaction = self._transfer_service.try_transfer(source, destination, accrual, None)
         if not transaction:
             raise IntegrityException()
 

@@ -1,11 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
-from app.internal.general.bot.decorators import (
-    if_update_message_exists,
-    if_user_is_created,
-    if_user_is_not_in_conversation,
-)
+from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
 from app.internal.general.services import friend_service, request_service, user_service
 from app.internal.user.presentation.handlers.bot.commands import get_user_details
 
@@ -17,9 +13,9 @@ _FRIENDSHIP_WELCOME = "Список заявок в друзья:\n\n"
 _FRIENDSHIPS_EMPTY = "На данный момент нет заявок в друзья :("
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_friends(update: Update, context: CallbackContext) -> None:
     user = user_service.get_user(update.effective_user.id)
 
@@ -32,9 +28,9 @@ def handle_friends(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(details)
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_friendships(update: Update, context: CallbackContext) -> None:
     usernames = request_service.get_usernames_to_friends(update.effective_user)
 

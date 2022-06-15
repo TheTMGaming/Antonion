@@ -97,10 +97,9 @@ def test_phone(update: Update, context: CallbackContext, telegram_user: Telegram
     update.message.text = text
 
     next_state = handle_phone(update, context)
+    telegram_user.refresh_from_db()
 
-    actual = TelegramUser.objects.get(pk=telegram_user.pk)
-
-    assert bool(actual.phone) == is_set
+    assert bool(telegram_user.phone) == is_set
     update.message.reply_text.assert_called_once_with(_UPDATING_PHONE if is_set else _INVALID_PHONE)
     if is_set:
         assert_conversation_end(next_state, context)

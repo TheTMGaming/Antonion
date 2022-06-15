@@ -1,11 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.general.bot.decorators import (
-    if_update_message_exists,
-    if_user_is_created,
-    if_user_is_not_in_conversation,
-)
+from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
 from app.internal.general.bot.filters import TEXT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.general.services import friend_service, request_service, user_service
@@ -21,9 +17,9 @@ _REQUEST_SUCCESS = "Заявка отправлена! Да прибудет д�
 _NOTIFICATION_MESSAGE = "С вами хочет познакомиться {username} ({name}). Используйте команду /accept"
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_add_friend_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
@@ -32,7 +28,7 @@ def handle_add_friend_start(update: Update, context: CallbackContext) -> int:
     return FriendStates.INPUT
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_add_friend(update: Update, context: CallbackContext) -> int:
     friend_identifier = "".join(update.message.text)
 

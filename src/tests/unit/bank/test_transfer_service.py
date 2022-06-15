@@ -176,7 +176,7 @@ def _assert_documents_transfer(
 
     if error_type == TransferError.VALIDATION:
         with pytest.raises(ValueError):
-            transfer_service.try_transfer(source, destination, accrual)
+            transfer_service.try_transfer(source, destination, accrual, None)
 
         return
 
@@ -187,7 +187,7 @@ def _assert_documents_transfer(
         (source_start - accrual, destination_start + accrual) if not is_error else (source_start, destination_start)
     )
 
-    is_transfer = transfer_service.try_transfer(source, destination, accrual)
+    is_transfer = transfer_service.try_transfer(source, destination, accrual, None)
 
     transactions = Transaction.objects.filter(source=source, destination=destination, accrual=accrual).all()
     actual_source, actual_destination = _get_actual(source), _get_actual(destination)

@@ -29,8 +29,7 @@ def test_accept_start(
 
     assert next_state == FriendStates.INPUT
     assert_conversation_start(context)
-    assert _USERNAMES_SESSION in context.user_data
-    assert context.user_data[_USERNAMES_SESSION] == {1: another_telegram_user.username}
+    assert context.user_data.get(_USERNAMES_SESSION) == {1: another_telegram_user.username}
     update.message.reply_text.assert_called_once()
 
 

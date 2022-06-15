@@ -1,11 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
-from app.internal.general.bot.decorators import (
-    if_update_message_exists,
-    if_user_is_created,
-    if_user_is_not_in_conversation,
-)
+from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
 from app.internal.general.services import bank_object_service, transaction_service, user_service
 from app.internal.user.db.models import TelegramUser
 
@@ -26,7 +22,7 @@ _RELATION_POINT = "{number}) {username}"
 _RELATION_LIST_EMPTY = "Похоже, что вы в танке... и ни с кеми не взаимодействовали"
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
 
@@ -37,9 +33,9 @@ def handle_start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_me(update: Update, context: CallbackContext) -> None:
     user = user_service.get_user(update.effective_user.id)
 
@@ -48,9 +44,9 @@ def handle_me(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(message)
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_relations(update: Update, context: CallbackContext) -> None:
     usernames = list(enumerate(transaction_service.get_related_usernames(update.effective_user.id), start=1))
 

@@ -15,6 +15,10 @@ class Transaction(models.Model):
     was_destination_viewed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def delete(self, using=None, keep_parents=False):
+        super().delete(using, keep_parents)
+        self.photo.delete(save=False)
+
     class Meta:
         ordering = ("created_at",)
         db_table = "transactions"

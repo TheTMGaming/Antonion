@@ -27,10 +27,8 @@ def test_rm_friend__start(
 
     assert next_state == FriendStates.INPUT
     assert_conversation_start(context)
-    assert _USERNAMES_SESSION in context.user_data
-    assert _USER_SESSION in context.user_data
-    assert type(context.user_data[_USERNAMES_SESSION]) is dict
-    assert context.user_data[_USER_SESSION] == telegram_user_with_phone
+    assert context.user_data.get(_USER_SESSION) == telegram_user_with_phone
+    assert type(context.user_data.get(_USERNAMES_SESSION)) is dict
     assert sorted(context.user_data[_USERNAMES_SESSION].values(), key=str) == sorted(friends, key=str)
 
 

@@ -66,9 +66,9 @@ class TransferService:
                 self._account_repo.subtract(source.number, accrual)
                 self._account_repo.accrue(destination.number, accrual)
 
-            return self._transaction_repo.declare(
-                source.number, destination.number, TransactionTypes.TRANSFER, accrual, photo
-            )
+                return self._transaction_repo.declare(
+                    source.number, destination.number, TransactionTypes.TRANSFER, accrual, photo
+                )
 
         except IntegrityError:
             return None

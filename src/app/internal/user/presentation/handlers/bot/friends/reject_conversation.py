@@ -1,11 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
-from app.internal.general.bot.decorators import (
-    if_update_message_exists,
-    if_user_is_created,
-    if_user_is_not_in_conversation,
-)
+from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
 from app.internal.general.bot.filters import INT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.general.services import request_service, user_service
@@ -23,16 +19,16 @@ _REJECT_MESSAGE = "Пользователь {username} отменил вашу �
 _USERNAMES_SESSION = "username_list"
 
 
-@if_update_message_exists
-@if_user_is_created
-@if_user_is_not_in_conversation
+@is_message_defined
+@authorize_user()
+@is_not_user_in_conversation
 def handle_reject_start(update: Update, context: CallbackContext) -> int:
     mark_conversation_start(context, entry_point.command)
 
     return send_username_list(update, context, _LIST_EMPTY, _USERNAMES_SESSION, _WELCOME)
 
 
-@if_update_message_exists
+@is_message_defined
 def handle_reject(update: Update, context: CallbackContext) -> int:
     username = context.user_data[_USERNAMES_SESSION].get(int(update.message.text))
 

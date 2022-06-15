@@ -3,8 +3,8 @@ from multiprocessing.connection import Client
 import freezegun
 import pytest
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.urls import reverse
-from telegram import TelegramError
 
 from app.internal.authentication.db.repositories import AuthRepository
 from app.internal.authentication.domain.services import JWTService
@@ -16,19 +16,18 @@ from app.internal.webhook.BotWebhookService import BotWebhookService
 
 @pytest.mark.django_db
 @pytest.mark.smoke
-def test_connection_with_db(telegram_user: TelegramUser) -> None:
+def test_database(telegram_user: TelegramUser) -> None:
     pass
 
 
 @pytest.mark.smoke
-def test_webhook_service() -> None:
-    service = BotWebhookService(settings.TELEGRAM_BOT_TOKEN)
+def test_storage() -> None:
+    default_storage.exists("storage_test")
 
-    try:
-        service.handle({})
-        assert True
-    except TelegramError:
-        assert False
+
+@pytest.mark.smoke
+def test_webhook_service() -> None:
+    BotWebhookService(settings.TELEGRAM_BOT_TOKEN).handle({})
 
 
 @freezegun.freeze_time("2022-06-02")

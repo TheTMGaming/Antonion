@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "debug_toolbar",
     "app",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 MIDDLEWARE = [
@@ -153,7 +154,6 @@ AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
 
 AWS_S3_ENDPOINT_URL = "https://storage.yandexcloud.net"
-AWS_S3_REGION_NAME = "storage"
 
 MAX_SIZE_PHOTO_KB = 1024
 MAX_SIZE_PHOTO_BYTES = MAX_SIZE_PHOTO_KB * 1024

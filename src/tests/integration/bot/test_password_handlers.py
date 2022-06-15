@@ -2,7 +2,8 @@ import pytest
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from app.internal.user.db.models import TelegramUser
+from app.internal.user.db.models import SecretKey, TelegramUser
+from app.internal.user.db.repositories import SecretKeyRepository, TelegramUserRepository
 from app.internal.user.presentation.handlers.bot.password.conversation import (
     _CONFIRM_PASSWORD,
     _CREATE_TIP,
@@ -22,10 +23,10 @@ from app.internal.user.presentation.handlers.bot.password.conversation import (
     handle_confirmation_in_creating,
     handle_confirmation_in_updating,
     handle_confirmation_secret_key,
-    handle_creating_secret_key,
-    handle_creating_tip,
     handle_entering_in_creating,
     handle_entering_in_updating,
+    handle_saving_secret_key,
+    handle_saving_tip,
     handle_start,
 )
 from app.internal.user.presentation.handlers.bot.password.PasswordStates import PasswordStates
@@ -54,7 +55,7 @@ def test_start__exists(update: Update, context: CallbackContext, telegram_user_w
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_secret__correct(
+def test_confirmation_secret_key(
     update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser
 ) -> None:
     update.message.text = KEY
@@ -95,14 +96,17 @@ def test_entering_in_updating(
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_in_updating__ok(
+def test_confirmation_in_updating(
     update: Update, context: CallbackContext, telegram_user_with_password: TelegramUser
 ) -> None:
-    update.message.text = context.user_data[_PASSWORD_SESSION] = PASSWORD
+    update.message.text = context.user_data[_PASSWORD_SESSION] = WRONG_PASSWORD
     next_state = handle_confirmation_in_updating(update, context)
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_with(_UPDATING_SUCCESS)
+
+    telegram_user_with_password.refresh_from_db(fields=["password"])
+    assert telegram_user_with_password.password == TelegramUserRepository._hash(WRONG_PASSWORD)
 
 
 @pytest.mark.django_db
@@ -129,9 +133,9 @@ def test_start__undefined(update: Update, context: CallbackContext, telegram_use
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_creating_secret_key(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
+def test_saving_secret_key(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     update.message.text = PASSWORD
-    next_state = handle_creating_secret_key(update, context)
+    next_state = handle_saving_secret_key(update, context)
 
     assert next_state == PasswordStates.TIP_CREATING
     update.message.reply_text.assert_called_once_with(_CREATE_TIP)
@@ -140,9 +144,9 @@ def test_creating_secret_key(update: Update, context: CallbackContext, telegram_
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_creating_tip(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
+def test_saving_tip(update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser) -> None:
     update.message.text = TIP
-    next_state = handle_creating_tip(update, context)
+    next_state = handle_saving_tip(update, context)
 
     assert next_state == PasswordStates.PASSWORD_ENTERING_IN_CREATING
     update.message.reply_text.assert_called_once_with(_INPUT_PASSWORD)
@@ -162,7 +166,7 @@ def test_entering_in_creating(update: Update, context: CallbackContext, telegram
 
 @pytest.mark.django_db
 @pytest.mark.integration
-def test_confirmation_in_creating__ok(
+def test_confirmation_in_creating(
     update: Update, context: CallbackContext, telegram_user_with_phone: TelegramUser
 ) -> None:
     update.message.text = context.user_data[_PASSWORD_SESSION] = PASSWORD
@@ -173,6 +177,12 @@ def test_confirmation_in_creating__ok(
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_with(_CREATING_SUCCESS)
+
+    telegram_user_with_phone.refresh_from_db(fields=["password"])
+    key = SecretKey.objects.filter(telegram_user=telegram_user_with_phone).first()
+    assert telegram_user_with_phone.password == TelegramUserRepository._hash(PASSWORD)
+    assert key.value == SecretKeyRepository._hash(KEY)
+    assert key.tip == TIP
 
 
 @pytest.mark.django_db

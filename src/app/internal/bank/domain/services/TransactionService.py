@@ -7,6 +7,7 @@ from telegram import User
 
 from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import ITransactionRepository
+from app.internal.user.db.models import TelegramUser
 
 
 class TransactionService:
@@ -29,7 +30,7 @@ class TransactionService:
     def get_related_usernames(self, user_id: Union[int, str]) -> QuerySet[str]:
         return self._transaction_repo.get_related_usernames(user_id)
 
-    def get_and_mark_new_transactions(self, user: User) -> List[Transaction]:
+    def get_and_mark_new_transactions(self, user: Union[User, TelegramUser]) -> List[Transaction]:
         transactions = list(self._transaction_repo.get_new_transactions(user.id))
 
         self._transaction_repo.mark_transactions_as_viewed(user.id)
