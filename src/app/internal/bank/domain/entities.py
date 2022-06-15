@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from ninja import Schema
+from ninja import Schema, UploadedFile
+from pydantic import Field, validator
 
 
 class BankAccountOut(Schema):

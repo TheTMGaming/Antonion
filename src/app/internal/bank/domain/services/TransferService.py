@@ -1,15 +1,19 @@
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Optional
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
-from telegram import Document, PhotoSize, TelegramError
+from ninja import UploadedFile
 
 from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
+from app.internal.bank.domain.services.Photo import Photo
 
 
 class TransferService:
+    PHOTO_EXTENSION = "jpg"
+
     def __init__(
         self,
         account_repo: IBankAccountRepository,
@@ -31,6 +35,9 @@ class TransferService:
             value > 0 and amount_before <= BankAccount.DIGITS_COUNT and abs(info.exponent) <= BankAccount.DECIMAL_PLACES
         )
 
+    def validate_file(self, file: UploadedFile) -> bool:
+        return file is None or file.content_type.startswith("image") and file.size <= settings.MAX_SIZE_PHOTO_BYTES
+
     def parse_accrual(self, digits: str) -> Decimal:
         accrual = Decimal(round(Decimal(digits), BankAccount.DECIMAL_PLACES))
 
@@ -50,24 +57,21 @@ class TransferService:
         source: BankAccount,
         destination: BankAccount,
         accrual: Decimal,
-        photo: Optional[PhotoSize],
+        photo: Optional[Photo],
     ) -> Optional[Transaction]:
         if not self.validate_accrual(accrual):
             raise ValueError()
 
-        try:
-            if photo:
-                photo = ContentFile(content=photo.get_file().download_as_bytearray(), name=f"{photo.file_unique_id}.jpg")
-        except TelegramError:
-            return None
-
+        content = (
+            ContentFile(content=photo.content, name=f"{photo.unique_name}.{self.PHOTO_EXTENSION}") if photo else None
+        )
         try:
             with transaction.atomic():
                 self._account_repo.subtract(source.number, accrual)
                 self._account_repo.accrue(destination.number, accrual)
 
                 return self._transaction_repo.declare(
-                    source.number, destination.number, TransactionTypes.TRANSFER, accrual, photo
+                    source.number, destination.number, TransactionTypes.TRANSFER, accrual, content
                 )
 
         except IntegrityError:

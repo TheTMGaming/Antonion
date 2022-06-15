@@ -6,6 +6,7 @@ from telegram import PhotoSize, Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
+from app.internal.bank.domain.services.Photo import Photo
 from app.internal.bank.presentation.handlers.bot.document import send_document_list
 from app.internal.bank.presentation.handlers.bot.transfer.TransferStates import TransferStates
 from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
@@ -190,7 +191,10 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     accrual: Decimal = context.user_data[_ACCRUAL_SESSION]
     photo: Optional[PhotoSize] = context.user_data.get(_PHOTO_SESSION)
 
-    transaction = transfer_service.try_transfer(source, destination, accrual, photo)
+    content = (
+        Photo(unique_name=photo.file_unique_id, content=photo.get_file().download_as_bytearray()) if photo else None
+    )
+    transaction = transfer_service.try_transfer(source, destination, accrual, content)
     message = _TRANSFER_SUCCESS if transaction else _TRANSFER_FAIL
 
     update.message.reply_text(message)

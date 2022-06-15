@@ -4,6 +4,8 @@ from itertools import chain
 from typing import List
 
 import pytest
+from django.conf import settings
+from ninja import UploadedFile
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject, Transaction
 from app.internal.general.services import bank_object_service, transfer_service
@@ -26,6 +28,26 @@ def test_checking_balance_zero(bank_account: BankAccount, cards: List[BankCard])
 
     assert bank_object_service.is_balance_zero(bank_account)
     assert bank_object_service.is_balance_zero(card)
+
+
+@pytest.mark.django_db
+@pytest.mark.unit
+def test_validation_file(uploaded_image: UploadedFile) -> None:
+    assert transfer_service.validate_file(uploaded_image)
+    assert transfer_service.validate_file(None) is True
+
+    bad_sizes = [
+        settings.MAX_SIZE_PHOTO_BYTES + 1,
+        settings.MAX_SIZE_PHOTO_BYTES + 10**-2,
+        settings.MAX_SIZE_PHOTO_BYTES + 10**-5,
+    ]
+    for size in bad_sizes:
+        uploaded_image.size = size
+        assert transfer_service.validate_file(uploaded_image) is False
+
+    uploaded_image.size = settings.MAX_SIZE_PHOTO_BYTES
+    uploaded_image.content_type = "text/plain"
+    assert transfer_service.validate_file(uploaded_image) is False
 
 
 @pytest.mark.unit

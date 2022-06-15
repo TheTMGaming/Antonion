@@ -5,7 +5,6 @@ from typing import Iterable, List
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db.models import Q
 
 from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
 from app.internal.general.services import transaction_service

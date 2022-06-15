@@ -399,7 +399,12 @@ def _assert_transfer(
 
         transaction = Transaction.objects.filter(source=source, destination=destination, accrual=accrual).first()
         assert transaction is not None
+
+        expected_content = transaction.photo.read() if transaction.photo else None
         transaction.photo.delete(save=False)
+
+        if photo:
+            assert expected_content == photo.get_file().download_as_bytearray()
 
         assert source.balance == source_balance - accrual
         assert destination.balance == destination_balance + accrual

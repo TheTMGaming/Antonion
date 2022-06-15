@@ -5,16 +5,12 @@ from django.http import HttpRequest
 
 from app.internal.general.rest.exceptions import BadRequestException, NotFoundException
 from app.internal.general.rest.responses import SuccessResponse
+from app.internal.general.services import friend_service, request_service, user_service
 from app.internal.user.db.models import FriendRequest, TelegramUser
-from app.internal.user.db.repositories import FriendRequestRepository, SecretKeyRepository, TelegramUserRepository
 from app.internal.user.domain.entities.user import TelegramUserOut
-from app.internal.user.domain.services import FriendRequestService, FriendService, TelegramUserService
 from app.internal.user.presentation.handlers import FriendHandlers
 
-user_service = TelegramUserService(user_repo=TelegramUserRepository(), secret_key_repo=SecretKeyRepository())
-friend_service = FriendService(friend_repo=TelegramUserRepository())
-request_service = FriendRequestService(request_repo=FriendRequestRepository())
-handlers = FriendHandlers(user_service=user_service, friend_service=friend_service, request_service=request_service)
+handlers = FriendHandlers(user_service, friend_service, request_service)
 
 
 @pytest.mark.django_db
