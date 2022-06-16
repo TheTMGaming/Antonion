@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style type="text/css">
+        @page { size: landscape; margin: 1cm; }
+
+        .table {
+            width: 100%;
+            border: none;
+            margin-bottom: 20px;
+            table-layout: fixed;
+            word-wrap: break-word;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table thead th {
+            font-weight: bold;
+            border: none;
+            padding: 10px 15px;
+            background: #d8d8d8;
+            font-size: 14px;
+        }
+        .table thead tr th:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+        .table thead tr th:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+        .table tbody td {
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        .table tbody tr:nth-child(even){
+            background: #f3f3f3;
+        }
+        .table tbody tr td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+        .table tbody tr td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Тип операции</th>
+                <th>Отправитель/Получатель</th>
+                <th>Сумма операции</th>
+                <th>Картинка</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for data, type, username, accrual, photo_url in transactions %}
+            <tr>
+                <td>{{ data }}</td>
+                <td>{{ type }}</td>
+                <td>{{ username }}</td>
+                <td>{{ accrual }}</td>
+                <td>
+                    {% if photo_url %}
+                        <a href="{{ photo_url }}">Ссылка</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,12 +1,15 @@
 from decimal import Decimal
 from typing import List, Optional, Union
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from telegram import User
 
 from app.internal.bank.db.models import BankAccount, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import ITransactionRepository
+from app.internal.bank.domain.services.OperationNames import OperationNames
 from app.internal.user.db.models import TelegramUser
 
 
@@ -36,3 +39,21 @@ class TransactionService:
         self._transaction_repo.mark_transactions_as_viewed(user.id)
 
         return transactions
+
+    def get_history_html(self, account: BankAccount) -> bytes:
+        data = []
+        context = {"transactions": data}
+
+        for transaction in self._transaction_repo.get_transactions(account.number):
+            is_accrual = account == transaction.destination
+
+            date = transaction.created_at.strftime(settings.DATETIME_PARSE_FORMAT)
+            type_ = (OperationNames.ACCRUAL if is_accrual else OperationNames.DEBIT).value
+            username = (transaction.source if is_accrual else transaction.destination).get_owner().username
+            photo_url = transaction.photo.url if transaction.photo else None
+
+            data.append([date, type_, username, transaction.accrual, photo_url])
+
+        template: str = render_to_string("history.html", context)
+
+        return template.encode("utf-8")

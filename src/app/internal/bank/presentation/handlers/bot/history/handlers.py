@@ -1,3 +1,4 @@
+from django.utils.timezone import now
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler, MessageHandler
 
@@ -8,14 +9,14 @@ from app.internal.general.bot.decorators import authorize_user, is_message_defin
 from app.internal.general.bot.filters import INT
 from app.internal.general.bot.handlers import cancel, mark_conversation_end, mark_conversation_start
 from app.internal.general.services import bank_object_service, transaction_service, user_service
-from app.internal.utils.files import create_temp_file, get_transfer_history_filename, remove_temp_file
-from app.internal.utils.table_builders import build_transfer_history
 
 _WELCOME = "Выберите счёт или карту, либо /cancel:\n"
 _STUPID_CHOICE = "Ммм. Я в банке работаю и то считать умею. Нет такого в списке! Повторите попытку, либо /cancel"
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 
 _DOCUMENTS_SESSION = "documents"
+
+_FILE_NAME = "Выписка для {number} к {date}.html"
 
 
 @is_message_defined
@@ -48,14 +49,9 @@ def handle_getting_document(update: Update, context: CallbackContext) -> int:
         return HistoryStates.DOCUMENT
 
     account = bank_object_service.get_bank_account_from_document(document)
-    transactions = transaction_service.get_transactions(account)
+    content = transaction_service.get_history_html(account)
 
-    history = build_transfer_history(account, transactions)
-    file = create_temp_file(history)
-
-    update.message.reply_document(file, get_transfer_history_filename(document.pretty_number))
-
-    remove_temp_file(file)
+    update.message.reply_document(content, filename=_FILE_NAME.format(number=document.pretty_number, date=now().date()))
 
     return mark_conversation_end(context)
 
