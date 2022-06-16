@@ -32,7 +32,7 @@ _ACCRUAL_PARSE_ERROR = "Размер перевода некорректен. В
 _ACCRUAL_GREATER_BALANCE_ERROR = (
     "Размер перевода не может быть больше, чем у вас имеется. Введите корректный размер, либо /cancel"
 )
-_FRIEND_LIST_EMPTY_ERROR = "Заведите сначала друзей! Команда /add_friend"
+_FRIEND_LIST_EMPTY_ERROR = "Заведите сначала друзей! Команда /add"
 _PHOTO_SIZE_ERROR = "Превышен максимальный размер. Загрузите другую картинку, либо /cancel или /skip"
 
 _TRANSFER_DETAILS = (
