@@ -11,7 +11,7 @@ from app.internal.general.services import bank_object_service, transaction_servi
 from app.internal.utils.files import create_temp_file, get_transfer_history_filename, remove_temp_file
 from app.internal.utils.table_builders import build_transfer_history
 
-_WELCOME = "Выберите счёт или карту:\n"
+_WELCOME = "Выберите счёт или карту, либо /cancel:\n"
 _STUPID_CHOICE = "Ммм. Я в банке работаю и то считать умею. Нет такого в списке! Повторите попытку, либо /cancel"
 _LIST_EMPTY_MESSAGE = "Упс. Вы не завели ни карты, ни счёта. Позвоните Василию!"
 

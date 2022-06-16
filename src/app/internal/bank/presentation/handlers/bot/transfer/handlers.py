@@ -17,12 +17,12 @@ from app.internal.user.db.models import TelegramUser
 
 _STUPID_CHOICE_ERROR = "ИнвАлидный выбор. Нет такого в списке! Введите заново, либо /cancel"
 
-_FRIEND_VARIANTS_WELCOME = "Напишите номер друга, которому хотите перевести:\n\n"
+_FRIEND_VARIANTS_WELCOME = "Напишите номер друга, которому хотите перевести, либо /cancel:\n\n"
 _FRIEND_VARIANT = "{number}) {username} ({first_name})"
 
-_TRANSFER_DESTINATION_WELCOME = "Выберите банковский счёт или карту получателя:\n"
-_TRANSFER_SOURCE_WELCOME = "Откуда списать:\n"
-_ACCRUAL_WELCOME = "Введите размер перевода:\n"
+_TRANSFER_DESTINATION_WELCOME = "Выберите банковский счёт или карту получателя, либо /cancel:\n"
+_TRANSFER_SOURCE_WELCOME = "Откуда списать, либо /cancel:\n"
+_ACCRUAL_WELCOME = "Введите размер перевода, либо /cancel:\n"
 _PHOTO_WELCOME = "Сделайте приятное другу, прикрепив картинку, либо /cancel или /skip."
 
 _SOURCE_DOCUMENT_LIST_EMPTY_ERROR = "У вас нет счёта или карты! Как вы собрались переводить?"

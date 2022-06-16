@@ -7,7 +7,7 @@ from app.internal.general.bot.handlers import cancel, mark_conversation_end, mar
 from app.internal.general.services import user_service
 from app.internal.user.presentation.handlers.bot.phone.PhoneStates import PhoneStates
 
-_WELCOME = "Введите, пожалуйста, номер телефона"
+_WELCOME = "Введите, пожалуйста, номер телефона, либо /cancel"
 _UPDATING_PHONE = "Телефон обновил! Готовьтесь к захватывающему спаму!"
 _INVALID_PHONE = "Я не могу сохранить эти кракозябры. Повторите попытку, либо /cancel"
 

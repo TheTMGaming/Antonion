@@ -9,7 +9,7 @@ from app.internal.user.db.models import TelegramUser
 from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 from app.internal.user.presentation.handlers.bot.friends.general import send_username_list
 
-_WELCOME = "Выберите из списка того, с кем не хотите иметь дело:\n\n"
+_WELCOME = "Выберите из списка того, с кем не хотите иметь дело, либо /cancel:\n\n"
 _LIST_EMPTY = "На данный момент нет заявок в друзья :("
 _STUPID_CHOICE = "Нет такого в списке. Повторите попытку, либо /cancel"
 _FRIEND_CANCEL = "Приятель уже не хочет с вами дружить :( Выберите другого пользователя, либо /cancel"
