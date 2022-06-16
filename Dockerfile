@@ -7,10 +7,10 @@ WORKDIR /app
 
 EXPOSE 8000
 
-COPY Pipfile Pipfile.lock ./
+COPY Pipfile.lock .
 RUN apt-get update && \
     apt-get install make && \
     pip install pipenv && \
-    pipenv install --clear
+    pipenv sync --clear
 
 COPY . .

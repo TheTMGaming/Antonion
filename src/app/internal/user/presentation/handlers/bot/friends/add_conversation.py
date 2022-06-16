@@ -8,7 +8,7 @@ from app.internal.general.services import friend_service, request_service, user_
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 
-_WELCOME = "Введите никнейм или идентификатор пользователя"
+_WELCOME = "Введите никнейм или идентификатор пользователя, либо /cancel"
 _STUPID_CHOICE_SELF_ERROR = "Это же ваш профиль! Повторите попытку, либо /cancel"
 _USER_NOT_FOUND_ERROR = "В нашей базе нет такого пользователя! Повторите попытку, либо /cancel"
 _ALREADY_EXIST_ERROR = "Так он уже твой друг! Смысл было меня отвлекать от важных дел! Повторите попытку, либо /cancel"

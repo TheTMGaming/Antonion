@@ -8,7 +8,7 @@ from app.internal.general.services import friend_service, user_service
 from app.internal.user.db.models import TelegramUser
 from app.internal.user.presentation.handlers.bot.friends.FriendStates import FriendStates
 
-_WELCOME = "Выберите пользователя, который плохо себя ведёт:\n\n"
+_WELCOME = "Выберите пользователя, который плохо себя ведёт, либо /cancel:\n\n"
 _LIST_EMPTY = "К сожалению, у вас нет друзей :("
 _REMOVE_SUCCESS = "Товарищ покинул ваш чат..."
 _REMOVE_MESSAGE = "Товарищ {username} оставил вас за бортом... Вы больше не друзья:("
