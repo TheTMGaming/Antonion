@@ -2,20 +2,12 @@ from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
 from app.internal.general.bot.decorators import authorize_user, is_message_defined, is_not_user_in_conversation
-from app.internal.general.services import bank_object_service, transaction_service, user_service
+from app.internal.general.services import transaction_service, user_service
 from app.internal.user.db.models import TelegramUser
 
 _WELCOME = 'Привет, дорогой {username}. Рад приветствовать в "Банке мечты"!'
 _UPDATING_DETAILS = "Всё пучком! Я обновил информацию о вас"
-_DETAILS = (
-    "ID: {id}\n"
-    "Ник: {username}\n"
-    "Фамилия: {last_name}\n"
-    "Имя: {first_name}\n"
-    "Телефон: {phone}\n"
-    "Счета:\n\t\t\t{bank_accounts}\n"
-    "Карты:\n\t\t\t{cards}\n"
-)
+_DETAILS = "ID: {id}\n" "Ник: {username}\n" "Фамилия: {last_name}\n" "Имя: {first_name}\n" "Телефон: {phone}\n"
 
 _RELATIONS_DETAILS = "Вот с этими людьми вы взаимодействовали:\n\n{usernames}"
 _RELATION_POINT = "{number}) {username}"
@@ -60,16 +52,12 @@ def handle_relations(update: Update, context: CallbackContext) -> None:
 
 
 def get_user_details(user: TelegramUser) -> str:
-    bank_accounts, cards = bank_object_service.get_bank_accounts(user), bank_object_service.get_cards(user)
-
     return _DETAILS.format(
         id=user.id,
         username=user.username,
         first_name=user.first_name,
         last_name=user.last_name,
         phone=user.phone,
-        bank_accounts="\n\t\t\t".join(account.short_number for account in bank_accounts),
-        cards="\n\t\t\t".join(card.short_number for card in cards),
     )
 
 

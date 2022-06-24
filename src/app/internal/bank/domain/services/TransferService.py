@@ -2,7 +2,7 @@ import logging.handlers
 import uuid
 from decimal import Decimal
 from time import time
-from typing import Callable, Optional
+from typing import Optional
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -15,43 +15,11 @@ from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCar
 from app.internal.bank.domain.services.Photo import Photo
 
 STARTING_LOG = "Starting transfer id={id} source={source} destination={destination} accrual={accrual} photo_size={size}"
+SUBTRACTION_LOG = "Subtraction completed id={id}"
+ACCRUAL_LOG = "Accrual completed id={id}"
 SUCCESS_LOG = "Transfer completed id={id} duration={seconds}s"
 INTEGRITY_LOG = "Transfer id={id} was not completed"
 logger = logging.getLogger()
-
-
-def log(try_transfer: Callable) -> Callable:
-    def wrapper(
-        instance: "TransferService",
-        source: BankAccount,
-        destination: BankAccount,
-        accrual: Decimal,
-        photo: Optional[Photo],
-    ) -> Optional[Transaction]:
-        id_ = uuid.uuid4()
-        logger.info(
-            STARTING_LOG.format(
-                id=id_,
-                source=source.pretty_number,
-                destination=destination.pretty_number,
-                accrual=accrual,
-                size=photo.size if photo else None,
-            )
-        )
-        start = time()
-
-        transaction = try_transfer(instance, source, destination, accrual, photo)
-
-        if not transaction:
-            logger.error(INTEGRITY_LOG.format(id=id_))
-        else:
-            seconds = round(time() - start, ndigits=3)
-            message = SUCCESS_LOG.format(id=id_, seconds=seconds)
-            (logger.info if seconds <= settings.MAX_OPERATION_SECONDS else logger.warning)(message)
-
-        return transaction
-
-    return wrapper
 
 
 class TransferService:
@@ -95,7 +63,6 @@ class TransferService:
 
         return accrual <= document.get_balance()
 
-    @log
     def try_transfer(
         self,
         source: BankAccount,
@@ -106,17 +73,40 @@ class TransferService:
         if not self.validate_accrual(accrual):
             raise ValueError()
 
+        id_ = uuid.uuid4()
+        logger.info(
+            STARTING_LOG.format(
+                id=id_,
+                source=source.pretty_number,
+                destination=destination.pretty_number,
+                accrual=accrual,
+                size=photo.size if photo else None,
+            )
+        )
+        start = time()
+
         content = (
             ContentFile(content=photo.content, name=f"{photo.unique_name}.{self.PHOTO_EXTENSION}") if photo else None
         )
         try:
             with atomic():
                 self._account_repo.subtract(source.number, accrual)
-                self._account_repo.accrue(destination.number, accrual)
+                logger.info(SUBTRACTION_LOG.format(id=id_))
 
-                return self._transaction_repo.declare(
+                self._account_repo.accrue(destination.number, accrual)
+                logger.info(ACCRUAL_LOG.format(id=id_))
+
+                transaction = self._transaction_repo.declare(
                     source.number, destination.number, TransactionTypes.TRANSFER, accrual, content
                 )
 
+                seconds = round(time() - start, ndigits=3)
+                message = SUCCESS_LOG.format(id=id_, seconds=seconds)
+                (logger.info if seconds <= settings.MAX_OPERATION_SECONDS else logger.warning)(message)
+
+                return transaction
+
         except IntegrityError:
+            logger.error(INTEGRITY_LOG.format(id=id_))
+
             return None
