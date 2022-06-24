@@ -192,7 +192,9 @@ def handle_transfer(update: Update, context: CallbackContext) -> int:
     photo: Optional[PhotoSize] = context.user_data.get(_PHOTO_SESSION)
 
     content = (
-        Photo(unique_name=photo.file_unique_id, content=photo.get_file().download_as_bytearray()) if photo else None
+        Photo(unique_name=photo.file_unique_id, content=photo.get_file().download_as_bytearray(), size=photo.file_size)
+        if photo
+        else None
     )
     transaction = transfer_service.try_transfer(source, destination, accrual, content)
     message = _TRANSFER_SUCCESS if transaction else _TRANSFER_FAIL

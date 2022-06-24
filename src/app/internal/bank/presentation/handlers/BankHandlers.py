@@ -77,7 +77,7 @@ class BankHandlers:
         if source == destination:
             raise BadRequestException("Source account equals destination account")
 
-        content = Photo(unique_name=str(now().timestamp()), content=photo.read()) if photo else None
+        content = Photo(unique_name=str(now().timestamp()), content=photo.read(), size=photo.size) if photo else None
         transaction = self._transfer_service.try_transfer(source, destination, accrual, content)
         if not transaction:
             raise IntegrityException()

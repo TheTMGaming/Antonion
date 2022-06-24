@@ -1,14 +1,57 @@
+import logging.handlers
+import uuid
 from decimal import Decimal
-from typing import Optional
+from time import time
+from typing import Callable, Optional
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
+from django.db.transaction import atomic
 from ninja import UploadedFile
 
 from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
 from app.internal.bank.domain.services.Photo import Photo
+
+STARTING_LOG = "Starting transfer id={id} source={source} destination={destination} accrual={accrual} photo_size={size}"
+SUCCESS_LOG = "Transfer completed id={id} duration={seconds}s"
+INTEGRITY_LOG = "Transfer id={id} was not completed"
+logger = logging.getLogger()
+
+
+def log(try_transfer: Callable) -> Callable:
+    def wrapper(
+        instance: "TransferService",
+        source: BankAccount,
+        destination: BankAccount,
+        accrual: Decimal,
+        photo: Optional[Photo],
+    ) -> Optional[Transaction]:
+        id_ = uuid.uuid4()
+        logger.info(
+            STARTING_LOG.format(
+                id=id_,
+                source=source.pretty_number,
+                destination=destination.pretty_number,
+                accrual=accrual,
+                size=photo.size if photo else None,
+            )
+        )
+        start = time()
+
+        transaction = try_transfer(instance, source, destination, accrual, photo)
+
+        if not transaction:
+            logger.error(INTEGRITY_LOG.format(id=id_))
+        else:
+            seconds = round(time() - start, ndigits=3)
+            message = SUCCESS_LOG.format(id=id_, seconds=seconds)
+            (logger.info if seconds <= settings.MAX_OPERATION_SECONDS else logger.warning)(message)
+
+        return transaction
+
+    return wrapper
 
 
 class TransferService:
@@ -52,6 +95,7 @@ class TransferService:
 
         return accrual <= document.get_balance()
 
+    @log
     def try_transfer(
         self,
         source: BankAccount,
@@ -66,7 +110,7 @@ class TransferService:
             ContentFile(content=photo.content, name=f"{photo.unique_name}.{self.PHOTO_EXTENSION}") if photo else None
         )
         try:
-            with transaction.atomic():
+            with atomic():
                 self._account_repo.subtract(source.number, accrual)
                 self._account_repo.accrue(destination.number, accrual)
 

@@ -22,6 +22,7 @@ services:
       - src/config/.env
     volumes:
       - static:/app/static
+      - /var/log/bank:/app/logs
     environment:
       POSTGRES_HOST: db
     depends_on:

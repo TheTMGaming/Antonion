@@ -12,3 +12,4 @@ __pycache__
 src/tests/performance/logs
 src/tests/performance/tank_errors.log
 src/tests/performance/token.txt
+transfer.log*

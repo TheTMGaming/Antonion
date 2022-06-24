@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import base64
+import logging.config
 import os
 from datetime import timedelta
+from logging import INFO, Formatter, Logger
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 from django.contrib.auth.hashers import BCryptSHA256PasswordHasher
@@ -141,11 +144,27 @@ SALT = b"$2b$12$" + base64.b64encode(SECRET_KEY.encode("utf-8"))
 
 REFRESH_TOKEN_COOKIE = "refresh_token"
 
+# Transfer logging
+
+FORMATTER = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
+
+HANDLER = TimedRotatingFileHandler(os.path.join("logs", "transfer.log"), when="midnight", backupCount=14)
+HANDLER.setLevel(INFO)
+HANDLER.setFormatter(FORMATTER)
+
+LOGGER = logging.getLogger()
+LOGGER.setLevel(INFO)
+LOGGER.addHandler(HANDLER)
+
+MAX_OPERATION_SECONDS = 5
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "static/"
+
+# Storage
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
