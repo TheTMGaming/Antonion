@@ -21,9 +21,11 @@ from django.contrib.auth.hashers import BCryptSHA256PasswordHasher
 from environ import Env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from app.internal.logging import TelegramLogHandler
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = Env()
+env = Env(LOGGING=(bool, False))
 Env.read_env()
 
 # Quick-start development settings - unsuitable for production
@@ -146,17 +148,22 @@ REFRESH_TOKEN_COOKIE = "refresh_token"
 
 # Transfer logging
 
-FORMATTER = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
+if env("LOGGING"):
+    FORMATTER = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
 
-HANDLER = TimedRotatingFileHandler(os.path.join("logs", "transfer.log"), when="midnight", backupCount=14)
-HANDLER.setLevel(INFO)
-HANDLER.setFormatter(FORMATTER)
+    FILE_HANDLER = TimedRotatingFileHandler(os.path.join("logs", "transfer.log"), when="midnight", backupCount=14)
+    FILE_HANDLER.setLevel(INFO)
+    FILE_HANDLER.setFormatter(FORMATTER)
 
-LOGGER = logging.getLogger()
-LOGGER.setLevel(INFO)
-LOGGER.addHandler(HANDLER)
+    BOT_HANDLER = TelegramLogHandler(token=env("LOGGING_BOT_TOKEN"), chat_id=env("LOGGING_CHANEL_ID"), level=INFO)
+    BOT_HANDLER.setFormatter(FORMATTER)
 
-MAX_OPERATION_SECONDS = 5
+    LOGGER = logging.getLogger()
+    LOGGER.setLevel(INFO)
+    LOGGER.addHandler(FILE_HANDLER)
+    LOGGER.addHandler(BOT_HANDLER)
+
+    MAX_OPERATION_SECONDS = 5
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
