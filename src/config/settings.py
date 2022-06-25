@@ -149,9 +149,14 @@ REFRESH_TOKEN_COOKIE = "refresh_token"
 # Transfer logging
 
 if env("LOGGING"):
+    MAX_OPERATION_SECONDS = 5
+    LOGS_LIFETIME = 14
+
     FORMATTER = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
 
-    FILE_HANDLER = TimedRotatingFileHandler(os.path.join("logs", "transfer.log"), when="midnight", backupCount=14)
+    FILE_HANDLER = TimedRotatingFileHandler(
+        os.path.join("logs", "transfer.log"), when="midnight", backupCount=LOGS_LIFETIME
+    )
     FILE_HANDLER.setLevel(INFO)
     FILE_HANDLER.setFormatter(FORMATTER)
 
@@ -163,7 +168,6 @@ if env("LOGGING"):
     LOGGER.addHandler(FILE_HANDLER)
     LOGGER.addHandler(BOT_HANDLER)
 
-    MAX_OPERATION_SECONDS = 5
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
