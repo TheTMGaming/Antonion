@@ -37,6 +37,18 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
 
+  metric:
+    build: metric/
+    container_name: metric
+    restart: always
+    ports:
+      - "16241:16241"
+    environment:
+      FOLDER_ID: "${FOLDER_ID}"
+      PROC_DIRECTORY: "/ua_proc"
+    volumes:
+      - /proc:/ua_proc
+
 volumes:
   data:
   static:

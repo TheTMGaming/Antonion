@@ -152,21 +152,21 @@ if env("LOGGING"):
     MAX_OPERATION_SECONDS = 5
     LOGS_LIFETIME = 14
 
-    FORMATTER = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
+    formatter = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
 
-    FILE_HANDLER = TimedRotatingFileHandler(
+    file_handler = TimedRotatingFileHandler(
         os.path.join("logs", "transfer.log"), when="midnight", backupCount=LOGS_LIFETIME
     )
-    FILE_HANDLER.setLevel(INFO)
-    FILE_HANDLER.setFormatter(FORMATTER)
+    file_handler.setLevel(INFO)
+    file_handler.setFormatter(formatter)
 
-    BOT_HANDLER = TelegramLogHandler(token=env("LOGGING_BOT_TOKEN"), chat_id=env("LOGGING_CHANEL_ID"), level=INFO)
-    BOT_HANDLER.setFormatter(FORMATTER)
+    bot_handler = TelegramLogHandler(token=env("LOGGING_BOT_TOKEN"), chat_id=env("LOGGING_CHANEL_ID"), level=INFO)
+    bot_handler.setFormatter(formatter)
 
-    LOGGER = logging.getLogger()
-    LOGGER.setLevel(INFO)
-    LOGGER.addHandler(FILE_HANDLER)
-    LOGGER.addHandler(BOT_HANDLER)
+    logger = logging.getLogger()
+    logger.setLevel(INFO)
+    logger.addHandler(file_handler)
+    logger.addHandler(bot_handler)
 
 
 # Static files (CSS, JavaScript, Images)
