@@ -9,7 +9,6 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.db.transaction import atomic
 from ninja import UploadedFile
-from prometheus_client import Summary
 
 from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
@@ -21,8 +20,6 @@ ACCRUAL_LOG = "Accrual completed id={id}"
 SUCCESS_LOG = "Transfer completed id={id} duration={seconds}s"
 INTEGRITY_LOG = "Transfer id={id} was not completed"
 logger = logging.getLogger()
-
-transfer_time = Summary("Transfer time", "Average transfer time")
 
 
 class TransferService:
@@ -66,7 +63,6 @@ class TransferService:
 
         return accrual <= document.get_balance()
 
-    @transfer_time.time()
     def try_transfer(
         self,
         source: BankAccount,
