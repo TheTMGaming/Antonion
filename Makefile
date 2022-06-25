@@ -50,6 +50,10 @@ lint_build:
 up:
 	docker-compose up -d
 
+rm:
+	docker-compose stop
+	docker-compose rm -f
+
 build:
 	docker-compose build
 
