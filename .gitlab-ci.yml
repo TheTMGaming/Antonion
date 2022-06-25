@@ -19,7 +19,6 @@ build:
     - job:build
   only:
     - master
-  environment: prod
 
 lint:
   stage: lint
@@ -29,7 +28,6 @@ lint:
     - make pull lint_build
   only:
     - master
-  environment: prod
 
 test:
   stage: test
@@ -38,13 +36,11 @@ test:
   script: make pull test_build
   only:
     - master
-  environment: prod
 
 deploy:
   stage: deploy
   tags:
     - job:deploy
-  script: make pull restart
+  script: make pull up
   only:
     - master
-  environment: prod

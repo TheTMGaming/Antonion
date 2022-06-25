@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from itertools import chain
 from typing import List
@@ -60,6 +61,10 @@ WRONG_PHONE_NUMBERS = [
 
 user_repo = TelegramUserRepository()
 secret_repo = SecretKeyRepository()
+
+
+def pytest_configure(config):
+    logging.disable()
 
 
 @pytest.fixture(scope="function")

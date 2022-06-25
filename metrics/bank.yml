@@ -1,0 +1,11 @@
+routes:
+ - input:
+     plugin: metrics_pull
+     config:
+       url: https://yuraperov.backend22.2tapp.cc/metrics/
+       format:
+         prometheus: {}
+       namespace: app
+   channel:
+     channel_ref:
+       name: cloud_monitoring

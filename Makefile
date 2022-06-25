@@ -45,14 +45,10 @@ check_lint:
 	pipenv run black --check --config pyproject.toml .
 
 lint_build:
-	docker run --rm "${IMAGE_NAME}" make check_lint
+	docker-compose run app make check_lint
 
 up:
-	docker-compose up -d --build
-
-restart:
-	docker-compose rm -sf app
-	make up
+	docker-compose up -d
 
 build:
 	docker-compose build
@@ -67,10 +63,10 @@ bash:
 	make exec c="bash"
 
 pull:
-	docker pull ${IMAGE_NAME}
+	docker-compose pull
 
 push:
-	docker push ${IMAGE_NAME}
+	docker-compose push
 
 test_build:
 	docker-compose run --rm app make test

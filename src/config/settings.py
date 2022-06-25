@@ -25,7 +25,7 @@ from app.internal.logging import TelegramLogHandler
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = Env(LOGGING=(bool, False))
+env = Env(LOGGING=(bool, False), DEBUG=(bool, False))
 Env.read_env()
 
 # Quick-start development settings - unsuitable for production
@@ -147,15 +147,14 @@ SALT = b"$2b$12$" + base64.b64encode(SECRET_KEY.encode("utf-8"))
 REFRESH_TOKEN_COOKIE = "refresh_token"
 
 # Transfer logging
+MAX_OPERATION_SECONDS = 5
+LOGS_LIFETIME = 14
 
 if env("LOGGING"):
-    MAX_OPERATION_SECONDS = 5
-    LOGS_LIFETIME = 14
-
     formatter = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
 
     file_handler = TimedRotatingFileHandler(
-        os.path.join("logs", "transfer.log"), when="midnight", backupCount=LOGS_LIFETIME
+        os.path.join(BASE_DIR, "logs", "transfer.log"), when="midnight", backupCount=LOGS_LIFETIME
     )
     file_handler.setLevel(INFO)
     file_handler.setFormatter(formatter)

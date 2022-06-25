@@ -14,7 +14,6 @@ services:
 
   app:
     build: .
-    image: "${IMAGE_NAME}"
     container_name: app
     command: make collectstatic migrate run
     restart: always
@@ -37,9 +36,9 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
 
-  metric:
-    build: metric/
-    container_name: metric
+  metrics:
+    build: metrics/
+    container_name: metrics
     restart: always
     ports:
       - "16241:16241"

@@ -9,6 +9,3 @@ class AppConfig(Config):
     def ready(self):
         if not settings.DEBUG:
             start_http_server(8010)
-
-
-default_app_config = "app.AppConfig"
