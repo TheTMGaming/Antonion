@@ -23,8 +23,8 @@ INTEGRITY_LOG = "Transfer id={id} was not completed"
 logger = logging.getLogger(__name__)
 
 duration = Summary("transfer_duration", "")
-accrual_sum = Gauge("accrual_sum", "")
-transfer_error = Gauge("transfer_integrity_error", "")
+accrual_sum = Counter("accrual_sum", "")
+transfer_error = Counter("transfer_integrity_error", "")
 
 
 class TransferService:
