@@ -19,7 +19,7 @@ SUBTRACTION_LOG = "Subtraction completed id={id}"
 ACCRUAL_LOG = "Accrual completed id={id}"
 SUCCESS_LOG = "Transfer completed id={id} duration={seconds}s"
 INTEGRITY_LOG = "Transfer id={id} was not completed"
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class TransferService:
@@ -102,7 +102,7 @@ class TransferService:
 
                 seconds = round(time() - start, ndigits=3)
                 message = SUCCESS_LOG.format(id=id_, seconds=seconds)
-                (logger.info if seconds <= settings.MAX_OPERATION_SECONDS else logger.warning)(message)
+                (logger.info if seconds <= settings.MAX_TRANSFER_DURATION_SECONDS else logger.warning)(message)
 
                 return transaction
 

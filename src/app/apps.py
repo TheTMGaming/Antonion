@@ -7,5 +7,5 @@ class AppConfig(Config):
     name = "app"
 
     def ready(self):
-        if not settings.DEBUG:
-            start_http_server(8010)
+        if settings.METRICS:
+            start_http_server(settings.METRICS_SERVER_PORT)
