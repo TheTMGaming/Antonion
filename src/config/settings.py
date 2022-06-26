@@ -179,7 +179,7 @@ if env("LOGGING"):
 # Metrics
 
 METRICS = env("METRICS")
-METRICS_SERVER_PORT = 8010
+METRICS_PORT = int(env("METRICS_PORT"))
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

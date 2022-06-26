@@ -8,4 +8,4 @@ class AppConfig(Config):
 
     def ready(self) -> None:
         if settings.METRICS:
-            start_http_server(settings.METRICS_SERVER_PORT)
+            start_http_server(settings.METRICS_PORT)
