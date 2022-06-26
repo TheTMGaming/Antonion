@@ -6,6 +6,6 @@ from prometheus_client import start_http_server
 class AppConfig(Config):
     name = "app"
 
-    def ready(self):
+    def ready(self) -> None:
         if settings.METRICS:
             start_http_server(settings.METRICS_SERVER_PORT)
