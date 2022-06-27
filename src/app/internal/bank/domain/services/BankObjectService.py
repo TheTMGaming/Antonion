@@ -2,6 +2,7 @@ from itertools import chain
 from typing import Optional
 
 from django.db.models import QuerySet
+from prometheus_client import Gauge
 
 from app.internal.bank.db.models import BankAccount, BankCard, BankObject
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository
@@ -9,9 +10,17 @@ from app.internal.user.db.models import TelegramUser
 
 
 class BankObjectService:
+    ACCOUNT_AMOUNT = Gauge("account_amount", "")
+    CARD_AMOUNT = Gauge("card_amount", "")
+    BALANCE_TOTAL = Gauge("balance_total", "")
+
     def __init__(self, account_repo: IBankAccountRepository, card_repo: IBankCardRepository):
         self._account_repo = account_repo
         self._card_repo = card_repo
+
+        self.ACCOUNT_AMOUNT.set_function(self._account_repo.get_amount)
+        self.CARD_AMOUNT.set_function(self._card_repo.get_amount)
+        self.BALANCE_TOTAL.set_function(lambda: self._account_repo.get_balance_total().__float__())
 
     def get_bank_account_from_document(self, document: BankObject) -> BankAccount:
         if isinstance(document, BankAccount):

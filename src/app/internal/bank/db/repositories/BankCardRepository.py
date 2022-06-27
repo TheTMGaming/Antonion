@@ -12,3 +12,6 @@ class BankCardRepository(IBankCardRepository):
 
     def get_cards(self, user_ud: Union[int, str]) -> QuerySet[BankCard]:
         return BankCard.objects.filter(bank_account__owner_id=user_ud).all()
+
+    def get_amount(self) -> int:
+        return BankCard.objects.count()

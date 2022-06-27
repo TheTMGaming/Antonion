@@ -15,3 +15,7 @@ class IBankCardRepository(ABC):
     @abstractmethod
     def get_cards(self, user_id: Union[int, str]) -> QuerySet[BankCard]:
         pass
+
+    @abstractmethod
+    def get_amount(self) -> int:
+        pass

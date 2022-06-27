@@ -20,3 +20,7 @@ class ITelegramUserRepository(ABC):
     @abstractmethod
     def update_password(self, user_id: Union[int, str], value: str) -> None:
         pass
+
+    @abstractmethod
+    def get_user_amount(self) -> int:
+        pass

@@ -22,13 +22,13 @@ SUCCESS_LOG = "Transfer completed id={id} duration={seconds}s"
 INTEGRITY_LOG = "Transfer id={id} was not completed"
 logger = logging.getLogger(__name__)
 
-duration = Summary("transfer_duration", "")
-accrual_sum = Counter("accrual_sum", "")
-transfer_error = Counter("transfer_integrity_error", "")
-
 
 class TransferService:
     PHOTO_EXTENSION = "jpg"
+
+    ACCRUAL_SUM = Gauge("transfer_accrual_total", "")
+    DURATION = Summary("transfer_seconds", "")
+    TRANSFER_ERRORS = Counter("transfer_errors", "")
 
     def __init__(
         self,
@@ -68,7 +68,8 @@ class TransferService:
 
         return accrual <= document.get_balance()
 
-    @duration.time()
+    @TRANSFER_ERRORS.count_exceptions(IntegrityError)
+    @DURATION.time()
     def try_transfer(
         self,
         source: BankAccount,
@@ -78,6 +79,8 @@ class TransferService:
     ) -> Optional[Transaction]:
         if not self.validate_accrual(accrual):
             raise ValueError()
+
+        self.ACCRUAL_SUM.inc(accrual.__float__())
 
         id_ = uuid.uuid4()
         logger.info(
@@ -89,7 +92,6 @@ class TransferService:
                 size=photo.size if photo else None,
             )
         )
-        accrual_sum.inc(accrual.__float__())
         start = time()
 
         content = (
@@ -115,6 +117,5 @@ class TransferService:
 
         except IntegrityError:
             logger.error(INTEGRITY_LOG.format(id=id_))
-            transfer_error.inc()
 
             return None

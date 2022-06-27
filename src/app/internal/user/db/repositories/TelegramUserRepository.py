@@ -56,6 +56,9 @@ class TelegramUserRepository(ITelegramUserRepository, IFriendRepository):
     def update_password(self, user_id: Union[int, str], value: str) -> None:
         TelegramUser.objects.filter(id=user_id).update(password=self._hash(value))
 
+    def get_user_amount(self) -> int:
+        return TelegramUser.objects.count()
+
     @staticmethod
     def _hash(password: str) -> str:
         return settings.HASHER.encode(password, settings.SALT)

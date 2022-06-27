@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Optional, Union
 
-from django.db.models import F, Q, QuerySet
+from django.db.models import F, Q, QuerySet, Sum
 
 from app.internal.bank.db.models import BankAccount
 from app.internal.bank.domain.interfaces import IBankAccountRepository
@@ -14,6 +14,9 @@ class BankAccountRepository(IBankAccountRepository):
     def get_bank_accounts(self, user_id: Union[int, str]) -> QuerySet[BankAccount]:
         return BankAccount.objects.filter(owner_id=user_id).all()
 
+    def get_amount(self) -> int:
+        return BankAccount.objects.count()
+
     def accrue(self, number: int, accrual: Decimal) -> None:
         BankAccount.objects.filter(number=number).update(balance=F("balance") + accrual)
 
@@ -25,6 +28,9 @@ class BankAccountRepository(IBankAccountRepository):
 
     def get_user_bank_account_by_document_number(self, user_id: Union[int, str], number: int) -> Optional[BankAccount]:
         return self._get_by_document_number(number).filter(owner_id=user_id).first()
+
+    def get_balance_total(self) -> Decimal:
+        return BankAccount.objects.aggregate(Sum("balance"))["balance__sum"]
 
     def _get_by_document_number(self, number: int) -> QuerySet[BankAccount]:
         return BankAccount.objects.filter(Q(number=number) | Q(bank_cards__number=number))

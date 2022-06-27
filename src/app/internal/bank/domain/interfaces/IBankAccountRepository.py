@@ -18,6 +18,10 @@ class IBankAccountRepository(ABC):
         pass
 
     @abstractmethod
+    def get_amount(self) -> int:
+        pass
+
+    @abstractmethod
     def accrue(self, number: int, accrual: Decimal) -> None:
         pass
 
@@ -31,4 +35,8 @@ class IBankAccountRepository(ABC):
 
     @abstractmethod
     def get_bank_account_by_document_number(self, number: int) -> Optional[BankAccount]:
+        pass
+
+    @abstractmethod
+    def get_balance_total(self) -> Decimal:
         pass

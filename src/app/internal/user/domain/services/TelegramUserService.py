@@ -4,6 +4,7 @@ from typing import Optional, Union
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from phonenumbers import NumberParseException, PhoneNumberFormat, format_number, is_valid_number_for_region, parse
+from prometheus_client import Gauge
 from telegram import User
 
 from app.internal.user.db.models import TelegramUser
@@ -11,9 +12,13 @@ from app.internal.user.domain.interfaces import ISecretKeyRepository, ITelegramU
 
 
 class TelegramUserService:
+    USER_AMOUNT = Gauge("user_amount", "")
+
     def __init__(self, user_repo: ITelegramUserRepository, secret_key_repo: ISecretKeyRepository):
         self._user_repo = user_repo
         self._secret_key_repo = secret_key_repo
+
+        self.USER_AMOUNT.set_function(self._user_repo.get_user_amount)
 
     def try_add_or_update_user(self, user: User) -> bool:
         return self._user_repo.try_add_or_update_user(user.id, user.username, user.first_name, user.last_name)
