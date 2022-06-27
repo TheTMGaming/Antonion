@@ -85,11 +85,10 @@ def _assert_telegram_user(expected: User) -> None:
 @pytest.mark.unit
 def test_updating_password(user: User, telegram_user_with_password: TelegramUser) -> None:
     was = telegram_user_with_password.password
-    is_updated = user_service.try_update_password(user, "".join(random.choice(chars) for _ in range(5)))
+    user_service.update_password(user, "".join(random.choice(chars) for _ in range(5)))
 
     actual = TelegramUser.objects.filter(pk=telegram_user_with_password.pk).first()
 
-    assert is_updated
     assert actual.password != was
 
 

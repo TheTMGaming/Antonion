@@ -31,7 +31,7 @@ def get_user_router(user_handlers: TelegramUserHandlers) -> Router:
         path="/password",
         methods=["PATCH"],
         view_func=user_handlers.update_password,
-        response={200: SuccessResponse, 500: ErrorResponse},
+        response={200: SuccessResponse},
     )
 
     return router

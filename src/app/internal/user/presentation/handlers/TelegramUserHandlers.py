@@ -28,7 +28,6 @@ class TelegramUserHandlers:
         if not self._user_service.is_secret_key_correct(request.telegram_user, body.key):
             raise BadRequestException("Wrong secret key")
 
-        if not self._user_service.try_update_password(request.telegram_user, body.password):
-            raise IntegrityException()
+        self._user_service.update_password(request.telegram_user, body.password)
 
         return SuccessResponse()

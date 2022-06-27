@@ -43,13 +43,8 @@ class TelegramUserService:
 
         return True
 
-    def try_update_password(self, user: Union[User, TelegramUser], password: str) -> bool:
-        try:
-            self._user_repo.update_password(user.id, password)
-
-            return True
-        except IntegrityError:
-            return False
+    def update_password(self, user: Union[User, TelegramUser], password: str) -> None:
+        self._user_repo.update_password(user.id, password)
 
     def try_create_password(self, user: User, password: str, key: str, tip: str) -> bool:
         try:

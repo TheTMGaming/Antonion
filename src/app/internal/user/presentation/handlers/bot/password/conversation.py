@@ -7,10 +7,12 @@ from app.internal.general.bot.handlers import cancel, mark_conversation_end, mar
 from app.internal.general.services import user_service
 from app.internal.user.presentation.handlers.bot.password.PasswordStates import PasswordStates
 
-_INPUT_SECRET_IF_EXISTS = "Введите секретное слово, либо /cancel\n\nПодсказка: {tip}"
-_SECRET_KEY_ERROR = "Неправильное секретной слово. Поки"
-_INPUT_SECRET_KEY = "Введите секретное слово, либо /cancel"
-_CREATE_TIP = "Введите подсказку для секретного слова, либо /cancel"
+_UPDATING_WELCOME = (
+    "Обновление пароля...\nВведите секретное слово (регистр не имеет значения), либо /cancel\n\nПодсказка: {tip}"
+)
+_SECRET_KEY_ERROR = "Неправильное секретной слово. Начните сначала"
+_CREATING_WELCOME = "Создание пароля...\nПридумайте секретное слово (регистр не имеет значения), либо /cancel"
+_CREATE_TIP = "Придумайте подсказку для секретного слова, либо /cancel"
 _INPUT_PASSWORD = "Введите пароль, либо /cancel"
 _CONFIRM_PASSWORD = "Введите ещё раз пароль, либо /cancel"
 _WRONG_PASSWORD = "Пароль не подтверждён. Начините сначала!"
@@ -31,11 +33,11 @@ def handle_start(update: Update, context: CallbackContext) -> int:
 
     user = user_service.get_user(update.effective_user.id)
 
-    if user.password is not None:
-        update.message.reply_text(_INPUT_SECRET_IF_EXISTS.format(tip=user.secret_key.tip))
+    if user.password:
+        update.message.reply_text(_UPDATING_WELCOME.format(tip=user.secret_key.tip))
         return PasswordStates.SECRET_CONFIRMATION
 
-    update.message.reply_text(_INPUT_SECRET_KEY)
+    update.message.reply_text(_CREATING_WELCOME)
     return PasswordStates.SECRET_CREATING
 
 
@@ -64,9 +66,9 @@ def handle_confirmation_in_updating(update: Update, context: CallbackContext) ->
     status = _handle_confirmation(update, context)
 
     if status == PasswordStates.CONFIRMATION_OK:
-        is_success = user_service.try_update_password(update.effective_user, context.user_data[_PASSWORD_SESSION])
+        user_service.update_password(update.effective_user, context.user_data[_PASSWORD_SESSION])
 
-        update.message.reply_text(_UPDATING_SUCCESS if is_success else _SERVER_ERROR)
+        update.message.reply_text(_UPDATING_SUCCESS)
 
     return mark_conversation_end(context)
 
@@ -117,9 +119,12 @@ def _handle_entering(update: Update, context: CallbackContext):
 
 
 def _handle_confirmation(update: Update, context: CallbackContext) -> int:
+    text = update.message.text
+    update.message.delete()
+
     password = context.user_data[_PASSWORD_SESSION]
 
-    if update.message.text != password:
+    if text != password:
         update.message.reply_text(_WRONG_PASSWORD)
 
         return mark_conversation_end(context)

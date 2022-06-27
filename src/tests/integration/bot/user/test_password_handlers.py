@@ -8,14 +8,14 @@ from app.internal.user.presentation.handlers.bot.password.conversation import (
     _CONFIRM_PASSWORD,
     _CREATE_TIP,
     _CREATING_SUCCESS,
+    _CREATING_WELCOME,
     _INPUT_PASSWORD,
-    _INPUT_SECRET_IF_EXISTS,
-    _INPUT_SECRET_KEY,
     _PASSWORD_SESSION,
     _SECRET_KEY_ERROR,
     _SECRET_KEY_SESSION,
     _TIP_SESSION,
     _UPDATING_SUCCESS,
+    _UPDATING_WELCOME,
     _WRONG_PASSWORD,
     _handle_confirmation,
     _handle_entering,
@@ -49,7 +49,7 @@ def test_start__exists(update: Update, context: CallbackContext, telegram_user_w
 
     assert next_state == PasswordStates.SECRET_CONFIRMATION
     update.message.reply_text.assert_called_once_with(
-        _INPUT_SECRET_IF_EXISTS.format(tip=telegram_user_with_password.secret_key.tip)
+        _UPDATING_WELCOME.format(tip=telegram_user_with_password.secret_key.tip)
     )
 
 
@@ -128,7 +128,7 @@ def test_start__undefined(update: Update, context: CallbackContext, telegram_use
     next_state = handle_start(update, context)
 
     assert next_state == PasswordStates.SECRET_CREATING
-    update.message.reply_text.assert_called_once_with(_INPUT_SECRET_KEY)
+    update.message.reply_text.assert_called_once_with(_CREATING_WELCOME)
 
 
 @pytest.mark.django_db
@@ -177,6 +177,7 @@ def test_confirmation_in_creating(
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_with(_CREATING_SUCCESS)
+    update.message.delete.assert_called_once()
 
     telegram_user_with_phone.refresh_from_db(fields=["password"])
     key = SecretKey.objects.filter(telegram_user=telegram_user_with_phone).first()
@@ -199,6 +200,7 @@ def test_confirmation_in_creating__wrong(
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_with(_WRONG_PASSWORD)
+    update.message.delete.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -213,6 +215,7 @@ def test_confirmation_password__correct(
 
     assert next_state == PasswordStates.CONFIRMATION_OK
     update.message.reply_text.assert_not_called()
+    update.message.delete.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -227,6 +230,7 @@ def test_confirmation_password__wrong(
 
     assert_conversation_end(next_state, context)
     update.message.reply_text.assert_called_once_with(_WRONG_PASSWORD)
+    update.message.delete.assert_called_once()
 
 
 @pytest.mark.django_db
