@@ -9,7 +9,7 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.db.transaction import atomic
 from ninja import UploadedFile
-from prometheus_client import Counter, Gauge, Summary
+from prometheus_client import Counter, Gauge
 
 from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
@@ -26,8 +26,7 @@ logger = logging.getLogger(__name__)
 class TransferService:
     PHOTO_EXTENSION = "jpg"
 
-    ACCRUAL_SUM = Gauge("transfer_accrual_total", "")
-    DURATION = Summary("transfer_seconds", "")
+    AMOUNT = Gauge("transfer_amount", "")
     TRANSFER_ERRORS = Counter("transfer_errors", "")
 
     def __init__(
@@ -69,7 +68,6 @@ class TransferService:
         return accrual <= document.get_balance()
 
     @TRANSFER_ERRORS.count_exceptions(IntegrityError)
-    @DURATION.time()
     def try_transfer(
         self,
         source: BankAccount,
@@ -80,7 +78,7 @@ class TransferService:
         if not self.validate_accrual(accrual):
             raise ValueError()
 
-        self.ACCRUAL_SUM.inc(accrual.__float__())
+        self.AMOUNT.inc()
 
         id_ = uuid.uuid4()
         logger.info(

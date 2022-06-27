@@ -154,14 +154,9 @@ LOGS_LIFETIME = 14
 if env("LOGGING"):
     formatter = Formatter(fmt="[{levelname}][{asctime}] {message}", datefmt="%Y-%m-%d %H:%M:%S", style="{")
 
+    # Transfer
     bot_handler = TelegramLogHandler(token=env("LOGGING_BOT_TOKEN"), chat_id=env("LOGGING_CHANEL_ID"), level=INFO)
     bot_handler.setFormatter(formatter)
-
-    logger = logging.getLogger()
-    logger.setLevel(INFO)
-    logger.addHandler(bot_handler)
-
-    # Transfer
 
     transfer_file_handler = TimedRotatingFileHandler(
         os.path.join(BASE_DIR, "logs", "transfer.log"), when="midnight", backupCount=LOGS_LIFETIME
