@@ -51,3 +51,6 @@ class TransactionRepository(ITransactionRepository):
     def mark_transactions_as_viewed(self, user_id: Union[int, str]) -> None:
         Transaction.objects.filter(source__owner_id=user_id).update(was_source_viewed=True)
         Transaction.objects.filter(destination__owner_id=user_id).update(was_destination_viewed=True)
+
+    def get_amount(self) -> int:
+        return Transaction.objects.count()

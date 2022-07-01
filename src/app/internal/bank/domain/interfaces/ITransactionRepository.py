@@ -35,3 +35,7 @@ class ITransactionRepository(ABC):
     @abstractmethod
     def mark_transactions_as_viewed(self, user_id: Union[int, str]) -> None:
         pass
+
+    @abstractmethod
+    def get_amount(self) -> int:
+        pass

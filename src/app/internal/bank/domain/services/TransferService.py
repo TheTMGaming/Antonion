@@ -9,11 +9,11 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.db.transaction import atomic
 from ninja import UploadedFile
-from prometheus_client import Counter, Gauge
 
 from app.internal.bank.db.models import BankAccount, BankObject, Transaction, TransactionTypes
 from app.internal.bank.domain.interfaces import IBankAccountRepository, IBankCardRepository, ITransactionRepository
 from app.internal.bank.domain.services.Photo import Photo
+from app.internal.metrics import TRANSFER_AMOUNT, TRANSFER_ERRORS
 
 STARTING_LOG = "Starting transfer id={id} source={source} destination={destination} accrual={accrual} photo_size={size}"
 SUBTRACTION_LOG = "Subtraction completed id={id}"
@@ -26,9 +26,6 @@ logger = logging.getLogger(__name__)
 class TransferService:
     PHOTO_EXTENSION = "jpg"
 
-    AMOUNT = Gauge("transfer_amount", "")
-    TRANSFER_ERRORS = Counter("transfer_errors", "")
-
     def __init__(
         self,
         account_repo: IBankAccountRepository,
@@ -38,6 +35,8 @@ class TransferService:
         self._account_repo = account_repo
         self._card_repo = card_repo
         self._transaction_repo = transaction_repo
+
+        TRANSFER_AMOUNT.set_function(self._transaction_repo.get_amount)
 
     def is_balance_zero(self, document: BankObject) -> bool:
         return document.get_balance() == 0
@@ -77,8 +76,6 @@ class TransferService:
     ) -> Optional[Transaction]:
         if not self.validate_accrual(accrual):
             raise ValueError()
-
-        self.AMOUNT.inc()
 
         id_ = uuid.uuid4()
         logger.info(
